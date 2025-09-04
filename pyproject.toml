@@ -1,6 +1,6 @@
 [project]
 name = "phaze"
-version = "0.1.0"
+version = "0.3.2"
 description = "A Python package for PHAZE: cryptographic and ZKML-based low latency inference at LHC"
 authors = [{ name = "Pratik Jawahar", email = "pratik.jawahar@cern.ch" }]
 dependencies = ["torch", "numpy", "scipy", "uv", "onnx", "onnxruntime", "ezkl"]
