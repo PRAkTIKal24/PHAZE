@@ -2,18 +2,8 @@
 name = "phaze"
 version = "0.1.0"
 description = "A Python package for PHAZE: cryptographic and ZKML-based low latency inference at LHC"
-authors = [
-    { name = "Manus AI", email = "manus@example.com" }
-]
-dependencies = [
-    "torch",
-    "numpy",
-    "scipy",
-    "uv",
-    "onnx",
-    "onnxruntime",
-    "ezkl"
-]
+authors = [{ name = "Pratik Jawahar", email = "pratik.jawahar@cern.ch" }]
+dependencies = ["torch", "numpy", "scipy", "uv", "onnx", "onnxruntime", "ezkl"]
 
 [project.optional-dependencies]
 dev = [
@@ -23,11 +13,9 @@ dev = [
     "flake8",
     "sphinx",
     "sphinx_rtd_theme",
-    "myst-parser"
+    "myst-parser",
 ]
 
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
-
-
