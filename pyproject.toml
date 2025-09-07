@@ -62,8 +62,8 @@ select = ["E", "F", "W", "B", "I"]
 [tool.hatch.build.targets.sdist]
 include = ["/phaze", "README.md", "pyproject.toml"]
 
-[tool.hatch.build.targets.wheel.sources]
-"phaze" = "phaze"
+[tool.hatch.build.targets.wheel]
+packages = ["phaze"]
 
 [tool.uv.sources]
 torch = [
