@@ -1,5 +1,6 @@
 import rust_zkml_bindings
 
+
 class RustZKMLBackend:
     def __init__(self):
         pass
@@ -14,5 +15,3 @@ class RustZKMLBackend:
         # For now, we'll just re-hash and compare
         expected_proof = rust_zkml_bindings.hash_data(data.flatten().numpy().tobytes())
         return proof == expected_proof
-
-

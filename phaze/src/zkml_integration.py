@@ -3,8 +3,8 @@ import json
 import os
 
 import numpy as np
-import onnx
-import onnxruntime as ort
+import onnx  # noqa: F401
+import onnxruntime as ort  # noqa: F401
 import torch
 import torch.nn as nn
 
@@ -130,7 +130,8 @@ class ZKMLProverVerifier:
                 rescaled_outputs_float = [float(x) for x in rescaled_outputs_list]
                 model_output = torch.tensor(rescaled_outputs_float, dtype=torch.float64)
             elif "outputs" in witness:
-                # Fallback to converting hexadecimal strings to integers and then to float64
+                # Fallback to converting hexadecimal strings to integers and
+                # then to float64
                 outputs_hex = witness["outputs"][0]
                 outputs_float = []
                 for hex_str in outputs_hex:
@@ -147,7 +148,7 @@ class ZKMLProverVerifier:
                 )  # Scale back if fixed-point was used
             else:
                 raise KeyError(
-                    "Neither 'outputs', 'output_data' nor 'pretty_elements.rescaled_outputs' found in witness JSON."
+                    "Neither 'outputs', 'output_data' nor 'pretty_elements.rescaled_outputs' found in witness JSON."  # noqa: E501
                 )
 
         return {"model_output": model_output, "proof": proof}
