@@ -1,11 +1,16 @@
 import time
-import torch
-import numpy as np
-from phaze.early_exit_models import SimpleEarlyExitModel
-from phaze.crypto_primitives import RabinFingerprint
-from phaze.zkml_integration import ZKMLProverVerifier, SimpleFullModel
 
-def run_early_exit_benchmark(model: SimpleEarlyExitModel, input_data: torch.Tensor, num_iterations: int = 100):
+import numpy as np
+import torch
+
+from phaze.crypto_primitives import RabinFingerprint
+from phaze.early_exit_models import SimpleEarlyExitModel
+from phaze.zkml_integration import SimpleFullModel, ZKMLProverVerifier
+
+
+def run_early_exit_benchmark(
+    model: SimpleEarlyExitModel, input_data: torch.Tensor, num_iterations: int = 100
+):
     """Benchmarks the inference time of an M_early model."""
     start_time = time.perf_counter()
     for _ in range(num_iterations):
@@ -14,7 +19,10 @@ def run_early_exit_benchmark(model: SimpleEarlyExitModel, input_data: torch.Tens
     avg_time_ms = (end_time - start_time) / num_iterations * 1000
     return avg_time_ms
 
-def run_hashing_benchmark(fingerprinter: RabinFingerprint, data_vector: list, num_iterations: int = 100):
+
+def run_hashing_benchmark(
+    fingerprinter: RabinFingerprint, data_vector: list, num_iterations: int = 100
+):
     """Benchmarks the time taken for polynomial hashing."""
     start_time = time.perf_counter()
     for _ in range(num_iterations):
@@ -23,7 +31,10 @@ def run_hashing_benchmark(fingerprinter: RabinFingerprint, data_vector: list, nu
     avg_time_ms = (end_time - start_time) / num_iterations * 1000
     return avg_time_ms
 
-def run_zkml_benchmark(zkml_pv: ZKMLProverVerifier, input_data: torch.Tensor, num_iterations: int = 10):
+
+def run_zkml_benchmark(
+    zkml_pv: ZKMLProverVerifier, input_data: torch.Tensor, num_iterations: int = 10
+):
     """Benchmarks the proving and verification time for a ZKML system."""
     proving_times = []
     verification_times = []
@@ -46,6 +57,7 @@ def run_zkml_benchmark(zkml_pv: ZKMLProverVerifier, input_data: torch.Tensor, nu
 
     return avg_proving_time_ms, avg_verification_time_ms
 
+
 def run_full_pipeline_benchmark(num_iterations: int = 100):
     """Runs a conceptual full pipeline benchmark for PHAZE components."""
     results = {}
@@ -53,29 +65,36 @@ def run_full_pipeline_benchmark(num_iterations: int = 100):
     # M_early benchmark
     early_model = SimpleEarlyExitModel()
     early_input = torch.randn(1, 10)
-    results["m_early_inference_ms"] = run_early_exit_benchmark(early_model, early_input, num_iterations)
+    results["m_early_inference_ms"] = run_early_exit_benchmark(
+        early_model, early_input, num_iterations
+    )
 
     # Hashing benchmark
     fingerprinter = RabinFingerprint(field_size=2**31 - 1, degree=10)
     hash_data = [np.random.randint(0, 100) for _ in range(10)]
-    results["hashing_ms"] = run_hashing_benchmark(fingerprinter, hash_data, num_iterations)
+    results["hashing_ms"] = run_hashing_benchmark(
+        fingerprinter, hash_data, num_iterations
+    )
 
     # ZKML benchmark
     full_model = SimpleFullModel()
     zkml_input = torch.randn(1, 10)
     zkml_pv = ZKMLProverVerifier(full_model, "ezkl")
-    
+
     # Setup ezkl once
     zkml_pv.setup(zkml_input)
 
-    proving_time, verification_time = run_zkml_benchmark(zkml_pv, zkml_input, num_iterations=10) # ZKML is more expensive, fewer iterations
+    proving_time, verification_time = run_zkml_benchmark(
+        zkml_pv, zkml_input, num_iterations=10
+    )  # ZKML is more expensive, fewer iterations
     results["zkml_proving_ms"] = proving_time
     results["zkml_verification_ms"] = verification_time
-    
+
     # Cleanup ezkl artifacts after all benchmarks
     zkml_pv.cleanup()
 
     return results
+
 
 if __name__ == "__main__":
     print("Running PHAZE full pipeline benchmark...")
@@ -83,5 +102,3 @@ if __name__ == "__main__":
     print("\n--- Benchmark Results ---")
     for key, value in benchmark_results.items():
         print(f"{key}: {value:.4f} ms")
-
-
