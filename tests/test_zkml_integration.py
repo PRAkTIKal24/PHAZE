@@ -1,63 +1,87 @@
 import pytest
 import torch
-import torch.nn as nn
 import os
 from phaze.zkml_integration import ZKMLProverVerifier, SimpleFullModel
+from phaze.rust_zkml_backend import RustZKMLBackend
 
-@pytest.fixture(scope="module")
-def toy_full_model():
-    return SimpleFullModel()
+# Fixture for a dummy model and input
+@pytest.fixture
+def dummy_model_input():
+    class DummyModel(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.linear = torch.nn.Linear(10, 1)
 
-@pytest.fixture(scope="module")
-def dummy_input():
-    return torch.randn(1, 10)
+        def forward(self, x):
+            return self.linear(x)
 
-@pytest.fixture(scope="module")
-def zkml_pv(toy_full_model):
-    pv = ZKMLProverVerifier(toy_full_model, "mock")
-    yield pv
-    pv.cleanup() # Clean up ONNX file after tests
+    model = DummyModel()
+    input_data = torch.randn(1, 10)
+    return model, input_data
 
-def test_zkml_prover_verifier_init(toy_full_model):
-    pv = ZKMLProverVerifier(toy_full_model, "mock")
-    assert pv.model == toy_full_model
-    assert pv.zkml_system_name == "mock"
-    assert pv.onnx_path.endswith(f"{toy_full_model.__class__.__name__}.onnx")
+@pytest.mark.asyncio
+async def test_ezkl_setup_and_prove(dummy_model_input):
+    model, input_data = dummy_model_input
+    pv = ZKMLProverVerifier(model, "test_model")
+    
+    # Ensure cleanup is called even if tests fail
+    try:
+        await pv.setup(input_data)
+        proof, output_data = await pv.generate_proof(input_data)
+        assert proof is not None
+        assert isinstance(proof, dict)
+        assert "proof" in proof
+        assert "public_inputs" in proof
+        assert "transcript_type" in proof
+        assert output_data is not None
 
-def test_export_to_onnx(zkml_pv, dummy_input):
-    zkml_pv._export_to_onnx(dummy_input)
-    assert os.path.exists(zkml_pv.onnx_path)
-    # Basic ONNX model check
-    model = onnx.load(zkml_pv.onnx_path)
-    onnx.checker.check_model(model)
+        # Verify the proof
+        is_valid = await pv.verify_proof(proof, input_data)
+        assert is_valid
+    finally:
+        pv.cleanup()
 
-def test_generate_proof(zkml_pv, dummy_input):
-    proof = zkml_pv.generate_proof(dummy_input)
-    assert "model_output" in proof
-    assert "proof_string" in proof
-    assert isinstance(proof["model_output"], torch.Tensor)
-    assert isinstance(proof["proof_string"], str)
-    assert "Proof_for_model" in proof["proof_string"]
-
-def test_verify_proof_valid(zkml_pv, dummy_input):
-    proof = zkml_pv.generate_proof(dummy_input)
-    is_valid = zkml_pv.verify_proof(proof)
-    assert is_valid is True
-
-def test_verify_proof_invalid(zkml_pv):
-    invalid_proof = {"model_output": torch.randn(1, 2), "
+@pytest.mark.asyncio
+async def test_ezkl_proof_verification_failure(dummy_model_input):
+    model, input_data = dummy_model_input
+    pv = ZKMLProverVerifier(model, "test_model")
+    
+    try:
+        await pv.setup(input_data)
+        proof, _ = await pv.generate_proof(input_data)
         
-        # Simulate a tampered proof string
-        "proof_string": "Tampered_proof_string"
-    }
-    is_valid = zkml_pv.verify_proof(invalid_proof)
-    assert is_valid is False
+        # Tamper with the proof to make verification fail
+        proof["public_inputs"] = [str(float(proof["public_inputs"][0]) + 1.0)]
 
-def test_cleanup(toy_full_model, dummy_input):
-    pv = ZKMLProverVerifier(toy_full_model, "mock")
-    pv.generate_proof(dummy_input) # This creates the ONNX file
-    assert os.path.exists(pv.onnx_path)
+        is_valid = await pv.verify_proof(proof, input_data)
+        assert not is_valid
+    finally:
+        pv.cleanup()
+
+@pytest.mark.asyncio
+async def test_ezkl_cleanup(dummy_model_input):
+    model, input_data = dummy_model_input
+    pv = ZKMLProverVerifier(model, "test_model")
+    await pv.setup(input_data)
     pv.cleanup()
-    assert not os.path.exists(pv.onnx_path)
+    # Check if files are removed (this is a heuristic, actual check depends on ezkl internals)
+    assert not os.path.exists("test_model.onnx")
+    assert not os.path.exists("test_model.compiled")
+    assert not os.path.exists("test_model.pk")
+    assert not os.path.exists("test_model.vk")
+    assert not os.path.exists("test_model_input.json")
+    assert not os.path.exists("test_model_output.json")
+
+def test_rust_zkml_backend_sha256():
+    backend = RustZKMLBackend()
+    data = "hello world".encode("utf-8")
+    hashed_data = backend.sha256_hash(data)
+    assert hashed_data == "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+
+def test_rust_zkml_backend_keccak256():
+    backend = RustZKMLBackend()
+    data = "hello world".encode("utf-8")
+    hashed_data = backend.keccak256_hash(data)
+    assert hashed_data == "47173285a8d7341e5fe08d5cfa03f2c3c88fcd85403403403403403403403403"
 
 
