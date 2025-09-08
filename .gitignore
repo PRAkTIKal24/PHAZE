@@ -62,7 +62,7 @@ docs/_build/
 .vscode/
 
 # OS-specific
-*.DS_Store
+.DS_Store
 
 # Project-specific
 phaze/workspaces/
