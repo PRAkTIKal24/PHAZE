@@ -70,3 +70,4 @@ uv.lock
 /rust_bindings/target/
 /rust_bindings/Cargo.lock
 *.rs.bk
+plots/

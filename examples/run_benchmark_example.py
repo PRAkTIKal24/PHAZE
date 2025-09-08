@@ -23,7 +23,7 @@ async def main():
     print("=" * 60)
 
     # Create output directory
-    output_dir = "/tmp/phaze_benchmark_example"
+    output_dir = "plots/phaze_benchmark_example"
     os.makedirs(output_dir, exist_ok=True)
 
     print(f"📁 Output directory: {output_dir}")
