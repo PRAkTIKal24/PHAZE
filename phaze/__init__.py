@@ -4,11 +4,11 @@ PHAZE: Privacy-preserving High-energy physics Analysis with Zero-knowledge proof
 A framework for cryptographic and ZKML-based low latency inference at LHC.
 """
 
-from .early_exit_models import SimpleEarlyExitModel
-from .crypto_primitives import RabinFingerprint
-from .zkml_integration import ZKMLProverVerifier, SimpleFullModel
-from .rust_zkml_backend import RustZKMLBackend
-from .benchmarking import (
+from .src.early_exit_models import SimpleEarlyExitModel
+from .src.crypto_primitives import RabinFingerprint
+from .src.zkml_integration import ZKMLProverVerifier, SimpleFullModel
+from .src.rust_zkml_backend import RustZKMLBackend
+from .src.benchmarking import (
     run_early_exit_benchmark, 
     run_hashing_benchmark, 
     run_zkml_benchmark, 
@@ -16,14 +16,14 @@ from .benchmarking import (
 )
 
 # New modular architecture
-from .zkml_framework_interface import (
+from .src.zkml_framework_interface import (
     ZKMLFramework,
     ZKMLBackendInterface,
     BenchmarkMetrics,
     ZKMLBenchmarkRunner,
     CryptographicPrimitiveBenchmark
 )
-from .zkml_backends import (
+from .src.zkml_backends import (
     EZKLBackend,
     MockZKMLBackend,
     ZKCNNBackend,
@@ -34,7 +34,7 @@ from .zkml_backends import (
     StarkBackend,
     create_backend
 )
-from .phaze_benchmark_suite import (
+from .src.phaze_benchmark_suite import (
     PHAZEBenchmarkConfig,
     PHAZEBenchmarkResults,
     PHAZEBenchmarkSuite
