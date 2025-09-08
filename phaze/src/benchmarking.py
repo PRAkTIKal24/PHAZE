@@ -4,9 +4,9 @@ import time
 import numpy as np
 import torch
 
-from phaze.crypto_primitives import RabinFingerprint
-from phaze.early_exit_models import SimpleEarlyExitModel
-from phaze.zkml_integration import SimpleFullModel, ZKMLProverVerifier
+from .crypto_primitives import RabinFingerprint
+from .early_exit_models import SimpleEarlyExitModel
+from .zkml_integration import SimpleFullModel, ZKMLProverVerifier
 
 
 async def run_early_exit_benchmark(
