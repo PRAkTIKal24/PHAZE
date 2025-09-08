@@ -29,4 +29,3 @@ Time and memory-based studies were performed to understand the scalability of th
 ## Conclusion
 The PHAZE project demonstrates the feasibility of using ZKML and probabilistic hashing for low-latency ML-based triggers in high-throughput environments like the LHC. While further optimization and integration with specific hardware accelerators are needed, the foundational components have been successfully implemented and benchmarked, paving the way for future research and development in this promising area.
 
-
