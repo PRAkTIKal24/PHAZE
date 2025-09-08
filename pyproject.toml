@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "phaze"
-version = "0.3.2"
+version = "0.5.1"
 description = "A Python package for PHAZE: cryptographic and ZKML-based low latency inference at LHC"
 authors = [{ name = "Pratik Jawahar", email = "pratik.jawahar@cern.ch" }]
 requires-python = ">=3.10, <3.13"
@@ -68,7 +68,7 @@ packages = ["phaze"]
 [tool.maturin]
 # Configure maturin to build the Rust extension
 module-name = "rust_zkml_bindings"
-# Path to the Rust project  
+# Path to the Rust project
 manifest-path = "rust_bindings/Cargo.toml"
 # Include Python sources from phaze directory
 python-source = "phaze"
@@ -92,5 +92,3 @@ explicit = true
 name = "pytorch-cu126"
 url = "https://download.pytorch.org/whl/cu126"
 explicit = true
-
-
