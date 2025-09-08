@@ -1,5 +1,5 @@
 import pytest
-from phaze.rust_zkml_backend import RustZKMLBackend
+from phaze.src.rust_zkml_backend import RustZKMLBackend
 
 def test_sha256_hash_data():
     backend = RustZKMLBackend()

@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
 
 [project]
 name = "phaze"
@@ -64,6 +64,14 @@ include = ["/phaze", "README.md", "pyproject.toml"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["phaze"]
+
+[tool.maturin]
+# Configure maturin to build the Rust extension
+module-name = "rust_zkml_bindings"
+# Path to the Rust project  
+manifest-path = "rust_bindings/Cargo.toml"
+# Include Python sources from phaze directory
+python-source = "phaze"
 
 [tool.uv.sources]
 torch = [
