@@ -7,6 +7,18 @@ use rand::Rng;
 use num_bigint::BigUint;
 use num_traits::{Zero, One};
 
+/// Trait defining a standardized interface for all zkML backends
+pub trait ZKMLBackend {
+    /// Performs one-time setup. params can be a JSON string for configuration.
+    fn setup(&mut self, params: &str) -> Result<String, String>;
+    
+    /// Generates a proof from input/witness data.
+    fn prove(&self, input_data: &[u8]) -> Result<Vec<u8>, String>;
+    
+    /// Verifies a proof against public outputs.
+    fn verify(&self, proof_data: &[u8], public_outputs: &[u8]) -> Result<bool, String>;
+}
+
 /// Hash functions module
 #[pyfunction]
 fn sha256_hash(data: &[u8]) -> PyResult<String> {
@@ -175,18 +187,14 @@ struct MockGroth16 {
     setup_params: HashMap<String, String>,
 }
 
-#[pymethods]
-impl MockGroth16 {
-    #[new]
-    fn new() -> Self {
-        let mut setup_params = HashMap::new();
-        setup_params.insert("curve".to_string(), "BN254".to_string());
-        setup_params.insert("field_size".to_string(), "21888242871839275222246405745257275088548364400416034343698204186575808495617".to_string());
+impl ZKMLBackend for MockGroth16 {
+    fn setup(&mut self, params: &str) -> Result<String, String> {
+        // Parse circuit_size from params JSON
+        let circuit_size = match serde_json::from_str::<HashMap<String, usize>>(params) {
+            Ok(config) => config.get("circuit_size").cloned().unwrap_or(1000),
+            Err(_) => 1000, // Default if JSON parsing fails
+        };
         
-        MockGroth16 { setup_params }
-    }
-    
-    fn setup(&mut self, circuit_size: usize) -> PyResult<String> {
         // Mock setup - generate random keys
         let mut rng = rand::thread_rng();
         let proving_key = format!("pk_{}", rng.gen::<u64>());
@@ -199,26 +207,103 @@ impl MockGroth16 {
         Ok(format!("Setup completed for circuit size: {}", circuit_size))
     }
     
-    fn prove(&self, witness: Vec<String>) -> PyResult<ZKMLProof> {
+    fn prove(&self, input_data: &[u8]) -> Result<Vec<u8>, String> {
         if !self.setup_params.contains_key("proving_key") {
-            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("Setup not completed"));
+            return Err("Setup not completed".to_string());
         }
+        
+        // Parse input data as a witness
+        let witness_str = String::from_utf8_lossy(input_data);
+        let witness: Vec<String> = match serde_json::from_str(&witness_str) {
+            Ok(w) => w,
+            Err(e) => return Err(format!("Failed to parse witness: {}", e)),
+        };
         
         // Mock proof generation
         let mut rng = rand::thread_rng();
         let proof_data = format!("groth16_proof_{}", rng.gen::<u64>());
-        let public_inputs = witness.into_iter().take(3).collect(); // Take first 3 as public inputs
+        let public_inputs: Vec<String> = witness.into_iter().take(3).collect(); // Take first 3 as public inputs
         
-        Ok(ZKMLProof::new(proof_data, public_inputs, "Groth16".to_string()))
+        let proof = ZKMLProof::new(proof_data, public_inputs, "Groth16".to_string());
+        
+        // Serialize the proof to bytes
+        match serde_json::to_vec(&proof) {
+            Ok(bytes) => Ok(bytes),
+            Err(e) => Err(format!("Failed to serialize proof: {}", e)),
+        }
     }
     
-    fn verify(&self, proof: &ZKMLProof) -> PyResult<bool> {
+    fn verify(&self, proof_data: &[u8], _public_outputs: &[u8]) -> Result<bool, String> {
         if !self.setup_params.contains_key("verification_key") {
-            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("Setup not completed"));
+            return Err("Setup not completed".to_string());
         }
+        
+        // Deserialize the proof
+        let proof: ZKMLProof = match serde_json::from_slice(proof_data) {
+            Ok(p) => p,
+            Err(e) => return Err(format!("Failed to deserialize proof: {}", e)),
+        };
         
         // Mock verification
         Ok(proof.framework == "Groth16" && proof.verify())
+    }
+}
+
+#[pymethods]
+impl MockGroth16 {
+    #[new]
+    fn new() -> Self {
+        let mut setup_params = HashMap::new();
+        setup_params.insert("curve".to_string(), "BN254".to_string());
+        setup_params.insert("field_size".to_string(), "21888242871839275222246405745257275088548364400416034343698204186575808495617".to_string());
+        
+        MockGroth16 { setup_params }
+    }
+    
+    fn setup(&mut self, circuit_size: usize) -> PyResult<String> {
+        // Create params JSON for the trait implementation
+        let params = format!("{{\"circuit_size\": {}}}", circuit_size);
+        match ZKMLBackend::setup(self, &params) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
+    
+    fn prove(&self, witness: Vec<String>) -> PyResult<ZKMLProof> {
+        // Serialize witness to bytes for the trait implementation
+        let witness_bytes = match serde_json::to_vec(&witness) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize witness: {}", e))),
+        };
+        
+        // Call the trait implementation
+        match ZKMLBackend::prove(self, &witness_bytes) {
+            Ok(proof_bytes) => {
+                // Deserialize the proof
+                match serde_json::from_slice::<ZKMLProof>(&proof_bytes) {
+                    Ok(proof) => Ok(proof),
+                    Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to deserialize proof: {}", e))),
+                }
+            },
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
+    
+    fn verify(&self, proof: &ZKMLProof) -> PyResult<bool> {
+        // Serialize the proof to bytes for the trait implementation
+        let proof_bytes = match serde_json::to_vec(proof) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize proof: {}", e))),
+        };
+        
+        // Mock public outputs (not used in mock implementation)
+        let public_outputs = vec![0u8; 10];
+        
+        // Call the trait implementation
+        match ZKMLBackend::verify(self, &proof_bytes, &public_outputs) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
     }
     
     fn get_setup_info(&self) -> HashMap<String, String> {
@@ -232,6 +317,52 @@ struct MockPlonky {
     degree_bound: usize,
 }
 
+impl ZKMLBackend for MockPlonky {
+    fn setup(&mut self, params: &str) -> Result<String, String> {
+        // Parse degree_bound from params JSON
+        let degree_bound = match serde_json::from_str::<HashMap<String, usize>>(params) {
+            Ok(config) => config.get("degree_bound").cloned().unwrap_or(1024),
+            Err(_) => 1024, // Default if JSON parsing fails
+        };
+        
+        self.degree_bound = degree_bound;
+        Ok(format!("Plonky setup completed with degree bound: {}", degree_bound))
+    }
+    
+    fn prove(&self, input_data: &[u8]) -> Result<Vec<u8>, String> {
+        // Parse input data as a witness
+        let witness_str = String::from_utf8_lossy(input_data);
+        let witness: Vec<String> = match serde_json::from_str(&witness_str) {
+            Ok(w) => w,
+            Err(e) => return Err(format!("Failed to parse witness: {}", e)),
+        };
+        
+        // Mock proof generation for Plonky
+        let mut rng = rand::thread_rng();
+        let proof_data = format!("plonky_proof_{}", rng.gen::<u64>());
+        let public_inputs = witness.into_iter().take(5).collect();
+        
+        let proof = ZKMLProof::new(proof_data, public_inputs, "Plonky".to_string());
+        
+        // Serialize the proof to bytes
+        match serde_json::to_vec(&proof) {
+            Ok(bytes) => Ok(bytes),
+            Err(e) => Err(format!("Failed to serialize proof: {}", e)),
+        }
+    }
+    
+    fn verify(&self, proof_data: &[u8], _public_outputs: &[u8]) -> Result<bool, String> {
+        // Deserialize the proof
+        let proof: ZKMLProof = match serde_json::from_slice(proof_data) {
+            Ok(p) => p,
+            Err(e) => return Err(format!("Failed to deserialize proof: {}", e)),
+        };
+        
+        // Mock verification
+        Ok(proof.framework == "Plonky" && proof.verify())
+    }
+}
+
 #[pymethods]
 impl MockPlonky {
     #[new]
@@ -243,21 +374,49 @@ impl MockPlonky {
     }
     
     fn setup(&mut self, degree_bound: usize) -> PyResult<String> {
-        self.degree_bound = degree_bound;
-        Ok(format!("Plonky setup completed with degree bound: {}", degree_bound))
+        // Create params JSON for the trait implementation
+        let params = format!("{{\"degree_bound\": {}}}", degree_bound);
+        match ZKMLBackend::setup(self, &params) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
     }
     
     fn prove(&self, witness: Vec<String>) -> PyResult<ZKMLProof> {
-        // Mock proof generation for Plonky
-        let mut rng = rand::thread_rng();
-        let proof_data = format!("plonky_proof_{}", rng.gen::<u64>());
-        let public_inputs = witness.into_iter().take(5).collect();
+        // Serialize witness to bytes for the trait implementation
+        let witness_bytes = match serde_json::to_vec(&witness) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize witness: {}", e))),
+        };
         
-        Ok(ZKMLProof::new(proof_data, public_inputs, "Plonky".to_string()))
+        // Call the trait implementation
+        match ZKMLBackend::prove(self, &witness_bytes) {
+            Ok(proof_bytes) => {
+                // Deserialize the proof
+                match serde_json::from_slice::<ZKMLProof>(&proof_bytes) {
+                    Ok(proof) => Ok(proof),
+                    Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to deserialize proof: {}", e))),
+                }
+            },
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
     }
     
     fn verify(&self, proof: &ZKMLProof) -> PyResult<bool> {
-        Ok(proof.framework == "Plonky" && proof.verify())
+        // Serialize the proof to bytes for the trait implementation
+        let proof_bytes = match serde_json::to_vec(proof) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize proof: {}", e))),
+        };
+        
+        // Mock public outputs (not used in mock implementation)
+        let public_outputs = vec![0u8; 10];
+        
+        // Call the trait implementation
+        match ZKMLBackend::verify(self, &proof_bytes, &public_outputs) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
     }
     
     fn get_field_info(&self) -> HashMap<String, String> {
@@ -274,6 +433,52 @@ struct MockHalo {
     curve_params: HashMap<String, String>,
 }
 
+impl ZKMLBackend for MockHalo {
+    fn setup(&mut self, params: &str) -> Result<String, String> {
+        // Parse circuit_depth from params JSON
+        let circuit_depth = match serde_json::from_str::<HashMap<String, usize>>(params) {
+            Ok(config) => config.get("circuit_depth").cloned().unwrap_or(10),
+            Err(_) => 10, // Default if JSON parsing fails
+        };
+        
+        self.curve_params.insert("circuit_depth".to_string(), circuit_depth.to_string());
+        Ok(format!("Halo setup completed with circuit depth: {}", circuit_depth))
+    }
+    
+    fn prove(&self, input_data: &[u8]) -> Result<Vec<u8>, String> {
+        // Parse input data as a witness
+        let witness_str = String::from_utf8_lossy(input_data);
+        let witness: Vec<String> = match serde_json::from_str(&witness_str) {
+            Ok(w) => w,
+            Err(e) => return Err(format!("Failed to parse witness: {}", e)),
+        };
+        
+        // Mock recursive proof generation
+        let mut rng = rand::thread_rng();
+        let proof_data = format!("halo_recursive_proof_{}", rng.gen::<u64>());
+        let public_inputs = witness.into_iter().take(2).collect(); // Halo typically has fewer public inputs
+        
+        let proof = ZKMLProof::new(proof_data, public_inputs, "Halo".to_string());
+        
+        // Serialize the proof to bytes
+        match serde_json::to_vec(&proof) {
+            Ok(bytes) => Ok(bytes),
+            Err(e) => Err(format!("Failed to serialize proof: {}", e)),
+        }
+    }
+    
+    fn verify(&self, proof_data: &[u8], _public_outputs: &[u8]) -> Result<bool, String> {
+        // Deserialize the proof
+        let proof: ZKMLProof = match serde_json::from_slice(proof_data) {
+            Ok(p) => p,
+            Err(e) => return Err(format!("Failed to deserialize proof: {}", e)),
+        };
+        
+        // Mock verification
+        Ok(proof.framework == "Halo" && proof.verify())
+    }
+}
+
 #[pymethods]
 impl MockHalo {
     #[new]
@@ -287,21 +492,53 @@ impl MockHalo {
     }
     
     fn setup(&mut self, circuit_depth: usize) -> PyResult<String> {
-        self.curve_params.insert("circuit_depth".to_string(), circuit_depth.to_string());
-        Ok(format!("Halo setup completed with circuit depth: {}", circuit_depth))
+        // Create params JSON for the trait implementation
+        let params = format!("{{\"circuit_depth\": {}}}", circuit_depth);
+        match ZKMLBackend::setup(self, &params) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
     }
     
     fn prove(&self, witness: Vec<String>) -> PyResult<ZKMLProof> {
-        // Mock recursive proof generation
-        let mut rng = rand::thread_rng();
-        let proof_data = format!("halo_recursive_proof_{}", rng.gen::<u64>());
-        let public_inputs = witness.into_iter().take(2).collect(); // Halo typically has fewer public inputs
+        // Serialize witness to bytes for the trait implementation
+        let witness_bytes = match serde_json::to_vec(&witness) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize witness: {}", e))),
+        };
         
-        Ok(ZKMLProof::new(proof_data, public_inputs, "Halo".to_string()))
+        // Call the trait implementation
+        match ZKMLBackend::prove(self, &witness_bytes) {
+            Ok(proof_bytes) => {
+                // Deserialize the proof
+                match serde_json::from_slice::<ZKMLProof>(&proof_bytes) {
+                    Ok(proof) => Ok(proof),
+                    Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to deserialize proof: {}", e))),
+                }
+            },
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
     }
     
     fn verify(&self, proof: &ZKMLProof) -> PyResult<bool> {
-        Ok(proof.framework == "Halo" && proof.verify())
+        // Serialize the proof to bytes for the trait implementation
+        let proof_bytes = match serde_json::to_vec(proof) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize proof: {}", e))),
+        };
+        
+        // Mock public outputs (not used in mock implementation)
+        let public_outputs = vec![0u8; 10];
+        
+        // Call the trait implementation
+        match ZKMLBackend::verify(self, &proof_bytes, &public_outputs) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
+    
+    fn verify_proof(&self, proof: &ZKMLProof) -> PyResult<bool> {
+        self.verify(proof)
     }
     
     fn get_curve_info(&self) -> HashMap<String, String> {
@@ -406,6 +643,7 @@ fn rust_zkml_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<MockGroth16>()?;
     m.add_class::<MockPlonky>()?;
     m.add_class::<MockHalo>()?;
+    m.add_class::<RiscZeroBackend>()?;
     
     // Utility functions
     m.add_function(wrap_pyfunction!(generate_random_field_element, m)?)?;
@@ -413,5 +651,175 @@ fn rust_zkml_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(benchmark_field_operations, m)?)?;
     
     Ok(())
+}
+
+/// RISC Zero backend for zkML
+#[pyclass]
+struct RiscZeroBackend {
+    config: HashMap<String, String>,
+    is_setup: bool,
+}
+
+impl ZKMLBackend for RiscZeroBackend {
+    fn setup(&mut self, params: &str) -> Result<String, String> {
+        // Parse configuration from params JSON
+        match serde_json::from_str::<HashMap<String, String>>(params) {
+            Ok(config) => {
+                for (key, value) in config {
+                    self.config.insert(key, value);
+                }
+            },
+            Err(e) => return Err(format!("Failed to parse setup params: {}", e)),
+        };
+        
+        // In a real implementation, this would:
+        // 1. Set up the RISC Zero environment
+        // 2. Compile the guest program if needed
+        // 3. Load method ID and other initialization
+        
+        self.is_setup = true;
+        Ok(format!("RISC Zero setup completed with params: {}", params))
+    }
+    
+    fn prove(&self, input_data: &[u8]) -> Result<Vec<u8>, String> {
+        if !self.is_setup {
+            return Err("Setup not completed".to_string());
+        }
+        
+        // In a real implementation, this would:
+        // 1. Deserialize input_data into input_tensor and model_weights
+        // 2. Set up the executor environment with the input
+        // 3. Load the guest ELF binary
+        // 4. Run the executor to generate a session
+        // 5. Generate a receipt (proof) from the session
+        
+        // For now, we'll create a mock receipt
+        let mut rng = rand::thread_rng();
+        let mock_receipt_id = format!("risc0_receipt_{}", rng.gen::<u64>());
+        
+        // Extract some "public outputs" from the input data
+        // In a real implementation, these would come from the guest computation
+        let public_outputs = vec!["mock_output_1".to_string(), "mock_output_2".to_string()];
+        
+        let proof = ZKMLProof::new(mock_receipt_id, public_outputs, "RISC0".to_string());
+        
+        // Serialize the proof to bytes
+        match serde_json::to_vec(&proof) {
+            Ok(bytes) => Ok(bytes),
+            Err(e) => Err(format!("Failed to serialize proof: {}", e)),
+        }
+    }
+    
+    fn verify(&self, proof_data: &[u8], public_outputs: &[u8]) -> Result<bool, String> {
+        if !self.is_setup {
+            return Err("Setup not completed".to_string());
+        }
+        
+        // Deserialize the proof
+        let proof: ZKMLProof = match serde_json::from_slice(proof_data) {
+            Ok(p) => p,
+            Err(e) => return Err(format!("Failed to deserialize proof: {}", e)),
+        };
+        
+        // In a real implementation, this would:
+        // 1. Deserialize the receipt from proof_data
+        // 2. Verify the receipt against the known method ID
+        // 3. Check that the public outputs match those committed in the receipt's journal
+        
+        // For now, mock verification
+        Ok(proof.framework == "RISC0" && proof.verify())
+    }
+}
+
+#[pymethods]
+impl RiscZeroBackend {
+    #[new]
+    fn new() -> Self {
+        let mut config = HashMap::new();
+        config.insert("proof_system".to_string(), "STARK".to_string());
+        config.insert("vm_type".to_string(), "RISC-V".to_string());
+        
+        RiscZeroBackend { 
+            config,
+            is_setup: false
+        }
+    }
+    
+    fn setup(&mut self, params: HashMap<String, String>) -> PyResult<String> {
+        // Convert the HashMap to a JSON string for the trait implementation
+        let params_json = match serde_json::to_string(&params) {
+            Ok(json) => json,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize params: {}", e))),
+        };
+        
+        match ZKMLBackend::setup(self, &params_json) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
+    
+    fn prove(&self, input_tensor: Vec<f32>, model_weights: Vec<f32>) -> PyResult<ZKMLProof> {
+        if !self.is_setup {
+            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("Setup not completed"));
+        }
+        
+        // Combine input_tensor and model_weights into a single input structure
+        let combined_input = CombinedModelInput {
+            input_tensor,
+            model_weights,
+        };
+        
+        // Serialize the combined input for the trait implementation
+        let input_bytes = match serde_json::to_vec(&combined_input) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize input: {}", e))),
+        };
+        
+        // Call the trait implementation
+        match ZKMLBackend::prove(self, &input_bytes) {
+            Ok(proof_bytes) => {
+                // Deserialize the proof
+                match serde_json::from_slice::<ZKMLProof>(&proof_bytes) {
+                    Ok(proof) => Ok(proof),
+                    Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to deserialize proof: {}", e))),
+                }
+            },
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
+    
+    fn verify(&self, proof: &ZKMLProof, expected_outputs: Vec<f32>) -> PyResult<bool> {
+        if !self.is_setup {
+            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("Setup not completed"));
+        }
+        
+        // Serialize the proof to bytes for the trait implementation
+        let proof_bytes = match serde_json::to_vec(proof) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize proof: {}", e))),
+        };
+        
+        // Serialize the expected outputs
+        let outputs_bytes = match serde_json::to_vec(&expected_outputs) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize expected outputs: {}", e))),
+        };
+        
+        // Call the trait implementation
+        match ZKMLBackend::verify(self, &proof_bytes, &outputs_bytes) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
+    
+    fn get_config(&self) -> HashMap<String, String> {
+        self.config.clone()
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct CombinedModelInput {
+    input_tensor: Vec<f32>,
+    model_weights: Vec<f32>,
 }
 

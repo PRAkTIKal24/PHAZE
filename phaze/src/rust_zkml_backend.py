@@ -4,6 +4,8 @@ Enhanced Rust-based zkML backend with expanded functionality.
 
 import json  # noqa: F401
 from typing import Any, Dict, List, Optional  # noqa: F401
+import numpy as np
+import torch
 
 import rust_zkml_bindings
 
@@ -200,6 +202,79 @@ class RustHaloBackend:
         return self.halo.get_curve_info()
 
 
+class RustRiscZeroBackend:
+    """Rust-based RISC Zero zkML backend."""
+
+    def __init__(self):
+        self.risc_zero = rust_zkml_bindings.RiscZeroBackend()
+        self.is_setup = False
+
+    def setup(self, params: Dict[str, str] = None) -> str:
+        """Setup RISC Zero parameters."""
+        if params is None:
+            params = {
+                "model_type": "simple",
+                "input_size": "10",
+                "output_size": "5",
+            }
+        
+        result = self.risc_zero.setup(params)
+        self.is_setup = True
+        return result
+
+    def prove(self, input_tensor: torch.Tensor, model_weights: Dict[str, torch.Tensor]) -> Dict[str, Any]:
+        """Generate a RISC Zero proof.
+        
+        Args:
+            input_tensor: Input tensor for model inference
+            model_weights: Model weights as a dictionary of tensors (state_dict format)
+        
+        Returns:
+            Dictionary containing the proof and related information
+        """
+        if not self.is_setup:
+            raise RuntimeError("Backend not setup. Call setup() first.")
+        
+        # Convert PyTorch tensors to flat float lists
+        input_data = input_tensor.flatten().tolist()
+        
+        # Convert model weights to a flat list
+        # In a real implementation, this would need to match the expected format in the guest program
+        flattened_weights = []
+        for weight in model_weights.values():
+            flattened_weights.extend(weight.flatten().tolist())
+        
+        proof = self.risc_zero.prove(input_data, flattened_weights)
+        return {
+            "proof_data": proof.proof_data,
+            "public_inputs": proof.public_inputs,
+            "framework": proof.framework,
+            "verification_key_hash": proof.verification_key_hash,
+        }
+
+    def verify(self, proof_dict: Dict[str, Any], expected_outputs: torch.Tensor = None) -> bool:
+        """Verify a RISC Zero proof."""
+        if not self.is_setup:
+            raise RuntimeError("Backend not setup. Call setup() first.")
+
+        proof = rust_zkml_bindings.ZKMLProof(
+            proof_dict["proof_data"],
+            proof_dict["public_inputs"],
+            proof_dict["framework"],
+        )
+        
+        # Convert expected outputs to a flat float list, if provided
+        expected_outputs_list = []
+        if expected_outputs is not None:
+            expected_outputs_list = expected_outputs.flatten().tolist()
+        
+        return self.risc_zero.verify(proof, expected_outputs_list)
+
+    def get_config(self) -> Dict[str, str]:
+        """Get RISC Zero configuration."""
+        return self.risc_zero.get_config()
+
+
 class RustZKMLFrameworkManager:
     """Manager for different Rust-based zkML frameworks."""
 
@@ -208,6 +283,7 @@ class RustZKMLFrameworkManager:
             "groth16": RustGroth16Backend(),
             "plonky": RustPlonkyBackend(),
             "halo": RustHaloBackend(),
+            "risc_zero": RustRiscZeroBackend(),
         }
         self.base_backend = RustZKMLBackend()
 
@@ -230,6 +306,7 @@ class RustZKMLFrameworkManager:
                 "groth16": {"circuit_size": 1000},
                 "plonky": {"degree_bound": 1024},
                 "halo": {"circuit_depth": 10},
+                "risc_zero": {},  # No specific parameters for RISC Zero
             }
 
         results = {}
@@ -249,9 +326,22 @@ class RustZKMLFrameworkManager:
                     setup_result = backend.setup(
                         circuit_params[framework_name]["circuit_depth"]
                     )
+                elif framework_name == "risc_zero":
+                    setup_result = backend.setup(
+                        {"witness_size": str(len(witness))}
+                    )
 
                 # Prove
-                proof = backend.prove(witness)
+                if framework_name == "risc_zero":
+                    # For RISC Zero, we need to convert the witness format
+                    # In a real implementation, this would be proper tensor input
+                    input_tensor = torch.tensor([float(w) for w in witness[:10]]).reshape(1, -1)
+                    model_weights = {
+                        "weights": torch.ones(10, 5)  # Dummy weights
+                    }
+                    proof = backend.prove(input_tensor, model_weights)
+                else:
+                    proof = backend.prove(witness)
 
                 # Verify
                 is_valid = backend.verify(proof)
@@ -283,6 +373,9 @@ class RustZKMLFrameworkManager:
                 elif framework_name == "halo":
                     backend.setup(5)
                     info = backend.get_curve_info()
+                elif framework_name == "risc_zero":
+                    backend.setup()
+                    info = backend.get_config()
 
                 comparison[framework_name] = {"info": info, "available": True}
 

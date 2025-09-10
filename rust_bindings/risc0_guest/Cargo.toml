@@ -1,0 +1,21 @@
+[package]
+name = "risc0_guest"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "risc0_guest"
+crate-type = ["staticlib"]
+
+[dependencies]
+# RISC Zero zkVM guest environment
+risc0-zkvm = { version = "0.20.1", default-features = false, features = ["std"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+bincode = "1.3"
+
+# Optional: A lightweight ML library for tensor operations
+# Uncomment one of these depending on the chosen ML library
+# dfdx = { version = "0.13.0", default-features = false, features = ["no-std"] }
+# burn = { version = "0.11.1", default-features = false }
