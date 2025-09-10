@@ -29,6 +29,8 @@ dependencies = [
     "dask",
     "numba",
     "setuptools",
+    "pandas>=2.3.2",
+    "psutil",
 ]
 
 [project.optional-dependencies]
@@ -43,7 +45,11 @@ dev = [
     "ruff",
 ]
 
-test = ["pytest>=8.0.0", "pytest-cov>=5.0.0", "pytest-xdist>=3.5.0"]
+test = [
+    "pytest>=8.0.0", 
+    "pytest-cov>=5.0.0",
+    "pytest-xdist>=3.5.0",
+]
 
 [project.scripts]
 phaze = "phaze.cli:main"
