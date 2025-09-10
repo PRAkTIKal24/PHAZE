@@ -1,12 +1,12 @@
 import pytest
 import torch
 import asyncio
-from phaze.zkml_framework_interface import (
+from phaze.src.zkml_framework_interface import (
     ZKMLFramework, ZKMLBenchmarkRunner, BenchmarkMetrics, 
     CryptographicPrimitiveBenchmark
 )
-from phaze.zkml_backends import MockZKMLBackend, create_backend
-from phaze.early_exit_models import SimpleEarlyExitModel
+from phaze.src.zkml_backends import MockZKMLBackend, create_backend
+from phaze.src.early_exit_models import SimpleEarlyExitModel
 
 
 @pytest.fixture
