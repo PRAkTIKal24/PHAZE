@@ -175,11 +175,13 @@ class ZKMLFrameworkBenchmark:
                     elif framework_name == "halo":
                         backend.setup(8)
                     elif framework_name == "risc_zero":
-                        backend.setup({
-                            "model_type": architecture,
-                            "input_size": str(input_size),
-                            "output_size": str(output_size),
-                        })
+                        backend.setup(
+                            {
+                                "model_type": architecture,
+                                "input_size": str(input_size),
+                                "output_size": str(output_size),
+                            }
+                        )
                 setup_end = time.time()
                 result.setup_time = setup_end - setup_start
 
@@ -202,11 +204,17 @@ class ZKMLFrameworkBenchmark:
                     if dummy_model is None:
                         # Create a simple model if not found
                         from phaze.src.model_architectures import PHAZEModelFactory
+
                         dummy_model = PHAZEModelFactory.create_early_exit_model(
-                            "simple", complexity="light", input_size=input_size, output_size=output_size
+                            "simple",
+                            complexity="light",
+                            input_size=input_size,
+                            output_size=output_size,
                         )
-                    
-                    model_weights = {k: v.clone() for k, v in dummy_model.state_dict().items()}
+
+                    model_weights = {
+                        k: v.clone() for k, v in dummy_model.state_dict().items()
+                    }
                     proof = backend.prove(input_data, model_weights)
                     output = []  # Mock output
                 proof_end = time.time()

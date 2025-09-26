@@ -217,33 +217,35 @@ class RustRiscZeroBackend:
                 "input_size": "10",
                 "output_size": "5",
             }
-        
+
         result = self.risc_zero.setup(params)
         self.is_setup = True
         return result
 
-    def prove(self, input_tensor: torch.Tensor, model_weights: Dict[str, torch.Tensor]) -> Dict[str, Any]:
+    def prove(
+        self, input_tensor: torch.Tensor, model_weights: Dict[str, torch.Tensor]
+    ) -> Dict[str, Any]:
         """Generate a RISC Zero proof.
-        
+
         Args:
             input_tensor: Input tensor for model inference
             model_weights: Model weights as a dictionary of tensors (state_dict format)
-        
+
         Returns:
             Dictionary containing the proof and related information
         """
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
-        
+
         # Convert PyTorch tensors to flat float lists
         input_data = input_tensor.flatten().tolist()
-        
+
         # Convert model weights to a flat list
         # In a real implementation, this would need to match the expected format in the guest program
         flattened_weights = []
         for weight in model_weights.values():
             flattened_weights.extend(weight.flatten().tolist())
-        
+
         proof = self.risc_zero.prove(input_data, flattened_weights)
         return {
             "proof_data": proof.proof_data,
@@ -252,7 +254,9 @@ class RustRiscZeroBackend:
             "verification_key_hash": proof.verification_key_hash,
         }
 
-    def verify(self, proof_dict: Dict[str, Any], expected_outputs: torch.Tensor = None) -> bool:
+    def verify(
+        self, proof_dict: Dict[str, Any], expected_outputs: torch.Tensor = None
+    ) -> bool:
         """Verify a RISC Zero proof."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
@@ -262,12 +266,12 @@ class RustRiscZeroBackend:
             proof_dict["public_inputs"],
             proof_dict["framework"],
         )
-        
+
         # Convert expected outputs to a flat float list, if provided
         expected_outputs_list = []
         if expected_outputs is not None:
             expected_outputs_list = expected_outputs.flatten().tolist()
-        
+
         return self.risc_zero.verify(proof, expected_outputs_list)
 
     def get_config(self) -> Dict[str, str]:
@@ -327,15 +331,15 @@ class RustZKMLFrameworkManager:
                         circuit_params[framework_name]["circuit_depth"]
                     )
                 elif framework_name == "risc_zero":
-                    setup_result = backend.setup(
-                        {"witness_size": str(len(witness))}
-                    )
+                    setup_result = backend.setup({"witness_size": str(len(witness))})
 
                 # Prove
                 if framework_name == "risc_zero":
                     # For RISC Zero, we need to convert the witness format
                     # In a real implementation, this would be proper tensor input
-                    input_tensor = torch.tensor([float(w) for w in witness[:10]]).reshape(1, -1)
+                    input_tensor = torch.tensor(
+                        [float(w) for w in witness[:10]]
+                    ).reshape(1, -1)
                     model_weights = {
                         "weights": torch.ones(10, 5)  # Dummy weights
                     }
