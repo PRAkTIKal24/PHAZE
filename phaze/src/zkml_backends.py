@@ -2,13 +2,14 @@
 Concrete implementations of zkML backends for different frameworks.
 """
 
+import asyncio
+import json
+import os
+from typing import Any, Dict, Tuple
+
+import numpy as np
 import torch
 import torch.nn as nn
-import os
-import json
-import numpy as np
-import asyncio
-from typing import Any, Dict, Tuple, Optional
 
 from .zkml_framework_interface import ZKMLBackendInterface, ZKMLFramework
 

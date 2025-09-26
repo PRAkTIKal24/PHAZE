@@ -4,10 +4,10 @@ Enhanced Rust-based zkML backend with expanded functionality.
 
 import json  # noqa: F401
 from typing import Any, Dict, List, Optional  # noqa: F401
-import numpy as np
-import torch
 
+import numpy as np  # noqa: F401
 import rust_zkml_bindings
+import torch
 
 
 class RustZKMLBackend:
@@ -241,7 +241,8 @@ class RustRiscZeroBackend:
         input_data = input_tensor.flatten().tolist()
 
         # Convert model weights to a flat list
-        # In a real implementation, this would need to match the expected format in the guest program
+        # In a real implementation, this would need to match
+        # the expected format in the guest program
         flattened_weights = []
         for weight in model_weights.values():
             flattened_weights.extend(weight.flatten().tolist())

@@ -8,15 +8,15 @@ This module provides a complete benchmarking suite that can evaluate:
 4. End-to-end PHAZE workflow performance
 """
 
-import asyncio
+import asyncio  # noqa: F401
 import json
 import logging
 import time
 import tracemalloc
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor  # noqa: F401
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,9 +27,9 @@ import psutil
 import torch
 
 from .crypto_primitives import RabinFingerprint, ShamirSecretSharing
-from .model_architectures import ModelComplexity, PHAZEModelFactory
+from .model_architectures import ModelComplexity, PHAZEModelFactory  # noqa: F401
 from .rust_zkml_backend import RustZKMLFrameworkManager
-from .zkml_integration import PHAZEZKMLIntegration, ZKMLProverVerifier
+from .zkml_integration import PHAZEZKMLIntegration, ZKMLProverVerifier  # noqa: F401
 
 
 @dataclass
@@ -216,7 +216,7 @@ class ZKMLFrameworkBenchmark:
                         k: v.clone() for k, v in dummy_model.state_dict().items()
                     }
                     proof = backend.prove(input_data, model_weights)
-                    output = []  # Mock output
+                    output = []  # Mock output  # noqa: F841
                 proof_end = time.time()
                 result.proof_time = proof_end - proof_start
 
@@ -287,7 +287,9 @@ class ZKMLFrameworkBenchmark:
                 for complexity in complexities:
                     for input_size in input_sizes:
                         self.logger.info(
-                            f"Benchmarking {framework} with {architecture}/{complexity}, input_size={input_size}"
+                            f"Benchmarking {framework} with {architecture}/{
+                                complexity
+                            }, input_size={input_size}"
                         )
 
                         results = await self.benchmark_framework(
@@ -331,7 +333,7 @@ class CryptographicPrimitiveBenchmark:
             start_time = time.time()
             for _ in range(num_trials):
                 try:
-                    hash_result = rabin.compute_hash(test_data)
+                    hash_result = rabin.compute_hash(test_data)  # noqa: F841
                 except Exception as e:
                     self.logger.error(f"Rabin fingerprint failed: {e}")
                     continue
@@ -510,7 +512,7 @@ class CryptographicPrimitiveBenchmark:
 
                 start_time = time.time()
                 for _ in range(100):
-                    hash_result = rust_manager.base_backend.keccak256_hash(test_data)
+                    hash_result = rust_manager.base_backend.keccak256_hash(test_data)  # noqa: F841
                 end_time = time.time()
 
                 execution_time, memory_usage, _ = monitor.stop_monitoring()
@@ -892,13 +894,21 @@ class ComprehensiveBenchmarkSuite:
                 [
                     "## zkML Framework Benchmarks",
                     "",
-                    f"- Frameworks tested: {', '.join(zkml_summary.get('frameworks_tested', []))}",
-                    f"- Architectures tested: {', '.join(zkml_summary.get('architectures_tested', []))}",
+                    f"- Frameworks tested: {
+                        ', '.join(zkml_summary.get('frameworks_tested', []))
+                    }",
+                    f"- Architectures tested: {
+                        ', '.join(zkml_summary.get('architectures_tested', []))
+                    }",
                     f"- Success rate: {zkml_summary.get('success_rate', 0):.2%}",
-                    f"- Average setup time: {zkml_summary.get('avg_setup_time', 0):.3f}s",
-                    f"- Average proof time: {zkml_summary.get('avg_proof_time', 0):.3f}s",
-                    f"- Average verification time: {zkml_summary.get('avg_verification_time', 0):.3f}s",
-                    f"- Average memory usage: {zkml_summary.get('avg_memory_usage', 0):.2f}MB",
+                    f"- Average setup time: {
+                        zkml_summary.get('avg_setup_time', 0):.3f}s",
+                    f"- Average proof time: {
+                        zkml_summary.get('avg_proof_time', 0):.3f}s",
+                    f"- Average verification time: {
+                        zkml_summary.get('avg_verification_time', 0):.3f}s",
+                    f"- Average memory usage: {
+                        zkml_summary.get('avg_memory_usage', 0):.2f}MB",
                     "",
                 ]
             )
@@ -910,11 +920,17 @@ class ComprehensiveBenchmarkSuite:
                 [
                     "## Cryptographic Primitive Benchmarks",
                     "",
-                    f"- Primitives tested: {', '.join(crypto_summary.get('primitives_tested', []))}",
-                    f"- Operations tested: {', '.join(crypto_summary.get('operations_tested', []))}",
+                    f"- Primitives tested: {
+                        ', '.join(crypto_summary.get('primitives_tested', []))
+                    }",
+                    f"- Operations tested: {
+                        ', '.join(crypto_summary.get('operations_tested', []))
+                    }",
                     f"- Success rate: {crypto_summary.get('success_rate', 0):.2%}",
-                    f"- Average execution time: {crypto_summary.get('avg_execution_time', 0):.6f}s",
-                    f"- Average throughput: {crypto_summary.get('avg_throughput', 0):.2f} ops/sec",
+                    f"- Average execution time: {
+                        crypto_summary.get('avg_execution_time', 0):.6f}s",
+                    f"- Average throughput: {
+                        crypto_summary.get('avg_throughput', 0):.2f} ops/sec",
                     "",
                 ]
             )
@@ -924,9 +940,11 @@ class ComprehensiveBenchmarkSuite:
                 "## Recommendations",
                 "",
                 "Based on the benchmark results:",
-                "1. Consider the trade-offs between proof generation time and verification time",
+                "1. Consider the trade-offs "
+                "between proof generation time and verification time",
                 "2. Monitor memory usage for large-scale deployments",
-                "3. Choose appropriate model complexity based on performance requirements",
+                "3. Choose appropriate model "
+                "complexity based on performance requirements",
                 "4. Evaluate cryptographic primitives based on throughput needs",
                 "",
             ]
