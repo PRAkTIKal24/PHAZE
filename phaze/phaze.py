@@ -79,7 +79,7 @@ Example usage:
 
 Default behavior (if no benchmark specified):
   uv run phaze  # Runs basic_benchmark with --mode all --output-dir plots/
-        """
+        """,
     )
 
     parser.add_argument(

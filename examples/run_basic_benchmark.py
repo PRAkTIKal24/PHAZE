@@ -118,10 +118,8 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
                 }"
             )
             print(f"  - Success rate: {crypto_summary.get('success_rate', 0):.1%}")
-            avg_throughput = crypto_summary.get('avg_throughput', 0)
-            print(
-                f"  - Avg throughput: {avg_throughput:.1f} ops/sec"
-            )
+            avg_throughput = crypto_summary.get("avg_throughput", 0)
+            print(f"  - Avg throughput: {avg_throughput:.1f} ops/sec")
             print()
 
         # Show some individual results
@@ -155,10 +153,8 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
                     }"
                 )
                 print(f"  Execution: {sample.get('execution_time', 0):.6f}s")
-                throughput = sample.get('throughput_ops_per_sec', 0)
-                print(
-                    f"  Throughput: {throughput:.1f} ops/sec"
-                )
+                throughput = sample.get("throughput_ops_per_sec", 0)
+                print(f"  Throughput: {throughput:.1f} ops/sec")
                 print(f"  Input size: {sample.get('input_size', 0)} bytes")
                 print()
 

@@ -889,14 +889,14 @@ class ComprehensiveBenchmarkSuite:
         # zkML section
         zkml_summary = summary.get("zkml_summary", {})
         if zkml_summary:
-            frameworks = ', '.join(zkml_summary.get('frameworks_tested', []))
-            architectures = ', '.join(zkml_summary.get('architectures_tested', []))
-            success_rate = zkml_summary.get('success_rate', 0)
-            setup_time = zkml_summary.get('avg_setup_time', 0)
-            proof_time = zkml_summary.get('avg_proof_time', 0)
+            frameworks = ", ".join(zkml_summary.get("frameworks_tested", []))
+            architectures = ", ".join(zkml_summary.get("architectures_tested", []))
+            success_rate = zkml_summary.get("success_rate", 0)
+            setup_time = zkml_summary.get("avg_setup_time", 0)
+            proof_time = zkml_summary.get("avg_proof_time", 0)
 
-            verification_time = zkml_summary.get('avg_verification_time', 0)
-            memory_usage = zkml_summary.get('avg_memory_usage', 0)
+            verification_time = zkml_summary.get("avg_verification_time", 0)
+            memory_usage = zkml_summary.get("avg_memory_usage", 0)
 
             report_lines.extend(
                 [
@@ -916,11 +916,11 @@ class ComprehensiveBenchmarkSuite:
         # Crypto section
         crypto_summary = summary.get("crypto_summary", {})
         if crypto_summary:
-            primitives = ', '.join(crypto_summary.get('primitives_tested', []))
-            operations = ', '.join(crypto_summary.get('operations_tested', []))
-            crypto_success_rate = crypto_summary.get('success_rate', 0)
-            exec_time = crypto_summary.get('avg_execution_time', 0)
-            throughput = crypto_summary.get('avg_throughput', 0)
+            primitives = ", ".join(crypto_summary.get("primitives_tested", []))
+            operations = ", ".join(crypto_summary.get("operations_tested", []))
+            crypto_success_rate = crypto_summary.get("success_rate", 0)
+            exec_time = crypto_summary.get("avg_execution_time", 0)
+            throughput = crypto_summary.get("avg_throughput", 0)
 
             report_lines.extend(
                 [
