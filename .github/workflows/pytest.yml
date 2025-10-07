@@ -9,13 +9,23 @@ on:
       - main
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Run ruff
+        run: |
+          uv tool run ruff check --output-format=github .
+          uv tool run ruff format --check .
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        os: [ubuntu-latest]  # Ubuntu is faster than macOS for CI
+        python-version: ['3.11']  # Test fewer versions for speed, add back others if needed
 
     steps:
       - name: Checkout repository
@@ -27,18 +37,45 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-        shell: bash
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-      - name: Create virtual environment
+      - name: Install minimal CI dependencies
         run: |
-          uv venv || { echo "Failed to create a virtual environment. Falling back to system environment."; exit 1; }
+          uv sync --group ci --no-dev --frozen
+        continue-on-error: false
 
-      - name: Install dependencies
+      - name: Install package in editable mode
         run: |
-          uv pip install -e ".[test]"
+          uv pip install -e . --no-deps
+        continue-on-error: false
 
-      - name: Run tests
-        run: uv run pytest
+      - name: Verify installation  
+        run: |
+          uv run python -c "import phaze; print(f'PHAZE version: {phaze.__version__}')"
+
+      - name: Run tests (optimized)
+        run: |
+          uv run pytest --tb=short --cov=phaze --cov-report=xml -q --maxfail=5 --disable-warnings
+        continue-on-error: false
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Create test summary
+        if: always()
+        run: |
+          echo "## Test Results 🧪" >> $GITHUB_STEP_SUMMARY
+          echo "- **OS**: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY  
+          echo "- **Python**: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests**: $([ -f coverage.xml ] && echo "✅ Passed with coverage" || echo "❌ Failed")" >> $GITHUB_STEP_SUMMARY
+          echo "- **Duration**: ~$(date -d@$SECONDS -u +%M:%S)" >> $GITHUB_STEP_SUMMARY

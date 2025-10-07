@@ -2,18 +2,20 @@
 Concrete implementations of zkML backends for different frameworks.
 """
 
+import asyncio
+import json
+import os
+from typing import Any, Dict, Tuple
+
+import numpy as np
 import torch
 import torch.nn as nn
-import os
-import json
-import numpy as np
-import asyncio
-from typing import Any, Dict, Tuple, Optional
 
 from .zkml_framework_interface import ZKMLBackendInterface, ZKMLFramework
 
 try:
     import ezkl
+
     EZKL_AVAILABLE = True
 except ImportError:
     EZKL_AVAILABLE = False
@@ -21,13 +23,15 @@ except ImportError:
 
 class EZKLBackend(ZKMLBackendInterface):
     """EZKL framework backend implementation."""
-    
+
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.EZKL, model, name)
-        
+
         if not EZKL_AVAILABLE:
-            raise ImportError("ezkl is not installed. Please install it to use this backend.")
-        
+            raise ImportError(
+                "ezkl is not installed. Please install it to use this backend."
+            )
+
         # File paths for EZKL artifacts
         self.onnx_path = f"/tmp/{self.name}.onnx"
         self.compiled_model_path = f"/tmp/{self.name}.compiled"
@@ -38,109 +42,132 @@ class EZKLBackend(ZKMLBackendInterface):
         self.proof_path = f"/tmp/{self.name}.proof"
         self.input_json_path = f"/tmp/{self.name}_input.json"
         self.output_json_path = f"/tmp/{self.name}_output.json"
-        self.srs_path = os.path.join(os.path.expanduser("~"), ".ezkl", "srs", "kzg17.srs")
-    
+        self.srs_path = os.path.join(
+            os.path.expanduser("~"), ".ezkl", "srs", "kzg17.srs"
+        )
+
     def _export_to_onnx(self, input_data: torch.Tensor):
         """Export the PyTorch model to ONNX format."""
         torch.onnx.export(
-            self.model, input_data, self.onnx_path,
+            self.model,
+            input_data,
+            self.onnx_path,
             opset_version=11,
             do_constant_folding=True,
             input_names=["input"],
             output_names=["output"],
-            dynamic_axes={
-                "input": {0: "batch_size"},
-                "output": {0: "batch_size"}
-            }
+            dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
         )
-    
+
     async def setup(self, input_data: torch.Tensor, **kwargs) -> None:
         """Setup the EZKL system."""
         self._export_to_onnx(input_data)
-        
+
         # Generate settings
         ezkl.gen_settings(self.onnx_path, self.settings_path)
-        
+
         # Download SRS if not exists
         if not os.path.exists(self.srs_path):
             print(f"Downloading SRS to {self.srs_path}...")
             os.makedirs(os.path.dirname(self.srs_path), exist_ok=True)
             await ezkl.get_srs(srs_path=self.srs_path, settings_path=self.settings_path)
-        
+
         # Compile the model
-        ezkl.compile_circuit(self.onnx_path, self.compiled_model_path, self.settings_path)
-        
+        ezkl.compile_circuit(
+            self.onnx_path, self.compiled_model_path, self.settings_path
+        )
+
         # Generate proving and verification keys
-        ezkl.setup(self.compiled_model_path, self.vk_path, self.pk_path, srs_path=self.srs_path)
-        
+        ezkl.setup(
+            self.compiled_model_path, self.vk_path, self.pk_path, srs_path=self.srs_path
+        )
+
         self.is_setup = True
-    
-    async def generate_proof(self, input_data: torch.Tensor, **kwargs) -> Tuple[Any, Any]:
+
+    async def generate_proof(
+        self, input_data: torch.Tensor, **kwargs
+    ) -> Tuple[Any, Any]:
         """Generate a zero-knowledge proof."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
-        
+
         # Prepare input data for ezkl
         input_array = (input_data.detach().numpy() * 2**15).astype(np.int64)
         data = dict(input_data=[input_array.flatten().tolist()])
-        
+
         with open(self.input_json_path, "w") as f:
             json.dump(data, f)
-        
+
         # Generate witness
-        ezkl.gen_witness(self.input_json_path, self.compiled_model_path, self.witness_path)
-        
+        ezkl.gen_witness(
+            self.input_json_path, self.compiled_model_path, self.witness_path
+        )
+
         # Generate proof
         proof = ezkl.prove(
-            self.witness_path, self.compiled_model_path, 
-            self.pk_path, self.proof_path, "single"
+            self.witness_path,
+            self.compiled_model_path,
+            self.pk_path,
+            self.proof_path,
+            "single",
         )
-        
+
         # Get the model output from the witness
         with open(self.witness_path, "r") as f:
             witness = json.load(f)
         output = witness["output_data"]
-        
+
         return proof, output
-    
-    async def verify_proof(self, proof: Any, input_data: torch.Tensor, **kwargs) -> bool:
+
+    async def verify_proof(
+        self, proof: Any, input_data: torch.Tensor, **kwargs
+    ) -> bool:
         """Verify a zero-knowledge proof."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
-        
+
         # Prepare input data for ezkl
         input_array = (input_data.detach().numpy() * 2**15).astype(np.int64)
         data = dict(input_data=[input_array.flatten().tolist()])
-        
+
         with open(self.input_json_path, "w") as f:
             json.dump(data, f)
-        
+
         # Verify proof
-        verified = ezkl.verify(proof, self.settings_path, self.vk_path, srs_path=self.srs_path)
-        
+        verified = ezkl.verify(
+            proof, self.settings_path, self.vk_path, srs_path=self.srs_path
+        )
+
         return verified
-    
+
     def cleanup(self) -> None:
         """Clean up generated files."""
         files_to_remove = [
-            self.onnx_path, self.compiled_model_path, self.pk_path, self.vk_path,
-            self.settings_path, self.witness_path, self.proof_path,
-            self.input_json_path, self.output_json_path
+            self.onnx_path,
+            self.compiled_model_path,
+            self.pk_path,
+            self.vk_path,
+            self.settings_path,
+            self.witness_path,
+            self.proof_path,
+            self.input_json_path,
+            self.output_json_path,
         ]
-        
+
         for file_path in files_to_remove:
             if os.path.exists(file_path):
                 os.remove(file_path)
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Get EZKL framework information."""
         try:
             import ezkl
+
             return {
                 "framework": "EZKL",
                 "version": getattr(ezkl, "__version__", "unknown"),
                 "backend": "KZG",
-                "curve": "BN254"
+                "curve": "BN254",
             }
         except ImportError:
             return {"framework": "EZKL", "status": "not_available"}
@@ -148,74 +175,78 @@ class EZKLBackend(ZKMLBackendInterface):
 
 class MockZKMLBackend(ZKMLBackendInterface):
     """Mock backend for testing and placeholder implementations."""
-    
+
     def __init__(self, framework: ZKMLFramework, model: nn.Module, name: str):
         super().__init__(framework, model, name)
         self.mock_proof = {"proof": "mock_proof_data", "public_inputs": ["mock_input"]}
-    
+
     async def setup(self, input_data: torch.Tensor, **kwargs) -> None:
         """Mock setup - just simulate some delay."""
         await asyncio.sleep(0.01)  # Simulate setup time
         self.is_setup = True
-    
-    async def generate_proof(self, input_data: torch.Tensor, **kwargs) -> Tuple[Any, Any]:
+
+    async def generate_proof(
+        self, input_data: torch.Tensor, **kwargs
+    ) -> Tuple[Any, Any]:
         """Generate a mock proof."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
-        
+
         await asyncio.sleep(0.05)  # Simulate proving time
-        
+
         # Mock output based on model forward pass
         with torch.no_grad():
             output = self.model(input_data)
-        
+
         return self.mock_proof, output.numpy().tolist()
-    
-    async def verify_proof(self, proof: Any, input_data: torch.Tensor, **kwargs) -> bool:
+
+    async def verify_proof(
+        self, proof: Any, input_data: torch.Tensor, **kwargs
+    ) -> bool:
         """Verify a mock proof."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
-        
+
         await asyncio.sleep(0.01)  # Simulate verification time
-        
+
         # Mock verification - always return True for valid mock proofs
         return proof == self.mock_proof
-    
+
     def cleanup(self) -> None:
         """Mock cleanup - nothing to clean."""
         pass
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Get mock framework information."""
         return {
             "framework": self.framework.value.upper(),
             "version": "mock_v1.0",
-            "status": "placeholder_implementation"
+            "status": "placeholder_implementation",
         }
 
 
 class ZKCNNBackend(MockZKMLBackend):
     """ZKCNN framework backend (placeholder implementation)."""
-    
+
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.ZKCNN, model, name)
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Get ZKCNN framework information."""
         return {
             "framework": "ZKCNN",
             "version": "placeholder_v1.0",
             "backend": "CNN-optimized circuits",
-            "status": "placeholder_implementation"
+            "status": "placeholder_implementation",
         }
 
 
 class Groth16Backend(MockZKMLBackend):
     """Groth16 framework backend (placeholder implementation)."""
-    
+
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.GROTH16, model, name)
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Get Groth16 framework information."""
         return {
@@ -223,16 +254,16 @@ class Groth16Backend(MockZKMLBackend):
             "version": "placeholder_v1.0",
             "backend": "Groth16 zk-SNARKs",
             "curve": "BN254",
-            "status": "placeholder_implementation"
+            "status": "placeholder_implementation",
         }
 
 
 class HaloBackend(MockZKMLBackend):
     """Halo framework backend (placeholder implementation)."""
-    
+
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.HALO, model, name)
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Get Halo framework information."""
         return {
@@ -240,16 +271,16 @@ class HaloBackend(MockZKMLBackend):
             "version": "placeholder_v1.0",
             "backend": "Halo recursive proofs",
             "curve": "Pasta curves",
-            "status": "placeholder_implementation"
+            "status": "placeholder_implementation",
         }
 
 
 class PlonkyBackend(MockZKMLBackend):
     """Plonky framework backend (placeholder implementation)."""
-    
+
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.PLONKY, model, name)
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Get Plonky framework information."""
         return {
@@ -257,16 +288,16 @@ class PlonkyBackend(MockZKMLBackend):
             "version": "placeholder_v1.0",
             "backend": "PLONK with FRI",
             "field": "Goldilocks field",
-            "status": "placeholder_implementation"
+            "status": "placeholder_implementation",
         }
 
 
 class RiscZeroBackend(MockZKMLBackend):
     """RISC Zero framework backend (placeholder implementation)."""
-    
+
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.RISC_ZERO, model, name)
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Get RISC Zero framework information."""
         return {
@@ -274,16 +305,16 @@ class RiscZeroBackend(MockZKMLBackend):
             "version": "placeholder_v1.0",
             "backend": "RISC-V zkVM",
             "proof_system": "STARK",
-            "status": "placeholder_implementation"
+            "status": "placeholder_implementation",
         }
 
 
 class StarkBackend(MockZKMLBackend):
     """STARK framework backend (placeholder implementation)."""
-    
+
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.STARK, model, name)
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Get STARK framework information."""
         return {
@@ -291,11 +322,13 @@ class StarkBackend(MockZKMLBackend):
             "version": "placeholder_v1.0",
             "backend": "STARK proofs",
             "field": "Prime field",
-            "status": "placeholder_implementation"
+            "status": "placeholder_implementation",
         }
 
 
-def create_backend(framework: ZKMLFramework, model: nn.Module, name: str) -> ZKMLBackendInterface:
+def create_backend(
+    framework: ZKMLFramework, model: nn.Module, name: str
+) -> ZKMLBackendInterface:
     """Factory function to create zkML backends."""
     backend_map = {
         ZKMLFramework.EZKL: EZKLBackend,
@@ -306,15 +339,14 @@ def create_backend(framework: ZKMLFramework, model: nn.Module, name: str) -> ZKM
         ZKMLFramework.RISC_ZERO: RiscZeroBackend,
         ZKMLFramework.STARK: StarkBackend,
     }
-    
+
     if framework not in backend_map:
         raise ValueError(f"Unsupported framework: {framework}")
-    
+
     backend_class = backend_map[framework]
-    
+
     # Special case for EZKL which has different constructor signature
     if framework == ZKMLFramework.EZKL:
         return backend_class(model, name)
     else:
         return backend_class(model, name)
-

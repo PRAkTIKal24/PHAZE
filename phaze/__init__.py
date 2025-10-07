@@ -1,5 +1,6 @@
 """
-PHAZE: Privacy-preserving High-energy physics Analysis with Zero-knowledge proofs and Early-exit models
+PHAZE: Privacy-preserving High-energy physics Analysis
+with Zero-knowledge proofs and Early-exit models
 
 A framework for cryptographic and ZKML-based low latency inference at LHC.
 """
@@ -10,8 +11,22 @@ from .src.benchmarking import (
     run_hashing_benchmark,
     run_zkml_benchmark,
 )
+from .src.comprehensive_benchmark import (
+    ComprehensiveBenchmarkSuite,
+    run_phaze_benchmarks,
+)
 from .src.crypto_primitives import RabinFingerprint
-from .src.early_exit_models import SimpleEarlyExitModel
+from .src.early_exit_models import SimpleEarlyExitModel as LegacySimpleEarlyExitModel
+from .src.model_architectures import (
+    ConvolutionalEarlyExitModel,
+    ModelComplexity,
+    MultiExitModel,
+    PHAZEModelFactory,
+    SimpleEarlyExitModel,
+    TransformerEarlyExitModel,
+    create_simple_early_exit_model,
+    create_simple_full_model,
+)
 from .src.phaze_benchmark_suite import (
     PHAZEBenchmarkConfig,
     PHAZEBenchmarkResults,
@@ -40,13 +55,27 @@ from .src.zkml_framework_interface import (
 )
 from .src.zkml_integration import SimpleFullModel, ZKMLProverVerifier
 
-__version__ = "0.3.2"
+# Get version dynamically from package metadata
+try:
+    from importlib.metadata import version
+
+    __version__ = version("phaze")
+except ImportError:
+    # Fallback for Python < 3.8
+    try:
+        from importlib_metadata import version
+
+        __version__ = version("phaze")
+    except ImportError:
+        __version__ = "unknown"
+
 __author__ = "Pratik Jawahar"
 __email__ = "pratik.jawahar@cern.ch"
 
 __all__ = [
     # Core models
     "SimpleEarlyExitModel",
+    "LegacySimpleEarlyExitModel",
     "SimpleFullModel",
     # Cryptographic primitives
     "RabinFingerprint",
@@ -58,6 +87,17 @@ __all__ = [
     "run_hashing_benchmark",
     "run_zkml_benchmark",
     "run_full_pipeline_benchmark",
+    # Comprehensive benchmarking
+    "ComprehensiveBenchmarkSuite",
+    "run_phaze_benchmarks",
+    # Model architectures
+    "PHAZEModelFactory",
+    "ModelComplexity",
+    "ConvolutionalEarlyExitModel",
+    "TransformerEarlyExitModel",
+    "MultiExitModel",
+    "create_simple_early_exit_model",
+    "create_simple_full_model",
     # New modular architecture
     "ZKMLFramework",
     "ZKMLBackendInterface",

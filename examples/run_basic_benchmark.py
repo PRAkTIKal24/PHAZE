@@ -97,7 +97,9 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
         if zkml_summary:
             print("🔐 zkML Framework Results:")
             print(
-                f"  - Frameworks tested: {', '.join(zkml_summary.get('frameworks_tested', []))}"
+                f"  - Frameworks tested: {
+                    ', '.join(zkml_summary.get('frameworks_tested', []))
+                }"
             )
             print(f"  - Success rate: {zkml_summary.get('success_rate', 0):.1%}")
             print(f"  - Avg proof time: {zkml_summary.get('avg_proof_time', 0):.3f}s")
@@ -111,12 +113,13 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
         if crypto_summary:
             print("🔒 Cryptographic Primitive Results:")
             print(
-                f"  - Primitives tested: {', '.join(crypto_summary.get('primitives_tested', []))}"
+                f"  - Primitives tested: {
+                    ', '.join(crypto_summary.get('primitives_tested', []))
+                }"
             )
             print(f"  - Success rate: {crypto_summary.get('success_rate', 0):.1%}")
-            print(
-                f"  - Avg throughput: {crypto_summary.get('avg_throughput', 0):.1f} ops/sec"
-            )
+            avg_throughput = crypto_summary.get("avg_throughput", 0)
+            print(f"  - Avg throughput: {avg_throughput:.1f} ops/sec")
             print()
 
         # Show some individual results
@@ -129,7 +132,9 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
             if successful_zkml:
                 sample = successful_zkml[0]
                 print(
-                    f"zkML Test: {sample.get('framework', 'Unknown')} - {sample.get('architecture', 'Unknown')}"
+                    f"zkML Test: {sample.get('framework', 'Unknown')} - {
+                        sample.get('architecture', 'Unknown')
+                    }"
                 )
                 print(f"  Setup: {sample.get('setup_time', 0):.3f}s")
                 print(f"  Proof: {sample.get('proof_time', 0):.3f}s")
@@ -143,12 +148,13 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
             if successful_crypto:
                 sample = successful_crypto[0]
                 print(
-                    f"Crypto Test: {sample.get('primitive_name', 'Unknown')} - {sample.get('operation', 'Unknown')}"
+                    f"Crypto Test: {sample.get('primitive_name', 'Unknown')} - {
+                        sample.get('operation', 'Unknown')
+                    }"
                 )
                 print(f"  Execution: {sample.get('execution_time', 0):.6f}s")
-                print(
-                    f"  Throughput: {sample.get('throughput_ops_per_sec', 0):.1f} ops/sec"
-                )
+                throughput = sample.get("throughput_ops_per_sec", 0)
+                print(f"  Throughput: {throughput:.1f} ops/sec")
                 print(f"  Input size: {sample.get('input_size', 0)} bytes")
                 print()
 
@@ -202,7 +208,9 @@ async def run_risc_zero_standalone(output_dir):
     print("🔒 Generating proof...")
     proof = backend.prove(input_data, model.state_dict())
     print(
-        f"✅ Proof generated: {proof['framework']} proof with {len(proof['proof_data'])} bytes"
+        f"✅ Proof generated: {proof['framework']} proof with {
+            len(proof['proof_data'])
+        } bytes"
     )
 
     # Verify proof
@@ -254,7 +262,9 @@ async def run_risc_zero_benchmark(output_dir):
             for complexity in complexities:
                 for input_size in input_sizes:
                     print(
-                        f"🔄 Benchmarking: {architecture}/{complexity}, input_size={input_size}"
+                        f"🔄 Benchmarking: {architecture}/{complexity}, input_size={
+                            input_size
+                        }"
                     )
 
                     results = await suite.zkml_benchmark.benchmark_framework(
@@ -272,8 +282,10 @@ async def run_risc_zero_benchmark(output_dir):
 
         # Count successful tests
         successful = [r for r in all_results if r.success]
+        success_percentage = len(successful) / len(all_results)
         print(
-            f"✅ Successful tests: {len(successful)}/{len(all_results)} ({len(successful) / len(all_results):.1%})"
+            f"✅ Successful tests: {len(successful)}/{len(all_results)} "
+            f"({success_percentage:.1%})"
         )
 
         # Calculate average metrics
@@ -414,7 +426,9 @@ async def run_extended_benchmark(output_dir):
         if zkml_summary:
             print("🔐 zkML Framework Results:")
             print(
-                f"  - Frameworks tested: {', '.join(zkml_summary.get('frameworks_tested', []))}"
+                f"  - Frameworks tested: {
+                    ', '.join(zkml_summary.get('frameworks_tested', []))
+                }"
             )
             print(f"  - Success rate: {zkml_summary.get('success_rate', 0):.1%}")
             print(f"  - Avg proof time: {zkml_summary.get('avg_proof_time', 0):.3f}s")
