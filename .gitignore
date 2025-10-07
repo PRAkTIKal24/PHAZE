@@ -66,7 +66,6 @@ docs/_build/
 
 # Project-specific
 phaze/workspaces/
-uv.lock
 /rust_bindings/target/
 /rust_bindings/Cargo.lock
 *.rs.bk
