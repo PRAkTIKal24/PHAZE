@@ -118,9 +118,9 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
                 }"
             )
             print(f"  - Success rate: {crypto_summary.get('success_rate', 0):.1%}")
+            avg_throughput = crypto_summary.get('avg_throughput', 0)
             print(
-                f"  - Avg throughput: {
-                    crypto_summary.get('avg_throughput', 0):.1f} ops/sec"
+                f"  - Avg throughput: {avg_throughput:.1f} ops/sec"
             )
             print()
 
@@ -155,9 +155,9 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
                     }"
                 )
                 print(f"  Execution: {sample.get('execution_time', 0):.6f}s")
+                throughput = sample.get('throughput_ops_per_sec', 0)
                 print(
-                    f"  Throughput: {
-                        sample.get('throughput_ops_per_sec', 0):.1f} ops/sec"
+                    f"  Throughput: {throughput:.1f} ops/sec"
                 )
                 print(f"  Input size: {sample.get('input_size', 0)} bytes")
                 print()
@@ -286,9 +286,10 @@ async def run_risc_zero_benchmark(output_dir):
 
         # Count successful tests
         successful = [r for r in all_results if r.success]
+        success_percentage = len(successful) / len(all_results)
         print(
-            f"✅ Successful tests: {len(successful)}/{len(all_results)} ({
-                len(successful) / len(all_results):.1%})"
+            f"✅ Successful tests: {len(successful)}/{len(all_results)} "
+            f"({success_percentage:.1%})"
         )
 
         # Calculate average metrics
