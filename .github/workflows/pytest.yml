@@ -32,13 +32,41 @@ jobs:
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         shell: bash
 
-      - name: Create virtual environment
+      - name: Sync dependencies with uv
         run: |
-          uv venv || { echo "Failed to create a virtual environment. Falling back to system environment."; exit 1; }
+          uv sync --group test
+        continue-on-error: false
 
-      - name: Install dependencies
+      - name: Install package in editable mode
         run: |
-          uv pip install -e ".[test]"
+          uv pip install -e .
+        continue-on-error: false
 
-      - name: Run tests
-        run: uv run pytest
+      - name: Verify installation
+        run: |
+          uv run python -c "import phaze; print(f'PHAZE version: {phaze.__version__}')"
+
+      - name: Run tests with coverage
+        run: |
+          uv run pytest --tb=short --cov=phaze --cov-report=xml --cov-report=term -v --maxfail=10
+        continue-on-error: false
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Create test summary
+        if: always()
+        run: |
+          echo "## Test Results 🧪" >> $GITHUB_STEP_SUMMARY
+          echo "- **OS**: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY  
+          echo "- **Python**: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage.xml ]; then
+            echo "- **Coverage**: Available in coverage.xml" >> $GITHUB_STEP_SUMMARY
+          fi
