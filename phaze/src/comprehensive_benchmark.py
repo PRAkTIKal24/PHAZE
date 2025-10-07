@@ -287,9 +287,8 @@ class ZKMLFrameworkBenchmark:
                 for complexity in complexities:
                     for input_size in input_sizes:
                         self.logger.info(
-                            f"Benchmarking {framework} with {architecture}/{
-                                complexity
-                            }, input_size={input_size}"
+                            f"Benchmarking {framework} with {architecture}/"
+                            f"{complexity}, input_size={input_size}"
                         )
 
                         results = await self.benchmark_framework(
