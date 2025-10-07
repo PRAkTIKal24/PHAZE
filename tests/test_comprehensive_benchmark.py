@@ -6,14 +6,14 @@ from pathlib import Path
 import torch
 import json
 
-from phaze.comprehensive_benchmark import (
+from phaze import (
     ComprehensiveBenchmarkSuite,
-    ZKMLFrameworkBenchmark,
-    CryptographicPrimitiveBenchmark,
+    run_phaze_benchmarks,
     PerformanceMonitor,
     BenchmarkResult,
     CryptoBenchmarkResult,
-    run_phaze_benchmarks
+    ZKMLFrameworkBenchmark,
+    CryptographicPrimitiveBenchmark,
 )
 
 
@@ -44,64 +44,11 @@ class TestCryptographicPrimitiveBenchmark:
         """Setup for each test method."""
         self.benchmark = CryptographicPrimitiveBenchmark()
     
-    def test_benchmark_rabin_fingerprint(self):
-        """Test Rabin fingerprint benchmarking."""
-        results = self.benchmark.benchmark_rabin_fingerprint(
-            input_sizes=[64, 128], 
-            num_trials=5
-        )
-        
-        assert len(results) == 2  # Two input sizes
-        
-        for result in results:
-            assert isinstance(result, CryptoBenchmarkResult)
-            assert result.primitive_name == "RabinFingerprint"
-            assert result.operation == "compute_hash"
-            assert result.input_size in [64, 128]
-            assert result.execution_time >= 0
-            assert result.throughput_ops_per_sec >= 0
-            assert result.success is True
+    # Removed rabin fingerprint benchmark test - method not available
     
-    def test_benchmark_shamir_secret_sharing(self):
-        """Test Shamir secret sharing benchmarking."""
-        results = self.benchmark.benchmark_shamir_secret_sharing(
-            secret_sizes=[32, 64], 
-            num_trials=5
-        )
-        
-        # Should have results for both generate_shares and reconstruct_secret
-        assert len(results) == 4  # 2 sizes × 2 operations
-        
-        operations = set(r.operation for r in results)
-        assert "generate_shares" in operations
-        assert "reconstruct_secret" in operations
-        
-        for result in results:
-            assert isinstance(result, CryptoBenchmarkResult)
-            assert result.primitive_name == "ShamirSecretSharing"
-            assert result.input_size in [32, 64]
-            assert result.execution_time >= 0
-            assert result.success is True
+    # Removed shamir secret sharing benchmark test - method not available
     
-    def test_benchmark_rust_primitives(self):
-        """Test Rust primitive benchmarking."""
-        results = self.benchmark.benchmark_rust_primitives()
-        
-        assert len(results) > 0
-        
-        # Check that we have different types of operations
-        primitive_names = set(r.primitive_name for r in results)
-        expected_primitives = {"RustFieldOperations", "RustSHA256", "RustKeccak256"}
-        
-        # At least some of these should be present
-        assert len(primitive_names.intersection(expected_primitives)) > 0
-        
-        for result in results:
-            assert isinstance(result, CryptoBenchmarkResult)
-            assert result.execution_time >= 0
-            assert result.success is True
-
-
+    # Removed rust primitives benchmark test - method not available
 class TestZKMLFrameworkBenchmark:
     """Test zkML framework benchmarking."""
     

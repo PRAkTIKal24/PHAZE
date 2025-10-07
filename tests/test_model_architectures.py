@@ -1,7 +1,7 @@
 import pytest
 import torch
 import torch.nn as nn
-from phaze.model_architectures import (
+from phaze import (
     SimpleEarlyExitModel,
     ConvolutionalEarlyExitModel,
     TransformerEarlyExitModel,

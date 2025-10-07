@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from phaze.crypto_primitives import RabinFingerprint
+from phaze import RabinFingerprint
 
 def test_rabin_fingerprint_init():
     fingerprinter = RabinFingerprint(field_size=101, degree=5)
@@ -15,8 +15,8 @@ def test_rabin_fingerprint_compute_hash_valid_input():
 
 def test_rabin_fingerprint_compute_hash_invalid_input_length():
     fingerprinter = RabinFingerprint(field_size=101, degree=5)
-    data_vector = [1, 2, 3, 4, 5, 6]  # Length > degree + 1
-    with pytest.raises(ValueError, match="Data vector length exceeds polynomial degree \+ 1"):
+    data_vector = [1, 2, 3, 4, 5, 6, 7]  # Length > degree + 1 (7 > 6)
+    with pytest.raises(ValueError, match=r"Data vector length exceeds polynomial degree \+ 1"):
         fingerprinter.compute_hash(data_vector)
 
 def test_rabin_fingerprint_compute_hash_zero_vector():

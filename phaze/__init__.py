@@ -10,8 +10,26 @@ from .src.benchmarking import (
     run_hashing_benchmark,
     run_zkml_benchmark,
 )
+from .src.comprehensive_benchmark import (
+    ComprehensiveBenchmarkSuite,
+    run_phaze_benchmarks,
+    ZKMLFrameworkBenchmark,
+    BenchmarkResult,
+    CryptoBenchmarkResult,
+    PerformanceMonitor,
+)
 from .src.crypto_primitives import RabinFingerprint
-from .src.early_exit_models import SimpleEarlyExitModel
+from .src.early_exit_models import SimpleEarlyExitModel as LegacySimpleEarlyExitModel
+from .src.model_architectures import (
+    PHAZEModelFactory,
+    ModelComplexity,
+    SimpleEarlyExitModel,
+    ConvolutionalEarlyExitModel,
+    TransformerEarlyExitModel,
+    MultiExitModel,
+    create_simple_early_exit_model,
+    create_simple_full_model,
+)
 from .src.phaze_benchmark_suite import (
     PHAZEBenchmarkConfig,
     PHAZEBenchmarkResults,
@@ -47,6 +65,7 @@ __email__ = "pratik.jawahar@cern.ch"
 __all__ = [
     # Core models
     "SimpleEarlyExitModel",
+    "LegacySimpleEarlyExitModel",
     "SimpleFullModel",
     # Cryptographic primitives
     "RabinFingerprint",
@@ -58,6 +77,17 @@ __all__ = [
     "run_hashing_benchmark",
     "run_zkml_benchmark",
     "run_full_pipeline_benchmark",
+    # Comprehensive benchmarking
+    "ComprehensiveBenchmarkSuite",
+    "run_phaze_benchmarks",
+    # Model architectures
+    "PHAZEModelFactory",
+    "ModelComplexity",
+    "ConvolutionalEarlyExitModel",
+    "TransformerEarlyExitModel",
+    "MultiExitModel",
+    "create_simple_early_exit_model",
+    "create_simple_full_model",
     # New modular architecture
     "ZKMLFramework",
     "ZKMLBackendInterface",

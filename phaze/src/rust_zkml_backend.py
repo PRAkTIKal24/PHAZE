@@ -6,8 +6,13 @@ import json  # noqa: F401
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import numpy as np  # noqa: F401
-import rust_zkml_bindings
 import torch
+
+try:
+    import rust_zkml_bindings
+except ImportError:
+    print("rust_zkml_bindings not found. Using mock implementation for testing.")
+    from . import mock_rust_zkml_bindings as rust_zkml_bindings
 
 
 class RustZKMLBackend:

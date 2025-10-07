@@ -1,8 +1,8 @@
 import pytest
-from phaze.rust_zkml_backend import (
-    RustZKMLBackend, 
-    RustGroth16Backend, 
-    RustPlonkyBackend, 
+from phaze.src.rust_zkml_backend import (
+    RustZKMLBackend,
+    RustGroth16Backend,
+    RustPlonkyBackend,
     RustHaloBackend,
     RustZKMLFrameworkManager
 )

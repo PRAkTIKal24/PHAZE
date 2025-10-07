@@ -1,5 +1,5 @@
 import torch
-from phaze.early_exit_models import SimpleEarlyExitModel
+from phaze import SimpleEarlyExitModel
 
 def test_simple_early_exit_model_init():
     model = SimpleEarlyExitModel()
