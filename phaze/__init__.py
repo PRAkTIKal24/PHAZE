@@ -58,7 +58,18 @@ from .src.zkml_framework_interface import (
 )
 from .src.zkml_integration import SimpleFullModel, ZKMLProverVerifier
 
-__version__ = "0.3.2"
+# Get version dynamically from package metadata
+try:
+    from importlib.metadata import version
+    __version__ = version("phaze")
+except ImportError:
+    # Fallback for Python < 3.8
+    try:
+        from importlib_metadata import version
+        __version__ = version("phaze")
+    except ImportError:
+        __version__ = "unknown"
+
 __author__ = "Pratik Jawahar"
 __email__ = "pratik.jawahar@cern.ch"
 
