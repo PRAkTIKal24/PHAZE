@@ -6,21 +6,19 @@ This script demonstrates how to use the RISC Zero backend with the PHAZE benchma
 to evaluate the performance of RISC Zero zkVM for machine learning inference proofs.
 """
 
-import os
-import sys
 import argparse
 import asyncio
-import torch
 import json
-from pathlib import Path
+import os
+import sys
+
+import torch
 
 # Make sure we can import phaze modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from phaze.src.comprehensive_benchmark import (
     ComprehensiveBenchmarkSuite,
-    ZKMLFrameworkBenchmark,
-    BenchmarkResult,
 )
 from phaze.src.model_architectures import PHAZEModelFactory
 from phaze.src.rust_zkml_backend import RustRiscZeroBackend

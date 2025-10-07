@@ -11,22 +11,22 @@ from .src.benchmarking import (
     run_zkml_benchmark,
 )
 from .src.comprehensive_benchmark import (
-    ComprehensiveBenchmarkSuite,
-    run_phaze_benchmarks,
-    ZKMLFrameworkBenchmark,
     BenchmarkResult,
+    ComprehensiveBenchmarkSuite,
     CryptoBenchmarkResult,
     PerformanceMonitor,
+    ZKMLFrameworkBenchmark,
+    run_phaze_benchmarks,
 )
 from .src.crypto_primitives import RabinFingerprint
 from .src.early_exit_models import SimpleEarlyExitModel as LegacySimpleEarlyExitModel
 from .src.model_architectures import (
-    PHAZEModelFactory,
-    ModelComplexity,
-    SimpleEarlyExitModel,
     ConvolutionalEarlyExitModel,
-    TransformerEarlyExitModel,
+    ModelComplexity,
     MultiExitModel,
+    PHAZEModelFactory,
+    SimpleEarlyExitModel,
+    TransformerEarlyExitModel,
     create_simple_early_exit_model,
     create_simple_full_model,
 )

@@ -5,13 +5,12 @@ This module provides various model architectures that can be used as M_early and
 in the PHAZE system, with support for different complexity levels and early-exit strategies.
 """
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from typing import Dict, List, Tuple, Optional, Any
 from abc import ABC, abstractmethod
 from enum import Enum
-import numpy as np
+from typing import Any, Dict, List, Optional, Tuple
+
+import torch
+import torch.nn as nn
 
 
 class ModelComplexity(Enum):

@@ -1,7 +1,8 @@
 import pytest
 import torch
-import os
-from phaze import ZKMLProverVerifier, SimpleFullModel, RustZKMLBackend
+
+from phaze import RustZKMLBackend
+
 
 # Fixture for a dummy model and input
 @pytest.fixture
@@ -18,11 +19,13 @@ def dummy_model_input():
     input_data = torch.randn(1, 10)
     return model, input_data
 
+
 # Removed zkml setup and prove test due to event loop conflicts
 
 # Removed zkml verification failure test due to event loop conflicts
 
 # Removed zkml cleanup test due to event loop conflicts
+
 
 def test_rust_zkml_backend_sha256():
     backend = RustZKMLBackend()
@@ -31,7 +34,8 @@ def test_rust_zkml_backend_sha256():
     # Test that it returns a valid 64-character hex string
     assert isinstance(hashed_data, str)
     assert len(hashed_data) == 64
-    assert all(c in '0123456789abcdef' for c in hashed_data)
+    assert all(c in "0123456789abcdef" for c in hashed_data)
+
 
 def test_rust_zkml_backend_keccak256():
     backend = RustZKMLBackend()
@@ -42,5 +46,3 @@ def test_rust_zkml_backend_keccak256():
     assert len(hashed_data) == 64
     # Test reproducibility
     assert backend.keccak256_hash(data) == hashed_data
-
-

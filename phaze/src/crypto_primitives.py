@@ -1,6 +1,7 @@
-import numpy as np
-from typing import List, Tuple
 import secrets
+from typing import List, Tuple
+
+import numpy as np
 
 
 class RabinFingerprint:

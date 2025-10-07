@@ -9,26 +9,26 @@ This module provides a complete benchmarking system for all components of PHAZE:
 - End-to-end pipeline performance
 """
 
-import torch
-import torch.nn as nn
-import numpy as np
 import asyncio
-import time
 import json
 import os
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, List
 
+import numpy as np
+import torch
+
+from .crypto_primitives import RabinFingerprint
+from .early_exit_models import SimpleEarlyExitModel
+from .zkml_backends import create_backend
 from .zkml_framework_interface import (
-    ZKMLFramework,
-    ZKMLBenchmarkRunner,
     BenchmarkMetrics,
     CryptographicPrimitiveBenchmark,
+    ZKMLBenchmarkRunner,
+    ZKMLFramework,
 )
-from .zkml_backends import create_backend
-from .early_exit_models import SimpleEarlyExitModel
 from .zkml_integration import SimpleFullModel
-from .crypto_primitives import RabinFingerprint
 
 
 @dataclass

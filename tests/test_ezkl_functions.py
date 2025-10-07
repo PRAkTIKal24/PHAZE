@@ -1,7 +1,6 @@
 import pytest
 import torch
-import os
-from phaze import ZKMLProverVerifier, SimpleFullModel
+
 
 # Fixture for a dummy model and input
 @pytest.fixture
@@ -18,10 +17,9 @@ def dummy_model_input():
     input_data = torch.randn(1, 10)
     return model, input_data
 
+
 # Removed EZKL setup test due to event loop conflicts
 
 # Removed EZKL verification test due to event loop conflicts
 
 # Removed EZKL cleanup test due to event loop conflicts
-
-

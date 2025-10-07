@@ -1,8 +1,6 @@
 import pytest
-import os
-import asyncio
 import torch
-from phaze import ZKMLProverVerifier, SimpleFullModel
+
 
 @pytest.fixture
 def dummy_model_input():
@@ -18,8 +16,7 @@ def dummy_model_input():
     input_data = torch.randn(1, 10)
     return model, input_data
 
+
 # Removed SRS download test due to event loop conflicts
 
 # Removed SRS reusability test due to event loop conflicts
-
-

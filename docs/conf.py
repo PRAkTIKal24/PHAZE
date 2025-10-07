@@ -11,7 +11,8 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+
+sys.path.insert(0, os.path.abspath(".."))
 
 
 # -- Project information -----------------------------------------------------
@@ -70,11 +71,18 @@ html_static_path = ["_static"]
 todo_include_todos = True
 
 # -- Autodoc configuration ---------------------------------------------------
-autodoc_mock_imports = ["ezkl", "onnx", "onnxruntime", "torch", "art", "rich", "tqdm", "trimap"]
+autodoc_mock_imports = [
+    "ezkl",
+    "onnx",
+    "onnxruntime",
+    "torch",
+    "art",
+    "rich",
+    "tqdm",
+    "trimap",
+]
 autodoc_default_options = {
-    'members': True,
-    'undoc-members': True,
-    'show-inheritance': True,
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
 }
-
-

@@ -5,13 +5,13 @@ This module provides abstract base classes and concrete implementations for vari
 zkML frameworks, allowing for easy benchmarking and comparison of different systems.
 """
 
+import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Tuple, Optional
+from enum import Enum
+from typing import Any, Dict, Optional, Tuple
+
 import torch
 import torch.nn as nn
-import time
-import asyncio
-from enum import Enum
 
 
 class ZKMLFramework(Enum):
