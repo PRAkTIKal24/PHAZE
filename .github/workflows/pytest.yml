@@ -34,7 +34,7 @@ jobs:
 
       - name: Sync dependencies with uv
         run: |
-          uv sync --group test
+          uv sync --group test --group dev
         continue-on-error: false
 
       - name: Install package in editable mode
@@ -45,6 +45,34 @@ jobs:
       - name: Verify installation
         run: |
           uv run python -c "import phaze; print(f'PHAZE version: {phaze.__version__}')"
+
+      - name: Run ruff linting with auto-fix
+        run: |
+          uv run ruff check --fix --exit-zero .
+        continue-on-error: true
+
+      - name: Run ruff formatting
+        run: |
+          uv run ruff format .
+        continue-on-error: true
+
+      - name: Check for formatting changes
+        id: format-changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Ruff made formatting changes"
+            git diff --name-only
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No formatting changes needed"
+          fi
+        continue-on-error: true
+
+      - name: Check for any remaining ruff issues
+        run: |
+          uv run ruff check .
+        continue-on-error: false
 
       - name: Run tests with coverage
         run: |
@@ -67,6 +95,11 @@ jobs:
           echo "- **OS**: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY  
           echo "- **Python**: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.format-changes.outputs.changes }}" = "true" ]; then
+            echo "- **Linting**: ✨ Ruff auto-fix applied with formatting changes" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Linting**: ✅ Ruff checks passed, no formatting needed" >> $GITHUB_STEP_SUMMARY
+          fi
           if [ -f coverage.xml ]; then
             echo "- **Coverage**: Available in coverage.xml" >> $GITHUB_STEP_SUMMARY
           fi
