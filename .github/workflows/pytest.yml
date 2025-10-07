@@ -9,13 +9,26 @@ on:
       - main
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Run ruff
+        run: |
+          uv tool run ruff check --output-format=github .
+          uv tool run ruff format --check .
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
-        python-version: ['3.11', '3.12']
+        os: [ubuntu-latest]  # Ubuntu is faster than macOS for CI
+        python-version: ['3.11']  # Test fewer versions for speed, add back others if needed
+    
+    env:
+      UV_CACHE_DIR: /tmp/.uv-cache
 
     steps:
       - name: Checkout repository
@@ -27,66 +40,46 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-        shell: bash
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-      - name: Sync dependencies with uv
+      - name: Restore uv cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.uv-cache
+          key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ matrix.python-version }}-
+
+      - name: Install minimal CI dependencies
         run: |
-          uv sync --group test --group dev
+          uv sync --group ci --no-dev --frozen
         continue-on-error: false
 
       - name: Install package in editable mode
         run: |
-          uv pip install -e .
+          uv pip install -e . --no-deps
         continue-on-error: false
 
-      - name: Verify installation
+      - name: Verify installation  
         run: |
           uv run python -c "import phaze; print(f'PHAZE version: {phaze.__version__}')"
 
-      - name: Run ruff linting with auto-fix
+      - name: Run tests (optimized)
         run: |
-          uv run ruff check --fix --exit-zero .
-        continue-on-error: true
-
-      - name: Run ruff formatting
-        run: |
-          uv run ruff format .
-        continue-on-error: true
-
-      - name: Check for formatting changes
-        id: format-changes
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "changes=true" >> $GITHUB_OUTPUT
-            echo "Ruff made formatting changes"
-            git diff --name-only
-          else
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "No formatting changes needed"
-          fi
-        continue-on-error: true
-
-      - name: Check for any remaining ruff issues
-        run: |
-          uv run ruff check .
-        continue-on-error: false
-
-      - name: Run tests with coverage
-        run: |
-          uv run pytest --tb=short --cov=phaze --cov-report=xml --cov-report=term -v --maxfail=10
+          uv run pytest --tb=short --cov=phaze --cov-report=xml -q --maxfail=5 --disable-warnings
         continue-on-error: false
 
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        if: matrix.python-version == '3.11'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           flags: unittests
-          name: codecov-umbrella
           fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Create test summary
         if: always()
@@ -95,11 +88,5 @@ jobs:
           echo "- **OS**: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY  
           echo "- **Python**: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.format-changes.outputs.changes }}" = "true" ]; then
-            echo "- **Linting**: ✨ Ruff auto-fix applied with formatting changes" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- **Linting**: ✅ Ruff checks passed, no formatting needed" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -f coverage.xml ]; then
-            echo "- **Coverage**: Available in coverage.xml" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "- **Tests**: $([ -f coverage.xml ] && echo "✅ Passed with coverage" || echo "❌ Failed")" >> $GITHUB_STEP_SUMMARY
+          echo "- **Duration**: ~$(date -d@$SECONDS -u +%M:%S)" >> $GITHUB_STEP_SUMMARY

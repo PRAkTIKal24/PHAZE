@@ -65,7 +65,21 @@ test = [
     "pytest>=8.0.0,<9",
     "pytest-asyncio>=1.2.0",
     "pytest-cov>=5.0.0,<6",
-    "pytest-xdist>=3.5.0,<4",
+]
+
+test-fast = [
+    "pytest>=8.0.0,<9", 
+    "pytest-cov>=5.0.0,<6",
+]
+
+ci = [
+    # Core dependencies needed for CI tests
+    "torch",
+    "numpy", 
+    "pandas>=2.3.2",
+    "psutil",
+    "pytest>=8.0.0,<9",
+    "pytest-cov>=5.0.0,<6", 
 ]
 
 [project.scripts]
