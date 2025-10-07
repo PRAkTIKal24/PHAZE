@@ -263,7 +263,7 @@ class TestPHAZEPerformance:
 
         with torch.no_grad():
             for _ in range(100):  # 100 forward passes
-                output = model(test_input)
+                _ = model(test_input)
 
         end_time = time.time()
         avg_time_per_batch = (end_time - start_time) / 100
@@ -279,9 +279,9 @@ class TestPHAZEPerformance:
 
         start_time = time.time()
 
-        for i in range(1000):
+        for _ in range(1000):
             data = [j for j in range(50)]  # 50 element vector
-            hash_value = fingerprinter.compute_hash(data)
+            _ = fingerprinter.compute_hash(data)
 
         end_time = time.time()
         avg_time_per_hash = (end_time - start_time) / 1000

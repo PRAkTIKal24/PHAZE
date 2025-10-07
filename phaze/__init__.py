@@ -1,5 +1,6 @@
 """
-PHAZE: Privacy-preserving High-energy physics Analysis with Zero-knowledge proofs and Early-exit models
+PHAZE: Privacy-preserving High-energy physics Analysis
+with Zero-knowledge proofs and Early-exit models
 
 A framework for cryptographic and ZKML-based low latency inference at LHC.
 """
@@ -11,11 +12,7 @@ from .src.benchmarking import (
     run_zkml_benchmark,
 )
 from .src.comprehensive_benchmark import (
-    BenchmarkResult,
     ComprehensiveBenchmarkSuite,
-    CryptoBenchmarkResult,
-    PerformanceMonitor,
-    ZKMLFrameworkBenchmark,
     run_phaze_benchmarks,
 )
 from .src.crypto_primitives import RabinFingerprint
@@ -61,11 +58,13 @@ from .src.zkml_integration import SimpleFullModel, ZKMLProverVerifier
 # Get version dynamically from package metadata
 try:
     from importlib.metadata import version
+
     __version__ = version("phaze")
 except ImportError:
     # Fallback for Python < 3.8
     try:
         from importlib_metadata import version
+
         __version__ = version("phaze")
     except ImportError:
         __version__ = "unknown"

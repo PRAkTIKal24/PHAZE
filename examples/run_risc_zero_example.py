@@ -2,7 +2,8 @@
 """
 Example script to run PHAZE benchmarks with RISC Zero backend.
 
-This script demonstrates how to use the RISC Zero backend with the PHAZE benchmarking suite
+This script demonstrates how to use the RISC Zero backend
+with the PHAZE benchmarking suite
 to evaluate the performance of RISC Zero zkVM for machine learning inference proofs.
 """
 
@@ -57,7 +58,8 @@ async def run_risc_zero_standalone_example():
     print("Generating proof...")
     proof = backend.prove(input_data, model.state_dict())
     print(
-        f"Proof generated: {proof['framework']} proof with {len(proof['proof_data'])} bytes"
+        f"Proof generated: {proof['framework']} proof with "
+        f"{len(proof['proof_data'])} bytes"
     )
 
     # Verify proof
@@ -69,7 +71,7 @@ async def run_risc_zero_standalone_example():
 
 
 async def run_risc_zero_integration_example():
-    """Run an example using the PHAZE integration layer with RISC Zero."""
+    """Example demonstrating RISC Zero integration with PHAZE for secure ML."""
     print("\n=== Running RISC Zero Integration Example ===")
 
     # Create integration manager

@@ -48,7 +48,8 @@ def main():
             )
             sys.exit(1)
         print(
-            f"Creating new project '{args.project[1]}' in workspace '{args.project[0]}'... (Not yet implemented)"
+            f"Creating new project '{args.project[1]}' in workspace "
+            f"'{args.project[0]}'... (Not yet implemented)"
         )
     else:
         print(f"Mode '{args.mode}' is not yet implemented.", file=sys.stderr)

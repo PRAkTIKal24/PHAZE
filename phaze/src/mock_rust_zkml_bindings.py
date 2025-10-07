@@ -1,5 +1,5 @@
 """
-Mock implementation of rust_zkml_bindings for testing when Rust bindings are not available.
+Mock implementation of rust_zkml_bindings for testing when Rust bindings unavailable.
 """
 
 import hashlib

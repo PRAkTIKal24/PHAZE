@@ -6,13 +6,15 @@ from pathlib import Path
 import pytest
 
 from phaze import (
-    BenchmarkResult,
     ComprehensiveBenchmarkSuite,
-    CryptoBenchmarkResult,
     CryptographicPrimitiveBenchmark,
+    run_phaze_benchmarks,
+)
+from phaze.src.comprehensive_benchmark import (
+    BenchmarkResult,
+    CryptoBenchmarkResult,
     PerformanceMonitor,
     ZKMLFrameworkBenchmark,
-    run_phaze_benchmarks,
 )
 
 

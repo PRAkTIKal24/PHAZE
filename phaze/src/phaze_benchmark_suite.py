@@ -230,11 +230,11 @@ class PHAZEBenchmarkSuite:
                 # Step 3: Cryptographic hashing of early output
                 fingerprinter = RabinFingerprint(field_size=2**31 - 1, degree=5)
                 early_data = early_output.flatten().numpy().astype(int)[:5].tolist()
-                hash_result = fingerprinter.compute_hash(early_data)
+                _ = fingerprinter.compute_hash(early_data)
 
                 # Step 4: M_full inference (would be done with zkML in practice)
                 with torch.no_grad():
-                    full_output = self.m_full(self.test_input)
+                    pass  # Model inference would happen here
 
             end_time = time.perf_counter()
             pipeline_times.append((end_time - start_time) * 1000)
@@ -376,7 +376,10 @@ class PHAZEBenchmarkSuite:
             fastest_zkml = min(
                 successful_zkml.items(), key=lambda x: x[1].proving_time_ms
             )
-            report += f"  Fastest zkML Framework: {fastest_zkml[0]} ({fastest_zkml[1].proving_time_ms:.2f} ms proving)\n"
+            report += (
+                f"  Fastest zkML Framework: {fastest_zkml[0]} "
+                f"({fastest_zkml[1].proving_time_ms:.2f} ms proving)\n"
+            )
 
         avg_pipeline = results.pipeline_results.get("avg_pipeline_time_ms", 0)
         if avg_pipeline > 0:

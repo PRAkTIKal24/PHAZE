@@ -1,8 +1,8 @@
 """
 Modular model architectures for the PHAZE framework.
 
-This module provides various model architectures that can be used as M_early and M_full
-in the PHAZE system, with support for different complexity levels and early-exit strategies.
+This module provides various model architectures for M_early and M_full
+in the PHAZE system, with support for different complexity levels.
 """
 
 from abc import ABC, abstractmethod
@@ -59,7 +59,8 @@ class PHAZEModelInterface(ABC, nn.Module):
 
     def get_flops_estimate(self, input_shape: Tuple[int, ...]) -> int:
         """Estimate FLOPs for the model (rough approximation)."""
-        # This is a very rough estimate - in practice you'd use tools like thop or fvcore
+        # This is a very rough estimate - in practice you'd use tools like
+        # thop or fvcore
         total_params = self.count_parameters()
         # Rough estimate: 2 FLOPs per parameter per forward pass
         return total_params * 2

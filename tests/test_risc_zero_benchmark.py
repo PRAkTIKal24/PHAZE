@@ -166,8 +166,9 @@ async def test_convenience_function_with_risc_zero():
         # if it's registered in the backend manager.
         result = await run_phaze_benchmarks(temp_dir, quick_mode=True)
 
-        # If RISC Zero is properly integrated, its results should be in the benchmark
-        frameworks = set(r["framework"] for r in result["results"]["zkml_results"])
+        # If RISC Zero is properly integrated, its results should be
+        # in the benchmark
+        _ = set(r["framework"] for r in result["results"]["zkml_results"])
 
         # This assertion may fail until RISC Zero is fully integrated
         # into the main codebase, so we skip checking it for now

@@ -165,7 +165,8 @@ class TestRustGroth16Backend:
             "verification_key_hash": "invalid_hash",
         }
         is_valid = self.backend.verify(invalid_proof)
-        # Mock implementation might still return True, so we'll just check it doesn't crash
+        # Mock implementation might still return True, so we'll just check
+        # it doesn't crash
         assert isinstance(is_valid, bool)
 
     def test_setup_info(self):

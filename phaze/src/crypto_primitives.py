@@ -6,7 +6,7 @@ import numpy as np
 
 class RabinFingerprint:
     """A toy implementation of Rabin Fingerprinting for polynomial hashing.
-    This simplified version uses direct polynomial evaluation for demonstration purposes.
+    This simplified version uses direct polynomial evaluation for demonstration.
     """
 
     def __init__(self, field_size=2**31 - 1, degree=100):
@@ -17,9 +17,9 @@ class RabinFingerprint:
         """Computes the Rabin fingerprint (hash) of a data vector.
 
         Args:
-            data_vector (list or bytes): The input data vector (coefficients of the polynomial).
-            challenge_point (int, optional): The point at which to evaluate the polynomial.
-                                               If None, a random point within the field is chosen.
+            data_vector (list or bytes): The input data vector (coefficients).
+            challenge_point (int, optional): Point to evaluate polynomial.
+                If None, a random point within the field is chosen.
 
         Returns:
             int: The computed hash value.
@@ -118,7 +118,7 @@ class ShamirSecretSharing:
                 shares = [(x, [y]) for x, y in byte_shares]
             else:
                 # Append to existing shares
-                for j, (x, y) in enumerate(byte_shares):
+                for j, (_x, y) in enumerate(byte_shares):
                     shares[j][1].append(y)
 
         # Convert y values back to bytes
