@@ -1,10 +1,11 @@
 """Configuration for PHAZE plotting system."""
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional
 from enum import Enum
-import matplotlib.pyplot as plt
+from typing import Dict, List, Optional, Tuple
+
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 
 class PlotStyle(Enum):
@@ -18,7 +19,7 @@ class PlotStyle(Enum):
 @dataclass
 class PlotConfig:
     """Configuration for PHAZE plotting system."""
-    
+
     # Style settings
     style: PlotStyle = PlotStyle.NEURIPS
     dpi: int = 300
@@ -26,18 +27,18 @@ class PlotConfig:
     font_size: int = 12
     title_size: int = 14
     legend_size: int = 10
-    
+
     # Colors (colorblind-friendly palette)
     primary_colors: List[str] = None
     secondary_colors: List[str] = None
-    
+
     # Export settings
     export_formats: List[str] = None
-    
+
     # Statistical settings
     confidence_level: float = 0.95
     num_trials: int = 10
-    
+
     def __post_init__(self):
         """Initialize default values after object creation."""
         if self.primary_colors is None:
@@ -54,7 +55,7 @@ class PlotConfig:
                 '#bcbd22',  # Olive
                 '#17becf'   # Cyan
             ]
-        
+
         if self.secondary_colors is None:
             # Lighter versions for error bars, fill areas
             self.secondary_colors = [
@@ -69,10 +70,10 @@ class PlotConfig:
                 '#dbdb8d',  # Light olive
                 '#9edae5'   # Light cyan
             ]
-        
+
         if self.export_formats is None:
             self.export_formats = ['png', 'pdf']
-    
+
     def apply_style(self) -> None:
         """Apply the configured style to matplotlib."""
         # Set style based on configuration
@@ -84,7 +85,7 @@ class PlotConfig:
             self._apply_web_style()
         elif self.style == PlotStyle.NEURIPS:
             self._apply_neurips_style()
-    
+
     def _apply_publication_style(self) -> None:
         """Apply publication-ready style settings."""
         plt.style.use('default')
@@ -105,7 +106,7 @@ class PlotConfig:
             'axes.spines.right': False,
             'figure.dpi': self.dpi,
         })
-    
+
     def _apply_presentation_style(self) -> None:
         """Apply presentation-friendly style settings."""
         plt.style.use('default')
@@ -125,7 +126,7 @@ class PlotConfig:
             'axes.spines.right': False,
             'figure.dpi': self.dpi,
         })
-    
+
     def _apply_web_style(self) -> None:
         """Apply web-friendly style settings."""
         plt.style.use('default')
@@ -145,7 +146,7 @@ class PlotConfig:
             'axes.spines.right': False,
             'figure.dpi': 150,
         })
-    
+
     def _apply_neurips_style(self) -> None:
         """Apply NeurIPS conference style settings."""
         plt.style.use('default')
@@ -168,29 +169,29 @@ class PlotConfig:
             'axes.axisbelow': True,
             'figure.dpi': self.dpi,
         })
-    
+
     def get_color_cycle(self, n_colors: Optional[int] = None) -> List[str]:
         """Get a cycle of colors for plotting.
-        
+
         Args:
             n_colors: Number of colors needed. If None, returns all primary colors.
-            
+
         Returns:
             List of color strings
         """
         if n_colors is None:
             return self.primary_colors
-        
+
         # Cycle through colors if more are needed
         colors = []
         for i in range(n_colors):
             colors.append(self.primary_colors[i % len(self.primary_colors)])
-        
+
         return colors
-    
+
     def get_framework_colors(self) -> Dict[str, str]:
         """Get consistent colors for zkML frameworks.
-        
+
         Returns:
             Dictionary mapping framework names to colors
         """
@@ -201,10 +202,10 @@ class PlotConfig:
             'plonky': self.primary_colors[3],    # Red
             'halo': self.primary_colors[4],      # Purple
         }
-    
+
     def get_algorithm_colors(self) -> Dict[str, str]:
         """Get consistent colors for algorithms.
-        
+
         Returns:
             Dictionary mapping algorithm names to colors
         """

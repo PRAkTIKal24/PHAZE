@@ -32,6 +32,10 @@ from .src.phaze_benchmark_suite import (
     PHAZEBenchmarkResults,
     PHAZEBenchmarkSuite,
 )
+from .src.plotter_registry import register_all_plotters
+
+# Plotting system
+from .src.plotting import PHAZEPlotSuite, PlotConfig, PlotStyle
 from .src.rust_zkml_backend import RustZKMLBackend
 from .src.zkml_backends import (
     EZKLBackend,
@@ -54,10 +58,6 @@ from .src.zkml_framework_interface import (
     ZKMLFramework,
 )
 from .src.zkml_integration import SimpleFullModel, ZKMLProverVerifier
-
-# Plotting system
-from .src.plotting import PHAZEPlotSuite, PlotConfig, PlotStyle
-from .src.plotter_registry import register_all_plotters
 
 # Auto-register plotters when package is imported
 register_all_plotters()
@@ -127,6 +127,6 @@ __all__ = [
     "PHAZEBenchmarkSuite",
     # Plotting system
     "PHAZEPlotSuite",
-    "PlotConfig", 
+    "PlotConfig",
     "PlotStyle",
 ]

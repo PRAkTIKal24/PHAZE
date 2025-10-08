@@ -81,6 +81,8 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "B", "I"]
+# Temporarily ignore line length for plotting files during development
+extend-ignore = ["E501"]
 
 [tool.maturin]
 # Configure maturin to build the Rust extension

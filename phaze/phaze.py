@@ -4,7 +4,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import List, Optional
 
 
 def get_available_plot_types():
@@ -39,9 +39,9 @@ async def run_plotting_command(
 ) -> int:
     """Run plotting command with specified parameters."""
     try:
-        from .src.plotting import PHAZEPlotSuite, PlotConfig, PlotStyle
         from .src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
-        
+        from .src.plotting import PHAZEPlotSuite, PlotConfig, PlotStyle
+
         # Create plot configuration
         style_enum = PlotStyle.NEURIPS
         if style.lower() == "publication":
@@ -50,41 +50,41 @@ async def run_plotting_command(
             style_enum = PlotStyle.PRESENTATION
         elif style.lower() == "web":
             style_enum = PlotStyle.WEB
-        
+
         config = PlotConfig(
             style=style_enum,
             export_formats=formats or ["png", "pdf"],
             num_trials=trials
         )
-        
+
         # Initialize plot suite
         plot_suite = PHAZEPlotSuite(config)
-        
+
         if verbose:
             print(f"Plot suite initialized with style: {style}")
             print(f"Output directory: {output_dir}")
             print(f"Export formats: {config.export_formats}")
-        
+
         # Get data for plotting
         if data_file:
             # Load data from file
             if verbose:
                 print(f"Loading data from: {data_file}")
-            
+
             data_path = Path(data_file)
             if not data_path.exists():
                 print(f"Error: Data file not found: {data_file}", file=sys.stderr)
                 return 1
-            
+
             with open(data_path, 'r') as f:
                 data = json.load(f)
         else:
             # Run benchmarks to generate data
             if verbose:
                 print("Running benchmarks to generate plotting data...")
-            
+
             benchmark_suite = ComprehensiveBenchmarkSuite(output_dir)
-            
+
             # Configure benchmark parameters based on requested plot types
             zkml_config = {
                 "architectures": ["simple", "multi_exit"],
@@ -92,22 +92,22 @@ async def run_plotting_command(
                 "input_sizes": [10, 50, 100],
                 "num_trials": max(3, trials // 3)  # Fewer trials for benchmarking
             }
-            
+
             crypto_config = {
                 "rabin_input_sizes": [64, 256, 1024],
                 "shamir_secret_sizes": [32, 64, 128],
                 "num_trials": trials
             }
-            
+
             # Run comprehensive benchmarks
             data = await benchmark_suite.run_full_benchmark_suite(
                 zkml_config, crypto_config
             )
-        
+
         # Generate plots
         if verbose:
             print(f"Generating plots for types: {plot_types or 'all available'}")
-        
+
         if components:
             # Generate comparative plots
             results = plot_suite.generate_comparative_plots(
@@ -118,22 +118,22 @@ async def run_plotting_command(
             results = plot_suite.generate_plots(
                 data, plot_types, output_dir, save_plots=True
             )
-        
+
         # Generate summary report
         report = plot_suite.generate_summary_report(
             results, Path(output_dir) / "plotting_report.md"
         )
-        
+
         if verbose:
             print("\nPlotting Summary:")
             print("=" * 50)
             print(report)
-        
+
         print(f"\nPlots generated successfully in: {output_dir}")
         print(f"Report saved to: {Path(output_dir) / 'plotting_report.md'}")
-        
+
         return 0
-        
+
     except Exception as e:
         print(f"Error during plotting: {e}", file=sys.stderr)
         if verbose:
@@ -200,7 +200,7 @@ def main():
         benchmark_list = chr(10).join(benchmark_names)
     else:
         benchmark_list = "  No benchmarks found"
-    
+
     # Format plot types for help text
     if available_plot_types:
         plot_type_names = [f"  {name}" for name in available_plot_types]
@@ -225,15 +225,15 @@ Example usage:
   # Run benchmarks
   uv run phaze -b basic_benchmark --mode standard --quick
   uv run phaze --benchmark risc_zero --mode standalone
-  
+
   # Generate plots
   uv run phaze --plot fingerprint --output plots/fingerprint/
   uv run phaze --plot zkml-proof --frameworks ezkl,risc_zero --trials 10
   uv run phaze --plot all --style publication --output plots/comprehensive/
-  
+
   # Comparative analysis
   uv run phaze --plot comparative --components fingerprint,zkml-proof
-  
+
   # List available options
   uv run phaze --list-benchmarks
   uv run phaze --list-plot-types
@@ -273,57 +273,57 @@ Default behavior (if no options specified):
         choices=available_plot_types + ["all", "comparative"],
         help="Generate plots of specified type (or 'all' for all types, 'comparative' for cross-component analysis)",
     )
-    
+
     parser.add_argument(
         "--list-plot-types",
         action="store_true",
         help="List all available plot types and exit",
     )
-    
+
     parser.add_argument(
         "--components",
         type=str,
         help="Comma-separated list of components for comparative plotting (e.g., 'fingerprint,zkml-proof')",
     )
-    
+
     parser.add_argument(
         "--frameworks",
         type=str,
         help="Comma-separated list of zkML frameworks to include (e.g., 'ezkl,risc_zero')",
     )
-    
+
     parser.add_argument(
         "--algorithms",
         type=str,
         help="Comma-separated list of fingerprinting algorithms to include (e.g., 'rabin,shamir')",
     )
-    
+
     parser.add_argument(
         "--complexity-range",
         type=str,
         help="Comma-separated list of model complexities to test (e.g., 'light,medium,heavy')",
     )
-    
+
     parser.add_argument(
         "--trials",
         type=int,
         default=10,
         help="Number of statistical trials per configuration (default: 10)",
     )
-    
+
     parser.add_argument(
         "--output",
         type=str,
         default="plots",
         help="Output directory for plots (default: plots)",
     )
-    
+
     parser.add_argument(
         "--data-file",
         type=str,
         help="Load benchmark data from JSON file instead of running new benchmarks",
     )
-    
+
     parser.add_argument(
         "--style",
         type=str,
@@ -331,7 +331,7 @@ Default behavior (if no options specified):
         default="neurips",
         help="Plot style (default: neurips)",
     )
-    
+
     parser.add_argument(
         "--format",
         type=str,
@@ -354,7 +354,7 @@ Default behavior (if no options specified):
         else:
             print("  No benchmarks found in examples directory")
         return 0
-    
+
     if args.list_plot_types:
         print("Available plot types:")
         if available_plot_types:
@@ -387,12 +387,12 @@ Default behavior (if no options specified):
     if args.plot:
         if args.verbose:
             print(f"Running plotting command: {args.plot}")
-        
+
         # Parse plot-specific arguments
         plot_types = None if args.plot in ["all", "comparative"] else [args.plot]
         components = args.components.split(",") if args.components else None
         formats = args.format.split(",") if args.format else None
-        
+
         # Run plotting asynchronously
         return asyncio.run(run_plotting_command(
             plot_types=plot_types,

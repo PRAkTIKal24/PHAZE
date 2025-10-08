@@ -7,6 +7,6 @@ from .fingerprint_plotter import FingerprintPlotter
 from .zkml_plotter import ZKMLPlotter
 
 __all__ = [
-    "FingerprintPlotter", 
+    "FingerprintPlotter",
     "ZKMLPlotter",
 ]
