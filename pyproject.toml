@@ -34,24 +34,6 @@ dependencies = [
     "psutil",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "black",
-    "isort",
-    "flake8",
-    "sphinx",
-    "sphinx_rtd_theme",
-    "myst-parser",
-    "ruff",
-]
-
-test = [
-    "pytest>=8.0.0",
-    "pytest-cov>=5.0.0",
-    "pytest-xdist>=3.5.0",
-]
-
 [dependency-groups]
 dev = [
     "wrapt>=1.17.2,<2",
@@ -99,12 +81,6 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "B", "I"]
-
-[tool.hatch.build.targets.sdist]
-include = ["/phaze", "README.md", "pyproject.toml"]
-
-[tool.hatch.build.targets.wheel]
-packages = ["phaze"]
 
 [tool.maturin]
 # Configure maturin to build the Rust extension
