@@ -20,10 +20,10 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
   - [Model Creation and Testing](#model-creation-and-testing)
   - [Zero-Knowledge ML Integration](#zero-knowledge-ml-integration)
   - [Cryptographic Primitives](#cryptographic-primitives)
-- [🏗️ Architecture](#️-architecture)
-  - [Project Structure](#project-structure)
-  - [Model Architecture System](#model-architecture-system)
-  - [zkML Backend Integration](#zkml-backend-integration)
+- [📊 Performance Analysis & Plotting](#-performance-analysis--plotting)
+  - [Publication-Ready Plots](#publication-ready-plots)
+  - [Plot Types and Styles](#plot-types-and-styles)
+  - [Statistical Analysis](#statistical-analysis)
 - [📊 Benchmarking](#-benchmarking)
   - [Performance Metrics](#performance-metrics)
   - [Typical Performance (Reference Hardware)](#typical-performance-reference-hardware)
@@ -68,6 +68,13 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
 - **Scalability Testing**: Performance across different input sizes and model complexities
 - **Framework Comparison**: Side-by-side evaluation of zkML approaches
 - **Automated Reporting**: Markdown reports with performance recommendations
+
+### 📈 Publication-Ready Plotting
+- **Statistical Analysis**: Error bars, confidence intervals, significance testing
+- **Multiple Plot Types**: Time complexity, memory usage, throughput, comparative analysis
+- **Publication Styles**: NeurIPS, IEEE/ACM, presentation, and web-optimized formats
+- **Export Formats**: High-resolution PNG, PDF, SVG for papers and presentations
+- **Colorblind-Friendly**: Accessible color schemes and consistent styling
 
 ## 🚀 Quick Start
 
@@ -135,6 +142,7 @@ uv run pytest
 **List Available Benchmarks**
 ```bash
 uv run phaze --list-benchmarks
+uv run phaze --list-plot-types  # List available plot types
 ```
 
 **Run Default Benchmarks**
@@ -153,6 +161,32 @@ uv run phaze -b risc_zero --mode standalone
 
 # Get help for a specific benchmark
 uv run phaze --help-benchmark basic_benchmark
+```
+
+**Generate Publication-Ready Plots**
+```bash
+# List available plot types
+uv run phaze --list-plot-types
+
+# Generate fingerprinting algorithm performance plots
+uv run phaze --plot fingerprint --output plots/fingerprint/ --trials 10
+
+# Generate zkML framework performance plots
+uv run phaze --plot zkml-proof --style neurips --format png,pdf --output plots/zkml/
+
+# Generate all available plots
+uv run phaze --plot all --style publication --output plots/comprehensive/
+
+# Comparative analysis across components
+uv run phaze --plot comparative --components fingerprint,zkml-proof --output plots/comparison/
+
+# Use existing benchmark data instead of running new benchmarks
+uv run phaze --plot fingerprint --data-file benchmark_results.json --output plots/
+
+# Different plot styles for different use cases
+uv run phaze --plot zkml-proof --style presentation --output plots/presentation/  # For slides
+uv run phaze --plot fingerprint --style neurips --output plots/paper/           # For papers
+uv run phaze --plot all --style web --format png --output plots/web/            # For websites
 ```
 
 ### Direct Python Examples
@@ -282,6 +316,127 @@ print(f"Generated {len(shares)} shares")
 # Reconstruct from subset
 reconstructed = sss.reconstruct_secret(shares[:3])  # Use any 3 shares
 print(f"Reconstruction: {'✅ Success' if reconstructed == secret_data else '❌ Failed'}")
+```
+
+## 📊 Performance Analysis & Plotting
+
+PHAZE provides comprehensive plotting capabilities for analyzing benchmark results with publication-ready visualizations. The plotting system supports statistical analysis, multiple export formats, and various styling options optimized for research papers, presentations, and web display.
+
+### Publication-Ready Plots
+
+**Available Plot Types:**
+- **Fingerprinting Analysis**: Time complexity, memory usage, throughput, and algorithm comparisons
+- **zkML Framework Analysis**: Proof generation/verification performance, memory consumption, proof size analysis
+- **Statistical Analysis**: Error bars, confidence intervals, distribution analysis, scaling analysis
+- **Comparative Analysis**: Cross-component performance comparisons and framework rankings
+
+**Quick Start with Plotting:**
+```bash
+# Generate all available plots with publication quality
+uv run phaze --plot all --style neurips --output plots/paper/
+
+# Generate specific analysis plots
+uv run phaze --plot fingerprint --trials 10 --output plots/crypto/
+uv run phaze --plot zkml-proof --style presentation --output plots/zkml/
+
+# Use existing benchmark data
+uv run phaze --plot fingerprint --data-file benchmark_results.json --style publication
+```
+
+### Plot Types and Styles
+
+**Fingerprinting Performance Plots:**
+```bash
+# Time complexity analysis across algorithms
+uv run phaze --plot fingerprint --algorithms rabin,shamir --complexity-range light,medium,heavy
+
+# Memory and throughput analysis
+uv run phaze --plot fingerprint --trials 20 --style neurips --format png,pdf
+```
+
+**zkML Framework Performance Plots:**
+```bash
+# Proof generation and verification analysis
+uv run phaze --plot zkml-proof --frameworks ezkl,risc_zero --style publication
+
+# Framework comparison matrix and scaling analysis
+uv run phaze --plot zkml-verify --complexity-range light,medium --trials 10
+```
+
+**Cross-Component Comparative Analysis:**
+```bash
+# Compare performance across different PHAZE components
+uv run phaze --plot comparative --components fingerprint,zkml-proof,zkml-verify
+
+# Generate comprehensive analysis with all metrics
+uv run phaze --plot all --trials 15 --style neurips --output plots/comprehensive/
+```
+
+### Statistical Analysis
+
+**Built-in Statistical Features:**
+- **Error Bars**: Standard deviation, standard error, 95% confidence intervals
+- **Distribution Analysis**: Box plots, violin plots, outlier detection
+- **Significance Testing**: Statistical comparison between frameworks and algorithms
+- **Effect Size Calculation**: Cohen's d for practical significance assessment
+
+**Plot Styling Options:**
+- **`neurips`**: NeurIPS conference style with serif fonts and publication formatting
+- **`publication`**: IEEE/ACM paper format with high-resolution output
+- **`presentation`**: Large fonts and clear visuals optimized for slides
+- **`web`**: Web-friendly styling with smaller file sizes
+
+**Export Formats:**
+```bash
+# Multiple format export
+uv run phaze --plot all --format png,pdf,svg --output plots/
+
+# High-resolution for publications
+uv run phaze --plot fingerprint --style publication --format pdf
+```
+
+**Advanced Usage Examples:**
+```python
+# Using the Python API for custom plotting
+from phaze import PHAZEPlotSuite, PlotConfig, PlotStyle
+import asyncio
+
+async def custom_plotting():
+    # Create custom plot configuration
+    config = PlotConfig(
+        style=PlotStyle.NEURIPS,
+        dpi=300,
+        export_formats=['png', 'pdf'],
+        confidence_level=0.95
+    )
+    
+    # Initialize plot suite
+    suite = PHAZEPlotSuite(config)
+    
+    # Load benchmark data
+    with open('benchmark_results.json', 'r') as f:
+        data = json.load(f)
+    
+    # Generate plots
+    results = suite.generate_plots(data, ['fingerprint', 'zkml-proof'])
+    
+    # Generate report
+    report = suite.generate_summary_report(results, 'plotting_report.md')
+    print("Plots generated successfully!")
+
+asyncio.run(custom_plotting())
+```
+
+**Plot Customization:**
+```bash
+# Custom trials and output settings
+uv run phaze --plot zkml-proof --trials 25 --output custom_plots/ --verbose
+
+# Specific framework and complexity combinations
+uv run phaze --plot zkml-proof --frameworks ezkl,risc_zero --complexity-range medium,heavy
+
+# Generate plots with existing data to save time
+uv run phaze --plot all --data-file previous_benchmark.json --style neurips
 ```
 
 ## 🏗️ Architecture
