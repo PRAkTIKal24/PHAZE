@@ -1,7 +1,7 @@
 # PHAZE Benchmarking Plots Integration Plan
 
-**Date:** October 8, 2025  
-**Branch:** 9-validation-plots  
+**Date:** October 8, 2025
+**Branch:** 9-validation-plots
 **Status:** DRAFT - Awaiting Approval
 
 ## Executive Summary
@@ -11,25 +11,26 @@ This document outlines the comprehensive plan to add modular benchmarking plots 
 ## 1. Current State Analysis
 
 ### ✅ Existing Infrastructure
-- Basic benchmarking system in `comprehensive_benchmark.py` 
-- Multiple zkML backends (EZKL, Groth16, Plonky, Halo, RISC Zero)
+- Basic benchmarking system in `comprehensive_benchmark.py`
+- Multiple zkML backends (EZKL, RISC Zero. Mockbackends for future integration: Groth16, Plonky, Halo)
 - Model architectures with complexity levels (minimal, light, medium, heavy, extreme)
-- Cryptographic primitives (RabinFingerprint, ShamirSecretSharing) 
-- CLI interface through `phaze.py`
+- Cryptographic primitives (RabinFingerprint, ShamirSecretSharing)
+- CLI interface through `phaze.py` and using the `uv run phaze command` (look at README for usage instructions)
 - Basic matplotlib plotting capabilities
 - Performance monitoring and metrics collection
 
 ### 🎯 PHAZE Framework Components to Benchmark
-1. **M_early inference** - Early-exit model performance
-2. **Fingerprinting algorithms** - Polynomial hashing performance  
+1. **M_early inference** - Early-exit model performance (future integration)
+2. **Fingerprinting algorithms** - Polynomial hashing performance
 3. **zkML proof generation** - Zero-knowledge proof creation
 4. **zkML proof verification** - Zero-knowledge proof validation
-5. **Decision map operations** - Population and lookup performance
-6. **End-to-end pipeline** - Complete PHAZE workflow
+5. **Decision map operations** - Population and lookup performance (future integration)
+6. **End-to-end pipeline** - Complete PHAZE workflow (future integration)
 
 ## 2. Proposed CLI Architecture
 
 ### New Plotting Commands
+The below setup is fine but we need to use correct `uv run phaze [OPTIONS]` CLI commands
 ```bash
 # Component-specific plotting
 phaze --plot fingerprint --algorithms rabin,shamir --complexity-range light,medium,heavy --trials 10 --output plots/fingerprint/
@@ -46,14 +47,19 @@ phaze --plot comparative --components fingerprint,zkml-proof --output plots/comp
 ```
 
 ### Command Options
-- `--algorithms`: Specify algorithms to compare (fingerprinting only)
-- `--frameworks`: Specify zkML frameworks to compare  
-- `--architectures`: Specify model architectures to compare
+- `--fingerprints`: Specify algorithms to compare (fingerprinting only)
+- `--zkml-frameworks`: Specify zkML frameworks to compare
+- `--model-architectures`: Specify model architectures to compare
 - `--complexity-range`: Range of model complexities to test
 - `--trials`: Number of statistical trials per configuration
 - `--output`: Output directory for plots
 - `--format`: Export format (png, pdf, svg)
 - `--style`: Plot style (publication, presentation, web)
+- `--phaze-components`: Specify which PHAZE components to include in comprehensive plots (fingerprint, zkml-proof, zkml-verify, model-inference, all etc.)
+
+### Configuration Management
+- Use a centralized configuration file (.py) for default settings and easy configuration management of all the parameters above
+- Allow command-line overrides for flexibility
 
 ## 3. Plot Types and Specifications
 
@@ -65,25 +71,36 @@ phaze --plot comparative --components fingerprint,zkml-proof --output plots/comp
   - Y-axis: Fingerprinting time (ms)
   - Colors: Different algorithms (RabinFingerprint variants, ShamirSecretSharing)
   - Error bars: Standard deviation across 10+ trials
-  
+
 - **Memory Consumption Plot**
   - X-axis: M_early complexity (model parameters)
   - Y-axis: Memory usage (MB)
   - Colors: Different algorithms
   - Error bars: Standard deviation across trials
 
+- **Throughput Plot**
+  - X-axis: M_early complexity (model parameters)
+  - Y-axis: Throughput (operations/sec)
+  - Colors: Different algorithms
+  - Error bars: Standard deviation across trials
+
+- **Collision Rate Plot** (for RabinFingerprint)
+  - X-axis: RabinFingerprint parameters
+  - Y-axis: Collision rate (%)
+  - Colors: field sizes or degrees
+  - Error bars: Standard deviation across trials
+
 **Algorithm Variants to Compare:**
-- RabinFingerprint with different field sizes (2^31-1, 2^61-1)
+- RabinFingerprint with different field sizes (2^8-1, 2^16-1, 2^32-1, 2^64-1 - or come up with similar more meaningful parameters)
 - RabinFingerprint with different degrees (10, 50, 100)
 - ShamirSecretSharing with different thresholds
-- [ ] **TODO: Specify which variants are most relevant for LHC triggers**
 
 ### 3.2 zkML Framework Performance Plots
 
 **Proof Generation Plots:**
 - **Time vs Model Complexity**
   - X-axis: Model complexity (parameters)
-  - Y-axis: Proof generation time (seconds)
+  - Y-axis: Proof generation time
   - Colors: Different frameworks (EZKL, RISC Zero, Groth16, Plonky, Halo)
   - Separate curves for M_early and M_full
 
@@ -97,12 +114,15 @@ phaze --plot comparative --components fingerprint,zkml-proof --output plots/comp
   - Y-axis: Proof size (bytes)
   - Colors: Different frameworks
 
+- **Framework Comparison Matrix**
+  - Heatmap showing time/memory/proof size across frameworks and complexities
+
 **Verification Plots:**
 - **Verification Time vs Proof Size**
 - **Memory Usage During Verification**
 - **Framework Comparison Matrix**
 
-### 3.3 Model Architecture Performance Plots
+### 3.3 Model Architecture Performance Plots (Do NOT integrate this yet. Need to wait for real M_full models)
 
 **Inference Performance:**
 - **M_early vs M_full Comparison**
@@ -114,7 +134,7 @@ phaze --plot comparative --components fingerprint,zkml-proof --output plots/comp
   - Simple vs Convolutional vs Transformer vs Multi-exit
   - Performance across different complexity levels
 
-### 3.4 Statistical Analysis Plots
+### 3.4 Statistical Analysis Plots (Do NOT integrate this yet. Need to wait for real M_full models)
 
 **Uncertainty Quantification:**
 - Box plots showing performance distributions
@@ -188,7 +208,7 @@ phaze/src/plotting/plotters/
 
 #### Estimated Time: 1-2 days
 
-### Phase 4: Data Collection Enhancement 📊 **MEDIUM PRIORITY**
+### Phase 4: Data Collection Enhancement (without pandas) 📊 **MEDIUM PRIORITY**
 
 #### Files to Modify:
 - `phaze/src/comprehensive_benchmark.py` - Enhance data collection
@@ -207,7 +227,7 @@ phaze/src/plotting/plotters/
 
 #### Tasks:
 - [ ] Implement performance prediction models
-- [ ] Add interactive plotting capabilities (optional)
+- [ ] Add interactive plotting capabilities
 - [ ] Create automated report generation
 - [ ] Add plot comparison utilities
 - [ ] Implement custom styling options
@@ -269,12 +289,12 @@ docs/plotting/
 ```python
 class BasePlotter(ABC):
     """Abstract base class for all PHAZE plotters."""
-    
+
     @abstractmethod
     def generate_plots(self, data: Dict, config: PlotConfig) -> List[Figure]:
         """Generate plots from benchmark data."""
         pass
-    
+
     @abstractmethod
     def save_plots(self, figures: List[Figure], output_dir: str):
         """Save plots to specified directory."""
@@ -298,39 +318,39 @@ class BasePlotter(ABC):
 ## 6. Questions for Clarification ❓
 
 ### 6.1 Algorithm Specifications
-- [ ] **Q1:** Which RabinFingerprint variants should we prioritize? (field sizes, degrees)
-- [ ] **Q2:** What ShamirSecretSharing configurations are relevant for LHC triggers?
-- [ ] **Q3:** Are there other fingerprinting algorithms we should implement and compare?
+- [ ] **Q1:** Which RabinFingerprint variants should we prioritize? (field sizes, degrees) - Edited above
+- [ ] **Q2:** What ShamirSecretSharing configurations are relevant for LHC triggers? Edited above
+- [ ] **Q3:** Are there other fingerprinting algorithms we should implement and compare? Not yet
 
 ### 6.2 Performance Metrics
-- [ ] **Q4:** Should model complexity be measured by parameters, FLOPs, or input/output dimensions?
-- [ ] **Q5:** What memory metrics are most important? (peak usage, average usage, allocation patterns?)
-- [ ] **Q6:** Should we include accuracy metrics in the performance trade-off analysis?
+- [ ] **Q4:** Should model complexity be measured by parameters, FLOPs, or input/output dimensions? parameters
+- [ ] **Q5:** What memory metrics are most important? (peak usage, average usage, allocation patterns?) all of these, possible overlayed in the same plot or in separate plots as required by the user.
+- [ ] **Q6:** Should we include accuracy metrics in the performance trade-off analysis? Not yet
 
-### 6.3 Statistical Requirements  
-- [ ] **Q7:** How many trials are needed for statistical significance? (currently planning 10)
-- [ ] **Q8:** What confidence level should we report? (95%, 99%?)
-- [ ] **Q9:** Should we perform multiple comparison corrections (Bonferroni, FDR)?
+### 6.3 Statistical Requirements
+- [ ] **Q7:** How many trials are needed for statistical significance? (currently planning 10) 10 by default
+- [ ] **Q8:** What confidence level should we report? (95%, 99%?) make a standard choice
+- [ ] **Q9:** Should we perform multiple comparison corrections (Bonferroni, FDR)? No, pick standard
 
 ### 6.4 zkML Framework Priority
-- [ ] **Q10:** Which zkML frameworks are most important for LHC trigger applications?
-- [ ] **Q11:** Should we include mock frameworks in comparisons or focus only on real implementations?
-- [ ] **Q12:** Are there specific proof systems optimized for low-latency applications?
+- [ ] **Q10:** Which zkML frameworks are most important for LHC trigger applications? Only test ezkl and risc zero for now
+- [ ] **Q11:** Should we include mock frameworks in comparisons or focus only on real implementations? only real for now
+- [ ] **Q12:** Are there specific proof systems optimized for low-latency applications? not really, we don't want to worry about this right now.
 
 ### 6.5 Decision Map Benchmarking
-- [ ] **Q13:** How should we benchmark decision map population performance?
-- [ ] **Q14:** What data structures should we test for decision map storage?
-- [ ] **Q15:** Should we include cache performance analysis?
+- [ ] **Q13:** How should we benchmark decision map population performance? Not focussing on this yet.
+- [ ] **Q14:** What data structures should we test for decision map storage? Not focussing on this yet.
+- [ ] **Q15:** Should we include cache performance analysis? Not focussing on this yet.
 
 ### 6.6 Publication Requirements
-- [ ] **Q16:** Any specific journal formatting requirements?
-- [ ] **Q17:** Required figure sizes or resolution specifications?
-- [ ] **Q18:** Color scheme preferences or restrictions?
+- [ ] **Q16:** Any specific journal formatting requirements? No, use any neat style preferably NeurIPS related styles if available
+- [ ] **Q17:** Required figure sizes or resolution specifications? no specific requirements
+- [ ] **Q18:** Color scheme preferences or restrictions? use a color-blind friendly color scheme and keep it consistent throughout the plots.
 
 ### 6.7 LHC Trigger Context
-- [ ] **Q19:** What are the target latency requirements for LHC triggers?
-- [ ] **Q20:** Should we include comparisons with existing LHC trigger algorithms?
-- [ ] **Q21:** Are there specific model sizes or input dimensions most relevant for LHC data?
+- [ ] **Q19:** What are the target latency requirements for LHC triggers? not focusing on this yet.
+- [ ] **Q20:** Should we include comparisons with existing LHC trigger algorithms? not focusing on this yet.
+- [ ] **Q21:** Are there specific model sizes or input dimensions most relevant for LHC data? not focusing on this yet.
 
 ## 7. Success Criteria ✅
 
@@ -346,60 +366,15 @@ class BasePlotter(ABC):
 - [ ] Plot generation completes in reasonable time
 
 ### 7.3 Quality Requirements
-- [ ] Comprehensive test coverage (>90%)
+- [ ] Comprehensive test coverage (>60%)
 - [ ] Clear documentation and examples
 - [ ] Consistent API design
 - [ ] Backward compatibility maintained
 
-## 8. Timeline and Milestones 📅
-
-### Week 1: Core Infrastructure
-- [ ] Day 1-2: Implement base plotting architecture
-- [ ] Day 3-4: Create plot configuration and styling system
-- [ ] Day 5: Statistical utilities and validation
-
-### Week 2: Component Plotters
-- [ ] Day 1-2: Fingerprinting and crypto plotters
-- [ ] Day 3-4: zkML framework plotters
-- [ ] Day 5: Model architecture plotters
-
-### Week 3: Integration and Testing
-- [ ] Day 1-2: CLI integration and validation
-- [ ] Day 3-4: Comprehensive testing suite
-- [ ] Day 5: Performance optimization
-
-### Week 4: Documentation and Polish
-- [ ] Day 1-2: Examples and documentation
-- [ ] Day 3-4: Plot gallery and tutorials
-- [ ] Day 5: Final testing and release preparation
-
-## 9. Risk Assessment and Mitigation 🚨
-
-### High Risk Items
-- **Statistical Validity:** Ensure proper statistical analysis
-  - *Mitigation:* Collaborate with statistics expert, use established libraries
-- **Performance Impact:** Plotting shouldn't slow down benchmarking significantly
-  - *Mitigation:* Profile early, optimize data structures, parallel processing
-- **Framework Compatibility:** Some zkML frameworks may have integration issues
-  - *Mitigation:* Graceful error handling, mock implementations for testing
-
-### Medium Risk Items
-- **Publication Standards:** Plots must meet academic publication quality
-  - *Mitigation:* Research journal requirements early, create style templates
-- **Cross-Platform Compatibility:** Ensure plots work on different systems
-  - *Mitigation:* Test on multiple platforms, use cross-platform libraries
-
-## 10. Next Steps 🎯
+## 8. Next Steps 🎯
 
 ### Immediate Actions Needed:
-1. **Review and approve this plan** - Please provide feedback on priorities and clarifications
-2. **Answer clarification questions** - Especially regarding algorithm variants and requirements  
-3. **Approve implementation phases** - Confirm priority ordering and timeline
-4. **Set up development branch** - Create feature branch for plotting implementation
-
-### Implementation Start:
-Once approved, I will begin with Phase 1 (Core Infrastructure) and create a proof-of-concept fingerprinting plotter to validate the architecture.
-
----
+1. **Review and approve this plan** - Please provide feedback on priorities and clarifications - this is the approved plan now with added comments
+2. **Answer clarification questions** - Especially regarding algorithm variants and requirements - answered inline
 
 **Please review this plan and provide feedback, especially on the clarification questions. You can edit this document directly or provide comments for any changes needed.**
