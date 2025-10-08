@@ -55,6 +55,13 @@ from .src.zkml_framework_interface import (
 )
 from .src.zkml_integration import SimpleFullModel, ZKMLProverVerifier
 
+# Plotting system
+from .src.plotting import PHAZEPlotSuite, PlotConfig, PlotStyle
+from .src.plotter_registry import register_all_plotters
+
+# Auto-register plotters when package is imported
+register_all_plotters()
+
 # Get version dynamically from package metadata
 try:
     from importlib.metadata import version
@@ -118,4 +125,8 @@ __all__ = [
     "PHAZEBenchmarkConfig",
     "PHAZEBenchmarkResults",
     "PHAZEBenchmarkSuite",
+    # Plotting system
+    "PHAZEPlotSuite",
+    "PlotConfig", 
+    "PlotStyle",
 ]
