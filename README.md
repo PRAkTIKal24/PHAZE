@@ -75,7 +75,12 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
 
 **Prerequisites**: Python 3.10+, [uv](https://docs.astral.sh/uv/) package manager
 
+First check for uv and install it if it doesn't exist. Alternative: see [uv docs](https://docs.astral.sh/uv/getting-started/installation/) to install uv.
+
 ```bash
+# Install uv package manager (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
 # Clone the repository
 git clone https://github.com/PRAkTIKal24/PHAZE.git
 cd PHAZE
@@ -83,6 +88,14 @@ cd PHAZE
 # Option 1: Automated installation (recommended)
 ./install_dev.sh
 
+# Verify installation and CLI
+uv run phaze --help
+uv run phaze --list-benchmarks
+```
+
+Alternatively, you can manually install the `maturin` based rust backend and then added the required `.pth` file that the `dev_setup.py` file will take care for you.
+
+```bash
 # Option 2: Manual installation
 uv pip install -e .
 uv run python dev_setup.py
@@ -97,14 +110,19 @@ uv run phaze --list-benchmarks
 ### Development Installation
 
 ```bash
+# Install uv if not already available
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Alternative: pip install uv
+
 # Install with all development dependencies
 uv sync --group dev --group test
 
 # Setup editable install (required for CLI)
 uv run python dev_setup.py
 
-# Verify installation
-uv run python -c "import phaze; print(f'PHAZE version: {phaze.__version__}')"
+# Verify installation and CLI
+uv run phaze --help
+uv run phaze --list-benchmarks
 
 # Run tests
 uv run pytest
@@ -138,6 +156,7 @@ uv run phaze --help-benchmark basic_benchmark
 ```
 
 ### Direct Python Examples
+> **Note**: This is not the recommended way to use PHAZE. Use the PHAZE CLI above instead.
 
 **Quick Start Example**
 ```bash
@@ -270,19 +289,51 @@ print(f"Reconstruction: {'✅ Success' if reconstructed == secret_data else '❌
 ### Project Structure
 
 ```
-phaze/
-├── __init__.py                     # Main package exports
-├── phaze.py                        # CLI interface  
-└── src/
-    ├── model_architectures.py      # Model factory and definitions
-    ├── zkml_integration.py         # zkML framework integration
-    ├── zkml_backends.py            # Concrete zkML implementations
-    ├── zkml_framework_interface.py # Abstract zkML interfaces
-    ├── rust_zkml_backend.py        # Rust-Python bindings
-    ├── crypto_primitives.py        # Cryptographic implementations
-    ├── comprehensive_benchmark.py  # Benchmarking system
-    ├── phaze_benchmark_suite.py    # Benchmark configurations
-    └── benchmarking.py             # Legacy benchmark functions
+PHAZE/
+├── README.md                       # Project documentation
+├── pyproject.toml                  # Python project configuration
+├── dev_setup.py                    # Editable install setup script
+├── install_dev.sh                  # Automated installation script
+├── uv.lock                         # Dependency lock file
+│
+├── phaze/                          # Main Python package
+│   ├── __init__.py                 # Package exports and version
+│   ├── phaze.py                    # CLI interface and entry point
+│   └── src/                        # Core implementation modules
+│       ├── model_architectures.py      # Model factory and definitions
+│       ├── zkml_integration.py         # zkML framework integration
+│       ├── zkml_backends.py            # Concrete zkML implementations
+│       ├── zkml_framework_interface.py # Abstract zkML interfaces
+│       ├── rust_zkml_backend.py        # Rust-Python bindings
+│       ├── crypto_primitives.py        # Cryptographic implementations
+│       ├── early_exit_models.py        # Early-exit model implementations
+│       ├── comprehensive_benchmark.py  # Benchmarking system
+│       ├── phaze_benchmark_suite.py    # Benchmark configurations
+│       ├── benchmarking.py             # Legacy benchmark functions
+│       └── mock_rust_zkml_bindings.py  # Mock Rust bindings for testing
+│
+├── rust_bindings/                  # Rust extension module
+│   ├── Cargo.toml                  # Rust project configuration
+│   ├── src/lib.rs                  # Rust implementation
+│   ├── risc0_guest/                # RISC Zero guest program
+│   └── target/                     # Rust build artifacts
+│
+├── examples/                       # Usage examples and benchmarks
+│   ├── run_basic_benchmark.py      # Standard benchmarking example
+│   └── run_risc_zero.py           # RISC Zero specific example
+│
+├── tests/                          # Test suite
+│   ├── test_*.py                   # Comprehensive test coverage
+│   └── ...                        # (20+ test files)
+│
+├── docs/                           # Documentation
+│   ├── conf.py                     # Sphinx configuration
+│   ├── API_REFERENCE.md           # API documentation
+│   ├── RISCZERO_INTEGRATION.md    # RISC Zero integration guide
+│   └── _build/                     # Generated documentation
+│
+└── .github/                       # CI/CD configuration
+    └── workflows/                  # GitHub Actions workflows
 ```
 
 ### Model Architecture System
