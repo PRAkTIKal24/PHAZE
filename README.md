@@ -8,6 +8,40 @@
 
 PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledge machine learning (zkML) systems with support for early-exit models and privacy-preserving inference at the Large Hadron Collider (LHC). The framework provides tools for comparing different zkML frameworks, cryptographic primitives, and model architectures with a focus on low-latency ML inference for high energy physics applications.
 
+## 📋 Table of Contents
+
+- [✨ Features](#-features)
+- [🚀 Quick Start](#-quick-start)
+  - [Installation](#installation)
+  - [Development Installation](#development-installation)
+- [💡 Usage Examples](#-usage-examples)
+  - [PHAZE CLI (Recommended)](#phaze-cli-recommended)
+  - [Direct Python Examples](#direct-python-examples)
+  - [Model Creation and Testing](#model-creation-and-testing)
+  - [Zero-Knowledge ML Integration](#zero-knowledge-ml-integration)
+  - [Cryptographic Primitives](#cryptographic-primitives)
+- [🏗️ Architecture](#️-architecture)
+  - [Project Structure](#project-structure)
+  - [Model Architecture System](#model-architecture-system)
+  - [zkML Backend Integration](#zkml-backend-integration)
+- [📊 Benchmarking](#-benchmarking)
+  - [Performance Metrics](#performance-metrics)
+  - [Typical Performance (Reference Hardware)](#typical-performance-reference-hardware)
+  - [Running Custom Benchmarks](#running-custom-benchmarks)
+- [🧪 Testing](#-testing)
+  - [Running Tests](#running-tests)
+  - [Test Structure](#test-structure)
+- [🔧 Configuration](#-configuration)
+  - [Environment Variables](#environment-variables)
+  - [Dependency Groups](#dependency-groups)
+- [🚨 Known Limitations](#-known-limitations)
+  - [Current Constraints](#current-constraints)
+  - [Performance Considerations](#performance-considerations)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [📞 Support](#-support)
+
 ## ✨ Features
 
 ### 🔐 Zero-Knowledge ML Support
@@ -35,7 +69,7 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
 - **Framework Comparison**: Side-by-side evaluation of zkML approaches
 - **Automated Reporting**: Markdown reports with performance recommendations
 
-## � Quick Start
+## 🚀 Quick Start
 
 ### Installation
 
@@ -46,18 +80,28 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
 git clone https://github.com/PRAkTIKal24/PHAZE.git
 cd PHAZE
 
-# Install using uv (recommended)
-uv sync
+# Option 1: Automated installation (recommended)
+./install_dev.sh
 
-# Or install with pip
-pip install -e .
+# Option 2: Manual installation
+uv pip install -e .
+uv run python dev_setup.py
+
+# Verify installation and CLI
+uv run phaze --help
+uv run phaze --list-benchmarks
 ```
+
+> **Note**: PHAZE uses a mixed Python/Rust architecture. The additional setup step (`dev_setup.py`) is required to ensure the CLI works correctly with editable installs.
 
 ### Development Installation
 
 ```bash
-# Install with development dependencies
+# Install with all development dependencies
 uv sync --group dev --group test
+
+# Setup editable install (required for CLI)
+uv run python dev_setup.py
 
 # Verify installation
 uv run python -c "import phaze; print(f'PHAZE version: {phaze.__version__}')"
@@ -68,18 +112,43 @@ uv run pytest
 
 ## 💡 Usage Examples
 
-### Running Benchmarks
+### PHAZE CLI (Recommended)
+
+**List Available Benchmarks**
+```bash
+uv run phaze --list-benchmarks
+```
+
+**Run Default Benchmarks**
+```bash
+# Runs basic_benchmark with --mode all --output-dir plots/
+uv run phaze
+```
+
+**Run Specific Benchmarks**
+```bash
+# Run basic benchmark in quick mode
+uv run phaze -b basic_benchmark --mode standard --quick
+
+# Run RISC Zero benchmarks
+uv run phaze -b risc_zero --mode standalone
+
+# Get help for a specific benchmark
+uv run phaze --help-benchmark basic_benchmark
+```
+
+### Direct Python Examples
 
 **Quick Start Example**
 ```bash
 # Run standard benchmarks in quick mode
-uv run python examples/run_benchmark_example.py --mode standard --quick
+uv run python examples/run_basic_benchmark.py --mode standard --quick
 
 # Run RISC Zero specific benchmarks  
-uv run python examples/run_risc_zero_example.py
+uv run python examples/run_risc_zero.py
 
 # Run comprehensive benchmarks (all frameworks)
-uv run python examples/run_benchmark_example.py --mode all
+uv run python examples/run_basic_benchmark.py --mode all
 ```
 
 **Using the Python API**
