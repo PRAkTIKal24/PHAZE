@@ -72,3 +72,5 @@ phaze/workspaces/
 plots/
 data/
 benchmark_results/
+rust_bindings/risc0_guest/target/
+rust_bindings/risc0_guest/Cargo.lock
