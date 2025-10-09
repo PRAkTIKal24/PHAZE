@@ -26,10 +26,16 @@ import psutil
 # import seaborn as sns
 import torch
 
-from .crypto_primitives import RabinFingerprint, ShamirSecretSharing
-from .model_architectures import ModelComplexity, PHAZEModelFactory  # noqa: F401
-from .rust_zkml_backend import RustZKMLFrameworkManager
-from .zkml_integration import PHAZEZKMLIntegration, ZKMLProverVerifier  # noqa: F401
+from phaze.src.crypto_primitives import RabinFingerprint, ShamirSecretSharing
+from phaze.src.model_architectures import (  # noqa: F401
+    ModelComplexity,
+    PHAZEModelFactory,
+)
+from phaze.src.rust_zkml_backend import RustZKMLFrameworkManager
+from phaze.src.zkml_integration import (  # noqa: F401
+    PHAZEZKMLIntegration,
+    ZKMLProverVerifier,
+)
 
 
 @dataclass

@@ -19,16 +19,16 @@ from typing import Any, Dict, List
 import numpy as np
 import torch
 
-from .crypto_primitives import RabinFingerprint
-from .early_exit_models import SimpleEarlyExitModel
-from .zkml_backends import create_backend
-from .zkml_framework_interface import (
+from phaze.src.crypto_primitives import RabinFingerprint
+from phaze.src.early_exit_models import SimpleEarlyExitModel
+from phaze.src.zkml_backends import create_backend
+from phaze.src.zkml_framework_interface import (
     BenchmarkMetrics,
     CryptographicPrimitiveBenchmark,
     ZKMLBenchmarkRunner,
     ZKMLFramework,
 )
-from .zkml_integration import SimpleFullModel
+from phaze.src.zkml_integration import SimpleFullModel
 
 
 @dataclass

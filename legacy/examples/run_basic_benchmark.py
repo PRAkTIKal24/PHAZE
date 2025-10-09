@@ -16,9 +16,9 @@ from pathlib import Path
 import torch
 
 # Add the parent directory to the path so we can import phaze
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from phaze.src.comprehensive_benchmark import (
+from legacy.src.comprehensive_benchmark import (
     ComprehensiveBenchmarkSuite,
     run_phaze_benchmarks,
 )
@@ -40,7 +40,7 @@ async def run_standard_benchmarks(output_dir, quick_mode=True):
 
     try:
         # Add RISC Zero to the benchmarks
-        from phaze.src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
+        from legacy.src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
         from phaze.src.rust_zkml_backend import RustRiscZeroBackend
 
         # Create benchmark suite
@@ -361,6 +361,7 @@ async def run_extended_benchmark(output_dir):
     try:
         # Create benchmark suite
         from phaze.src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
+
         from phaze.src.rust_zkml_backend import RustRiscZeroBackend
 
         # Create the benchmark suite
