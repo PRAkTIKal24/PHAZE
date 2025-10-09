@@ -16,10 +16,6 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
   - [Development Installation](#development-installation)
 - [💡 Usage Examples](#-usage-examples)
   - [PHAZE CLI (Recommended)](#phaze-cli-recommended)
-  - [Direct Python Examples](#direct-python-examples)
-  - [Model Creation and Testing](#model-creation-and-testing)
-  - [Zero-Knowledge ML Integration](#zero-knowledge-ml-integration)
-  - [Cryptographic Primitives](#cryptographic-primitives)
 - [📊 Performance Analysis & Plotting](#-performance-analysis--plotting)
   - [Publication-Ready Plots](#publication-ready-plots)
   - [Plot Types and Styles](#plot-types-and-styles)
@@ -27,7 +23,6 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
 - [📊 Benchmarking](#-benchmarking)
   - [Performance Metrics](#performance-metrics)
   - [Typical Performance (Reference Hardware)](#typical-performance-reference-hardware)
-  - [Running Custom Benchmarks](#running-custom-benchmarks)
 - [🧪 Testing](#-testing)
   - [Running Tests](#running-tests)
   - [Test Structure](#test-structure)
@@ -41,6 +36,12 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [📞 Support](#-support)
+- [📚 Legacy Usage Examples](#-legacy-usage-examples)
+  - [Direct Python Examples](#direct-python-examples)
+  - [Model Creation and Testing](#model-creation-and-testing)
+  - [Zero-Knowledge ML Integration](#zero-knowledge-ml-integration)
+  - [Cryptographic Primitives](#cryptographic-primitives)
+  - [Custom Benchmarking](#custom-benchmarking)
 
 ## ✨ Features
 
@@ -91,7 +92,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Clone the repository
 git clone https://github.com/PRAkTIKal24/PHAZE.git
 cd PHAZE
+```
 
+Then begin installation either directly using the installation script or manually:
+
+```bash
 # Option 1: Automated installation (recommended)
 ./install_dev.sh
 
@@ -100,7 +105,7 @@ uv run phaze --help
 uv run phaze --list-benchmarks
 ```
 
-Alternatively, you can manually install the `maturin` based rust backend and then added the required `.pth` file that the `dev_setup.py` file will take care for you.
+Alternatively, you can manually install the `maturin` based rust backend and then added the required `.pth` file that the `dev_setup.py` file will take care for you. You might have to create the venv yourself using `uv venv` and source it to begin installation.
 
 ```bash
 # Option 2: Manual installation
@@ -135,32 +140,185 @@ uv run phaze --list-benchmarks
 uv run pytest
 ```
 
-## 💡 Usage Examples
+## � Latest Integration: Python Configuration & Training Pipeline
+
+PHAZE now includes a comprehensive training pipeline with flexible Python-based configuration system, replacing the previous YAML-only approach. This system provides better IDE support, type safety, and more flexible configuration management.
+
+### Training Pipeline Commands
+
+**Complete Training & Benchmarking Pipeline:**
+```bash
+# Default: Full pipeline in quick mode (recommended for first use)
+uv run phaze
+
+# Full pipeline with complete configuration  
+uv run phaze --train
+
+# Training only (skip benchmarking and plotting)
+uv run phaze --train-only
+
+# Use custom Python configuration
+uv run phaze --config my_config.py
+
+# Override specific parameters
+uv run phaze --architectures simple,conv --epochs 3
+
+# Verbose output for debugging
+uv run phaze --verbose
+```
+
+**Training with Custom Parameters:**
+```bash
+# Specific model architectures and complexities
+uv run phaze --architectures simple,conv,transformer --complexities minimal,light
+
+# Custom number of epochs (overrides config)
+uv run phaze --epochs 10
+
+# Custom output directory
+uv run phaze --output my_benchmark_results/
+
+# Combined example: specific models with custom epochs
+uv run phaze --architectures simple,conv --epochs 1
+```
+
+### Training Pipeline Features
+
+**5-Phase Pipeline:**
+1. **Model Training**: Train models across architectures/complexities/seeds
+2. **Early Exit Generation**: Create early-exit variants from largest models  
+3. **zkML Benchmarking**: Benchmark trained models with EZKL/RISC Zero
+4. **Crypto Benchmarking**: Test early-exit models with Rabin/Shamir algorithms
+5. **Plot Generation**: Create publication-ready performance plots
+
+**Key Benefits:**
+- **MNIST Integration**: Fast training with balanced subsets for consistent benchmarks
+- **ONNX Export**: Automatic model export for ezkl compatibility
+- **Multi-Seed Training**: Reproducible results across multiple random seeds
+- **Automatic Plotting**: Real benchmark data integration with plotting system
+- **Memory Profiling**: Track memory usage during training and benchmarking
+- **Progress Tracking**: Detailed logging of each pipeline phase
+
+**Configuration Files:**
+```bash
+# Python configuration (recommended)
+my_config.py:
+```
+```python
+from phaze_config import get_config
+
+# Start with a preset and customize
+config = get_config("quick")
+config.training.epochs = 2
+config.model.architectures = ["simple", "conv"] 
+config.experiment.seeds = [42, 123]
+```
+
+**Backward Compatibility:**
+The system maintains backward compatibility with YAML configurations:
+```bash
+# YAML configs still supported  
+uv run phaze --train --config old_config.yaml
+
+# Auto-detection of file format
+uv run phaze --train --config config.yml    # YAML
+uv run phaze --train --config config.py     # Python
+```
+
+### Python Configuration System
+
+**Configuration Presets:**
+```python
+from phaze_config import get_config
+
+# Available configuration presets
+config = get_config("default")    # Balanced training and benchmarking
+config = get_config("quick")      # Fast testing and development  
+config = get_config("minimal")    # Minimal resource usage
+config = get_config("ci")         # CI/CD optimized settings
+config = get_config("dev")        # Development with verbose logging
+```
+
+**Custom Configuration:**
+```python
+# Create custom configurations in Python
+from phaze_config import PHAZEConfig, DatasetConfig, ModelConfig, TrainingConfig
+
+# Define custom dataset configuration
+dataset = DatasetConfig(
+    source="mnist",
+    dataset_size=2000,      # Custom dataset size
+    batch_size=32,
+    normalize=True
+)
+
+# Define model architectures to train
+model = ModelConfig(
+    architectures=["simple", "conv"],           # Specific architectures
+    complexities=["minimal", "light"],          # Complexity levels
+    early_exit_ratios=[0.25, 0.50, 0.75]      # Early exit points
+)
+
+# Training configuration
+training = TrainingConfig(
+    epochs=5,               # More training epochs
+    learning_rate=0.001,
+    device="auto",          # Auto GPU detection
+    verbose=True
+)
+
+# Create complete configuration
+config = PHAZEConfig(
+    project_name="my_phaze_experiment",
+    dataset=dataset,
+    model=model,
+    training=training
+)
+```
+
+### Training Results Structure
+
+**Output Organization:**
+```
+benchmark_results/
+├── trained_models/              # Model artifacts
+│   ├── simple_minimal_seed42.pth
+│   ├── simple_minimal_seed42.onnx
+│   └── simple_minimal_seed42_metadata.json
+├── plots/                      # Generated plots
+│   ├── zkml-proof/
+│   ├── zkml-verify/
+│   └── plotting_summary.md
+├── logs/                       # Training logs
+└── complete_benchmark_results.json  # Full results
+```
+
+**Model Information:**
+Each trained model includes comprehensive metadata:
+```json
+{
+  "model_id": "simple_minimal_seed42", 
+  "architecture": "simple",
+  "complexity": "minimal",
+  "parameters": 1234,
+  "accuracy": 0.95,
+  "training_time": 12.5,
+  "seed": 42,
+  "paths": {
+    "model": "simple_minimal_seed42.pth",
+    "onnx": "simple_minimal_seed42.onnx"
+  }
+}
+```
+
+## �💡 Usage Examples
 
 ### PHAZE CLI (Recommended)
 
-**List Available Benchmarks**
+**Run Default Pipeline in Quick Mode**
 ```bash
-uv run phaze --list-benchmarks
-uv run phaze --list-plot-types  # List available plot types
-```
-
-**Run Default Benchmarks**
-```bash
-# Runs basic_benchmark with --mode all --output-dir plots/
+# Runs full training and benchmarking pipeline in quick mode
 uv run phaze
-```
-
-**Run Specific Benchmarks**
-```bash
-# Run basic benchmark in quick mode
-uv run phaze -b basic_benchmark --mode standard --quick
-
-# Run RISC Zero benchmarks
-uv run phaze -b risc_zero --mode standalone
-
-# Get help for a specific benchmark
-uv run phaze --help-benchmark basic_benchmark
 ```
 
 **Generate Publication-Ready Plots**
@@ -187,135 +345,6 @@ uv run phaze --plot fingerprint --data-file benchmark_results.json --output plot
 uv run phaze --plot zkml-proof --style presentation --output plots/presentation/  # For slides
 uv run phaze --plot fingerprint --style neurips --output plots/paper/           # For papers
 uv run phaze --plot all --style web --format png --output plots/web/            # For websites
-```
-
-### Direct Python Examples
-> **Note**: This is not the recommended way to use PHAZE. Use the PHAZE CLI above instead.
-
-**Quick Start Example**
-```bash
-# Run standard benchmarks in quick mode
-uv run python examples/run_basic_benchmark.py --mode standard --quick
-
-# Run RISC Zero specific benchmarks  
-uv run python examples/run_risc_zero.py
-
-# Run comprehensive benchmarks (all frameworks)
-uv run python examples/run_basic_benchmark.py --mode all
-```
-
-**Using the Python API**
-```python
-import asyncio
-from phaze import run_phaze_benchmarks
-
-async def main():
-    # Run comprehensive benchmarks
-    results = await run_phaze_benchmarks(
-        output_dir="./benchmark_results",
-        quick_mode=True  # For demonstration
-    )
-    
-    # Print summary
-    summary = results["results"]["summary"]
-    print(f"Success rate: {summary['overall_summary']['overall_success_rate']:.1%}")
-    print(f"Frameworks tested: {summary['zkml_summary']['frameworks_tested']}")
-
-asyncio.run(main())
-```
-
-### Model Creation and Testing
-
-```python
-from phaze import PHAZEModelFactory, ModelComplexity
-import torch
-
-# Create different model architectures
-simple_model = PHAZEModelFactory.create_early_exit_model(
-    architecture="simple",
-    complexity=ModelComplexity.LIGHT,
-    input_size=128,
-    output_size=10
-)
-
-conv_model = PHAZEModelFactory.create_early_exit_model(
-    architecture="conv",
-    complexity=ModelComplexity.MEDIUM,
-    input_size=32*32*3,  # CIFAR-10 sized input
-    output_size=10
-)
-
-multi_exit_model = PHAZEModelFactory.create_early_exit_model(
-    architecture="multi_exit",
-    complexity=ModelComplexity.HEAVY,
-    input_size=256,
-    output_size=100
-)
-
-# Test inference
-input_data = torch.randn(1, 128)
-output = simple_model(input_data)
-confidence = simple_model.get_confidence(input_data)
-
-print(f"Output shape: {output.shape}")
-print(f"Confidence: {confidence.item():.3f}")
-```
-
-### Zero-Knowledge ML Integration
-
-```python
-import asyncio
-from phaze import create_backend, ZKMLFramework
-from phaze.src.model_architectures import PHAZEModelFactory
-import torch
-
-async def zkml_example():
-    # Create a model
-    model = PHAZEModelFactory.create_early_exit_model("simple", "light")
-    
-    # Create zkML backend (EZKL, RISC Zero, etc.)
-    backend = create_backend(ZKMLFramework.EZKL, model, "test_circuit")
-    
-    # Prepare input
-    input_data = torch.randn(1, 10)
-    
-    # Setup (compile model, generate circuits)
-    await backend.setup(input_data)
-    
-    # Generate proof
-    proof, output = await backend.generate_proof(input_data)
-    
-    # Verify proof
-    is_valid = await backend.verify_proof(proof, input_data)
-    
-    print(f"Proof generated: {len(proof)} bytes")
-    print(f"Verification: {'✅ Valid' if is_valid else '❌ Invalid'}")
-
-asyncio.run(zkml_example())
-```
-
-### Cryptographic Primitives
-
-```python
-from phaze import RabinFingerprint, ShamirSecretSharing
-
-# Rabin Fingerprinting for data integrity
-rabin = RabinFingerprint(field_size=2**31 - 1, degree=5)
-data = [1, 2, 3, 4, 5]
-hash_value = rabin.compute_hash(data)
-print(f"Rabin hash: {hash_value}")
-
-# Shamir Secret Sharing
-sss = ShamirSecretSharing(threshold=3, num_shares=5, field_size=2**31 - 1)
-secret_data = b"my_secret_key_data"
-
-# Generate shares
-shares = sss.generate_shares(secret_data)
-print(f"Generated {len(shares)} shares")
-
-# Reconstruct from subset
-reconstructed = sss.reconstruct_secret(shares[:3])  # Use any 3 shares
-print(f"Reconstruction: {'✅ Success' if reconstructed == secret_data else '❌ Failed'}")
 ```
 
 ## 📊 Performance Analysis & Plotting
@@ -447,13 +476,15 @@ uv run phaze --plot all --data-file previous_benchmark.json --style neurips
 PHAZE/
 ├── README.md                       # Project documentation
 ├── pyproject.toml                  # Python project configuration
+├── phaze_config.py                 # Python configuration system
 ├── dev_setup.py                    # Editable install setup script
 ├── install_dev.sh                  # Automated installation script
 ├── uv.lock                         # Dependency lock file
 │
 ├── phaze/                          # Main Python package
 │   ├── __init__.py                 # Package exports and version
-│   ├── phaze.py                    # CLI interface and entry point
+│   ├── phaze.py                    # Main CLI interface
+│   ├── phaze_legacy.py             # Legacy benchmark CLI
 │   └── src/                        # Core implementation modules
 │       ├── model_architectures.py      # Model factory and definitions
 │       ├── zkml_integration.py         # zkML framework integration
@@ -462,20 +493,32 @@ PHAZE/
 │       ├── rust_zkml_backend.py        # Rust-Python bindings
 │       ├── crypto_primitives.py        # Cryptographic implementations
 │       ├── early_exit_models.py        # Early-exit model implementations
-│       ├── comprehensive_benchmark.py  # Benchmarking system
-│       ├── phaze_benchmark_suite.py    # Benchmark configurations
-│       ├── benchmarking.py             # Legacy benchmark functions
-│       └── mock_rust_zkml_bindings.py  # Mock Rust bindings for testing
+│       ├── training_config.py          # Configuration loading system
+│       ├── training_orchestrator.py    # Training pipeline coordinator
+│       ├── mnist_trainer.py            # Fast MNIST training
+│       ├── multi_exit_generator.py     # Multi-exit model generation
+│       ├── enhanced_zkml_benchmark.py  # Enhanced zkML benchmarking
+│       ├── enhanced_crypto_benchmark.py # Enhanced crypto benchmarking
+│       ├── mock_rust_zkml_bindings.py  # Mock Rust bindings for testing
+│       └── plotting/                   # Plotting system
+│           ├── __init__.py
+│           ├── plotters/               # Individual plot implementations
+│           └── ...
+│
+├── legacy/                         # Legacy benchmark system
+│   ├── examples/                   # Legacy benchmark scripts
+│   │   ├── run_basic_benchmark.py  # Standard benchmarking example
+│   │   └── run_risc_zero.py       # RISC Zero specific example
+│   └── src/                        # Legacy benchmark modules
+│       ├── benchmarking.py         # Legacy benchmark functions
+│       ├── comprehensive_benchmark.py # Legacy comprehensive benchmarking
+│       └── phaze_benchmark_suite.py   # Legacy benchmark configurations
 │
 ├── rust_bindings/                  # Rust extension module
 │   ├── Cargo.toml                  # Rust project configuration
 │   ├── src/lib.rs                  # Rust implementation
 │   ├── risc0_guest/                # RISC Zero guest program
 │   └── target/                     # Rust build artifacts
-│
-├── examples/                       # Usage examples and benchmarks
-│   ├── run_basic_benchmark.py      # Standard benchmarking example
-│   └── run_risc_zero.py           # RISC Zero specific example
 │
 ├── tests/                          # Test suite
 │   ├── test_*.py                   # Comprehensive test coverage
@@ -536,31 +579,6 @@ PHAZE tracks comprehensive performance metrics:
 | Groth16* | ~0.1-1s | ~0.1-2s | ~0.01-0.1s | ~50-200MB |
 
 *Mock implementation - actual performance may vary
-
-### Running Custom Benchmarks
-
-```python
-from phaze.src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
-
-# Create benchmark suite
-suite = ComprehensiveBenchmarkSuite("./my_benchmarks")
-
-# Configure test parameters
-config = {
-    "architectures": ["simple", "conv", "multi_exit"],
-    "complexities": ["light", "medium", "heavy"], 
-    "input_sizes": [10, 50, 100, 500],
-    "frameworks": ["ezkl", "risc_zero", "groth16"],
-    "num_trials": 3
-}
-
-# Run benchmarks
-results = await suite.run_full_benchmark_suite(config)
-
-# Generate report
-report = suite.generate_report(results)
-print(report)
-```
 
 ## 🧪 Testing
 
@@ -715,7 +733,169 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **GitHub Issues**: [Report bugs and request features](https://github.com/PRAkTIKal24/PHAZE/issues)
 - **Discussions**: [Ask questions and share ideas](https://github.com/PRAkTIKal24/PHAZE/discussions)
 - **Documentation**: Comprehensive API docs in source code
-- **Examples**: Check the `examples/` directory for usage patterns
+- **Examples**: Check the `legacy/examples/` directory for legacy usage patterns
+
+---
+
+## 📚 Legacy Usage Examples
+
+> **⚠️ Note**: The examples below use the legacy benchmark system. For new projects, use the modern training pipeline with `uv run phaze` as shown in the main usage section above.
+
+### Direct Python Examples
+
+**Legacy Benchmark Scripts**
+```bash
+# Use the dedicated legacy CLI (recommended)
+uv run phaze-legacy basic_benchmark --mode standard --quick
+
+# Run RISC Zero specific benchmarks (legacy)
+uv run phaze-legacy risc_zero --mode standalone
+
+# Run comprehensive benchmarks (legacy - all frameworks)
+uv run phaze-legacy basic_benchmark --mode all
+
+# List available legacy benchmarks
+uv run phaze-legacy --list-benchmarks
+```
+
+**Using the Legacy Python API**
+```python
+import asyncio
+from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
+
+async def main():
+    # Run comprehensive benchmarks (legacy)
+    results = await run_phaze_benchmarks(
+        output_dir="./benchmark_results",
+        quick_mode=True  # For demonstration
+    )
+    
+    # Print summary
+    summary = results["results"]["summary"]
+    print(f"Success rate: {summary['overall_summary']['overall_success_rate']:.1%}")
+    print(f"Frameworks tested: {summary['zkml_summary']['frameworks_tested']}")
+
+asyncio.run(main())
+```
+
+### Model Creation and Testing
+
+```python
+from phaze import PHAZEModelFactory, ModelComplexity
+import torch
+
+# Create different model architectures
+simple_model = PHAZEModelFactory.create_early_exit_model(
+    architecture="simple",
+    complexity=ModelComplexity.LIGHT,
+    input_size=128,
+    output_size=10
+)
+
+conv_model = PHAZEModelFactory.create_early_exit_model(
+    architecture="conv",
+    complexity=ModelComplexity.MEDIUM,
+    input_size=32*32*3,  # CIFAR-10 sized input
+    output_size=10
+)
+
+multi_exit_model = PHAZEModelFactory.create_early_exit_model(
+    architecture="multi_exit",
+    complexity=ModelComplexity.HEAVY,
+    input_size=256,
+    output_size=100
+)
+
+# Test inference
+input_data = torch.randn(1, 128)
+output = simple_model(input_data)
+confidence = simple_model.get_confidence(input_data)
+
+print(f"Output shape: {output.shape}")
+print(f"Confidence: {confidence.item():.3f}")
+```
+
+### Zero-Knowledge ML Integration
+
+```python
+import asyncio
+from phaze import create_backend, ZKMLFramework
+from phaze.src.model_architectures import PHAZEModelFactory
+import torch
+
+async def zkml_example():
+    # Create a model
+    model = PHAZEModelFactory.create_early_exit_model("simple", "light")
+    
+    # Create zkML backend (EZKL, RISC Zero, etc.)
+    backend = create_backend(ZKMLFramework.EZKL, model, "test_circuit")
+    
+    # Prepare input
+    input_data = torch.randn(1, 10)
+    
+    # Setup (compile model, generate circuits)
+    await backend.setup(input_data)
+    
+    # Generate proof
+    proof, output = await backend.generate_proof(input_data)
+    
+    # Verify proof
+    is_valid = await backend.verify_proof(proof, input_data)
+    
+    print(f"Proof generated: {len(proof)} bytes")
+    print(f"Verification: {'✅ Valid' if is_valid else '❌ Invalid'}")
+
+asyncio.run(zkml_example())
+```
+
+### Cryptographic Primitives
+
+```python
+from phaze import RabinFingerprint, ShamirSecretSharing
+
+# Rabin Fingerprinting for data integrity
+rabin = RabinFingerprint(field_size=2**31 - 1, degree=5)
+data = [1, 2, 3, 4, 5]
+hash_value = rabin.compute_hash(data)
+print(f"Rabin hash: {hash_value}")
+
+# Shamir Secret Sharing
+sss = ShamirSecretSharing(threshold=3, num_shares=5, field_size=2**31 - 1)
+secret_data = b"my_secret_key_data"
+
+# Generate shares
+shares = sss.generate_shares(secret_data)
+print(f"Generated {len(shares)} shares")
+
+# Reconstruct from subset
+reconstructed = sss.reconstruct_secret(shares[:3])  # Use any 3 shares
+print(f"Reconstruction: {'✅ Success' if reconstructed == secret_data else '❌ Failed'}")
+```
+
+### Custom Benchmarking
+
+```python
+from legacy.src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
+
+# Create legacy benchmark suite
+suite = ComprehensiveBenchmarkSuite("./my_benchmarks")
+
+# Configure test parameters
+config = {
+    "architectures": ["simple", "conv", "multi_exit"],
+    "complexities": ["light", "medium", "heavy"], 
+    "input_sizes": [10, 50, 100, 500],
+    "frameworks": ["ezkl", "risc_zero", "groth16"],
+    "num_trials": 3
+}
+
+# Run benchmarks
+results = await suite.run_full_benchmark_suite(config)
+
+# Generate report
+report = suite.generate_report(results)
+print(report)
+```
 
 ---
 
