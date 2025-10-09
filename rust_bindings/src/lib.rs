@@ -799,13 +799,26 @@ impl ZKMLBackend for RiscZeroBackend {
             .map_err(|e| format!("Failed to build executor environment: {}", e))?;
         
         // Get the guest ELF binary
-        // Note: This requires building the guest program with RISC Zero toolchain
-        // For now, we'll fall back to mock if the ELF isn't available
-        const GUEST_ELF_PATH: &str = "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest";
-        let guest_elf = match fs::read(GUEST_ELF_PATH) {
-            Ok(elf) => elf,
-            Err(_) => {
+        // This should be built with: cargo risczero build --manifest-path risc0_guest/Cargo.toml
+        let guest_elf_paths = [
+            "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+            "./risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+            "../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+        ];
+        
+        let mut guest_elf = None;
+        for path in &guest_elf_paths {
+            if let Ok(elf) = fs::read(path) {
+                guest_elf = Some(elf);
+                break;
+            }
+        }
+        
+        let guest_elf = match guest_elf {
+            Some(elf) => elf,
+            None => {
                 // Fall back to mock behavior if guest ELF isn't built
+                // To build: cargo install cargo-risczero && cargo risczero build --manifest-path risc0_guest/Cargo.toml
                 let mock_proof = ZKMLProof::new(
                     format!("mock_risc0_proof_{:x}", rand::thread_rng().gen::<u64>()),
                     vec!["mock_output".to_string()],
@@ -873,10 +886,23 @@ impl ZKMLBackend for RiscZeroBackend {
         };
         
         // Get the guest ELF binary for verification
-        const GUEST_ELF_PATH: &str = "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest";
-        let guest_elf = match fs::read(GUEST_ELF_PATH) {
-            Ok(elf) => elf,
-            Err(_) => {
+        let guest_elf_paths = [
+            "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+            "./risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest", 
+            "../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+        ];
+        
+        let mut guest_elf = None;
+        for path in &guest_elf_paths {
+            if let Ok(elf) = fs::read(path) {
+                guest_elf = Some(elf);
+                break;
+            }
+        }
+        
+        let guest_elf = match guest_elf {
+            Some(elf) => elf,
+            None => {
                 // Fall back to basic verification if guest ELF isn't built
                 return Ok(proof.framework == "RISC0" && !proof.proof_data.is_empty());
             }
