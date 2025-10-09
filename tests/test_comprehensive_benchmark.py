@@ -1,16 +1,20 @@
 import json
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from phaze import (
+# Add project root to path for legacy imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
+from legacy.src.phaze_benchmark_suite import (
     ComprehensiveBenchmarkSuite,
     CryptographicPrimitiveBenchmark,
-    run_phaze_benchmarks,
 )
-from phaze.src.comprehensive_benchmark import (
+from legacy.src.comprehensive_benchmark import (
     BenchmarkResult,
     CryptoBenchmarkResult,
     PerformanceMonitor,

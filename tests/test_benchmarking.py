@@ -1,11 +1,19 @@
+import sys
+from pathlib import Path
+
 import numpy as np
 import pytest
 import torch
+
+# Add project root to path for legacy imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from phaze import (
     RabinFingerprint,
     SimpleEarlyExitModel,
     SimpleFullModel,
+)
+from legacy.src.benchmarking import (
     run_early_exit_benchmark,
     run_hashing_benchmark,
     run_zkml_benchmark,
