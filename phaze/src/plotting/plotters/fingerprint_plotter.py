@@ -25,7 +25,7 @@ class FingerprintPlotter(BasePlotter):
             "throughput",
             "algorithm_comparison",
             "performance_distribution",
-            "scaling_analysis"
+            "scaling_analysis",
         ]
 
     def get_required_data_fields(self) -> List[str]:
@@ -93,14 +93,12 @@ class FingerprintPlotter(BasePlotter):
                     "execution_times": [],
                     "memory_usage": [],
                     "throughput": [],
-                    "success_flags": []
+                    "success_flags": [],
                 }
 
             # Only include successful results
             if result.get("success", False):
-                organized_data[key]["input_sizes"].append(
-                    result.get("input_size", 0)
-                )
+                organized_data[key]["input_sizes"].append(result.get("input_size", 0))
                 organized_data[key]["execution_times"].append(
                     result.get("execution_time", 0)
                 )
@@ -144,24 +142,29 @@ class FingerprintPlotter(BasePlotter):
             )
 
             # Get color for this algorithm
-            algo_key = algo_name.split('_')[0].lower()  # Extract base algorithm name
+            algo_key = algo_name.split("_")[0].lower()  # Extract base algorithm name
             color = colors.get(
                 algo_key,
-                self.config.primary_colors[i % len(self.config.primary_colors)]
+                self.config.primary_colors[i % len(self.config.primary_colors)],
             )
 
             ax.errorbar(
-                sizes, means, yerr=errors,
-                marker='o', linewidth=2, markersize=6,
-                label=algo_name.replace('_', ' ').title(),
-                color=color, capsize=5
+                sizes,
+                means,
+                yerr=errors,
+                marker="o",
+                linewidth=2,
+                markersize=6,
+                label=algo_name.replace("_", " ").title(),
+                color=color,
+                capsize=5,
             )
 
-        ax.set_xlabel('Input Size (bytes)')
-        ax.set_ylabel('Execution Time (seconds)')
-        ax.set_title('Fingerprinting Algorithm Time Complexity')
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+        ax.set_xlabel("Input Size (bytes)")
+        ax.set_ylabel("Execution Time (seconds)")
+        ax.set_title("Fingerprinting Algorithm Time Complexity")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
         ax.legend()
         ax.grid(True, alpha=0.3)
 
@@ -195,20 +198,28 @@ class FingerprintPlotter(BasePlotter):
             )
 
             # Get color for this algorithm
-            algo_key = algo_name.split('_')[0].lower()
-            color = colors.get(algo_key, self.config.primary_colors[i % len(self.config.primary_colors)])
-
-            ax.errorbar(
-                sizes, means, yerr=errors,
-                marker='s', linewidth=2, markersize=6,
-                label=algo_name.replace('_', ' ').title(),
-                color=color, capsize=5
+            algo_key = algo_name.split("_")[0].lower()
+            color = colors.get(
+                algo_key,
+                self.config.primary_colors[i % len(self.config.primary_colors)],
             )
 
-        ax.set_xlabel('Input Size (bytes)')
-        ax.set_ylabel('Memory Usage (MB)')
-        ax.set_title('Fingerprinting Algorithm Memory Consumption')
-        ax.set_xscale('log')
+            ax.errorbar(
+                sizes,
+                means,
+                yerr=errors,
+                marker="s",
+                linewidth=2,
+                markersize=6,
+                label=algo_name.replace("_", " ").title(),
+                color=color,
+                capsize=5,
+            )
+
+        ax.set_xlabel("Input Size (bytes)")
+        ax.set_ylabel("Memory Usage (MB)")
+        ax.set_title("Fingerprinting Algorithm Memory Consumption")
+        ax.set_xscale("log")
         ax.legend()
         ax.grid(True, alpha=0.3)
 
@@ -242,21 +253,29 @@ class FingerprintPlotter(BasePlotter):
             )
 
             # Get color for this algorithm
-            algo_key = algo_name.split('_')[0].lower()
-            color = colors.get(algo_key, self.config.primary_colors[i % len(self.config.primary_colors)])
-
-            ax.errorbar(
-                sizes, means, yerr=errors,
-                marker='^', linewidth=2, markersize=6,
-                label=algo_name.replace('_', ' ').title(),
-                color=color, capsize=5
+            algo_key = algo_name.split("_")[0].lower()
+            color = colors.get(
+                algo_key,
+                self.config.primary_colors[i % len(self.config.primary_colors)],
             )
 
-        ax.set_xlabel('Input Size (bytes)')
-        ax.set_ylabel('Throughput (operations/sec)')
-        ax.set_title('Fingerprinting Algorithm Throughput')
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+            ax.errorbar(
+                sizes,
+                means,
+                yerr=errors,
+                marker="^",
+                linewidth=2,
+                markersize=6,
+                label=algo_name.replace("_", " ").title(),
+                color=color,
+                capsize=5,
+            )
+
+        ax.set_xlabel("Input Size (bytes)")
+        ax.set_ylabel("Throughput (operations/sec)")
+        ax.set_title("Fingerprinting Algorithm Throughput")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
         ax.legend()
         ax.grid(True, alpha=0.3)
 
@@ -269,9 +288,9 @@ class FingerprintPlotter(BasePlotter):
         """Create a comparison matrix of algorithm performance."""
         algorithms = list(data.keys())
         metrics = [
-            'Mean Execution Time (s)',
-            'Mean Memory (MB)',
-            'Mean Throughput (ops/s)'
+            "Mean Execution Time (s)",
+            "Mean Memory (MB)",
+            "Mean Throughput (ops/s)",
         ]
 
         # Calculate mean values for each algorithm
@@ -281,15 +300,14 @@ class FingerprintPlotter(BasePlotter):
 
             mean_time = (
                 np.mean(algo_data["execution_times"])
-                if algo_data["execution_times"] else 0
+                if algo_data["execution_times"]
+                else 0
             )
             mean_memory = (
-                np.mean(algo_data["memory_usage"])
-                if algo_data["memory_usage"] else 0
+                np.mean(algo_data["memory_usage"]) if algo_data["memory_usage"] else 0
             )
             mean_throughput = (
-                np.mean(algo_data["throughput"])
-                if algo_data["throughput"] else 0
+                np.mean(algo_data["throughput"]) if algo_data["throughput"] else 0
             )
 
             comparison_data.append([mean_time, mean_memory, mean_throughput])
@@ -304,27 +322,33 @@ class FingerprintPlotter(BasePlotter):
             values = [row[i] for row in comparison_data]
 
             bars = ax.bar(
-                x_pos, values, color=colors, alpha=0.7,
-                edgecolor='black', linewidth=0.5
+                x_pos, values, color=colors, alpha=0.7, edgecolor="black", linewidth=0.5
             )
 
             # Add value labels on bars
             for bar, value in zip(bars, values, strict=False):
                 height = bar.get_height()
-                ax.annotate(f'{value:.3f}',
-                           xy=(bar.get_x() + bar.get_width() / 2, height),
-                           xytext=(0, 3),  # 3 points vertical offset
-                           textcoords="offset points",
-                           ha='center', va='bottom', fontsize=9)
+                ax.annotate(
+                    f"{value:.3f}",
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                )
 
             ax.set_ylabel(metric)
-            ax.set_title(f'Algorithm {metric}')
+            ax.set_title(f"Algorithm {metric}")
             ax.set_xticks(x_pos)
-            ax.set_xticklabels([name.replace('_', ' ').title() for name in algorithms],
-                              rotation=45, ha='right')
-            ax.grid(True, alpha=0.3, axis='y')
+            ax.set_xticklabels(
+                [name.replace("_", " ").title() for name in algorithms],
+                rotation=45,
+                ha="right",
+            )
+            ax.grid(True, alpha=0.3, axis="y")
 
-        plt.suptitle('Fingerprinting Algorithm Performance Comparison')
+        plt.suptitle("Fingerprinting Algorithm Performance Comparison")
         plt.tight_layout()
         return fig
 
@@ -336,19 +360,28 @@ class FingerprintPlotter(BasePlotter):
 
         algorithms = list(data.keys())
         exec_time_data = [
-            data[algo]["execution_times"] for algo in algorithms
+            data[algo]["execution_times"]
+            for algo in algorithms
             if data[algo]["execution_times"]
         ]
         labels = [
-            algo.replace('_', ' ').title() for algo in algorithms
+            algo.replace("_", " ").title()
+            for algo in algorithms
             if data[algo]["execution_times"]
         ]
 
         if not exec_time_data:
             # Create empty plot with message
-            ax.text(0.5, 0.5, 'No execution time data available',
-                   transform=ax.transAxes, ha='center', va='center', fontsize=14)
-            ax.set_title('Execution Time Distribution')
+            ax.text(
+                0.5,
+                0.5,
+                "No execution time data available",
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                fontsize=14,
+            )
+            ax.set_title("Execution Time Distribution")
             return fig
 
         # Create box plots
@@ -356,15 +389,15 @@ class FingerprintPlotter(BasePlotter):
 
         # Color the boxes
         colors = self.config.get_color_cycle(len(exec_time_data))
-        for patch, color in zip(box_plot['boxes'], colors, strict=False):
+        for patch, color in zip(box_plot["boxes"], colors, strict=False):
             patch.set_facecolor(color)
             patch.set_alpha(0.7)
 
-        ax.set_ylabel('Execution Time (seconds)')
-        ax.set_title('Execution Time Distribution by Algorithm')
-        ax.set_yscale('log')
-        plt.xticks(rotation=45, ha='right')
-        ax.grid(True, alpha=0.3, axis='y')
+        ax.set_ylabel("Execution Time (seconds)")
+        ax.set_title("Execution Time Distribution by Algorithm")
+        ax.set_yscale("log")
+        plt.xticks(rotation=45, ha="right")
+        ax.grid(True, alpha=0.3, axis="y")
 
         plt.tight_layout()
         return fig
@@ -389,35 +422,52 @@ class FingerprintPlotter(BasePlotter):
             sizes, times, tput = zip(*sorted_data, strict=False)
 
             # Get color for this algorithm
-            algo_key = algo_name.split('_')[0].lower()
-            color = colors.get(algo_key, self.config.primary_colors[i % len(self.config.primary_colors)])
+            algo_key = algo_name.split("_")[0].lower()
+            color = colors.get(
+                algo_key,
+                self.config.primary_colors[i % len(self.config.primary_colors)],
+            )
 
             # Plot scaling of execution time
-            ax1.plot(sizes, times, marker='o', linewidth=2, markersize=6,
-                    label=algo_name.replace('_', ' ').title(), color=color)
+            ax1.plot(
+                sizes,
+                times,
+                marker="o",
+                linewidth=2,
+                markersize=6,
+                label=algo_name.replace("_", " ").title(),
+                color=color,
+            )
 
             # Plot scaling of throughput
-            ax2.plot(sizes, tput, marker='s', linewidth=2, markersize=6,
-                    label=algo_name.replace('_', ' ').title(), color=color)
+            ax2.plot(
+                sizes,
+                tput,
+                marker="s",
+                linewidth=2,
+                markersize=6,
+                label=algo_name.replace("_", " ").title(),
+                color=color,
+            )
 
         # Configure first subplot (execution time scaling)
-        ax1.set_xlabel('Input Size (bytes)')
-        ax1.set_ylabel('Execution Time (seconds)')
-        ax1.set_title('Execution Time Scaling')
-        ax1.set_xscale('log')
-        ax1.set_yscale('log')
+        ax1.set_xlabel("Input Size (bytes)")
+        ax1.set_ylabel("Execution Time (seconds)")
+        ax1.set_title("Execution Time Scaling")
+        ax1.set_xscale("log")
+        ax1.set_yscale("log")
         ax1.legend()
         ax1.grid(True, alpha=0.3)
 
         # Configure second subplot (throughput scaling)
-        ax2.set_xlabel('Input Size (bytes)')
-        ax2.set_ylabel('Throughput (operations/sec)')
-        ax2.set_title('Throughput Scaling')
-        ax2.set_xscale('log')
-        ax2.set_yscale('log')
+        ax2.set_xlabel("Input Size (bytes)")
+        ax2.set_ylabel("Throughput (operations/sec)")
+        ax2.set_title("Throughput Scaling")
+        ax2.set_xscale("log")
+        ax2.set_yscale("log")
         ax2.legend()
         ax2.grid(True, alpha=0.3)
 
-        plt.suptitle('Algorithm Scaling Analysis')
+        plt.suptitle("Algorithm Scaling Analysis")
         plt.tight_layout()
         return fig

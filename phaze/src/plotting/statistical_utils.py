@@ -12,8 +12,7 @@ class StatisticalUtils:
 
     @staticmethod
     def calculate_confidence_interval(
-        data: List[float],
-        confidence_level: float = 0.95
+        data: List[float], confidence_level: float = 0.95
     ) -> Tuple[float, float, float]:
         """Calculate confidence interval for data.
 
@@ -43,8 +42,7 @@ class StatisticalUtils:
 
     @staticmethod
     def calculate_error_bars(
-        data: List[List[float]],
-        error_type: str = "std"
+        data: List[List[float]], error_type: str = "std"
     ) -> Tuple[List[float], List[float]]:
         """Calculate error bars for multiple data series.
 
@@ -86,9 +84,7 @@ class StatisticalUtils:
 
     @staticmethod
     def detect_outliers(
-        data: List[float],
-        method: str = "iqr",
-        threshold: float = 1.5
+        data: List[float], method: str = "iqr", threshold: float = 1.5
     ) -> List[bool]:
         """Detect outliers in data.
 
@@ -123,9 +119,7 @@ class StatisticalUtils:
 
     @staticmethod
     def filter_outliers(
-        data: List[float],
-        method: str = "iqr",
-        threshold: float = 1.5
+        data: List[float], method: str = "iqr", threshold: float = 1.5
     ) -> List[float]:
         """Remove outliers from data.
 
@@ -142,7 +136,8 @@ class StatisticalUtils:
 
         outliers = StatisticalUtils.detect_outliers(data, method, threshold)
         return [
-            val for val, is_outlier in zip(data, outliers, strict=False)
+            val
+            for val, is_outlier in zip(data, outliers, strict=False)
             if not is_outlier
         ]
 
@@ -170,9 +165,7 @@ class StatisticalUtils:
 
     @staticmethod
     def compare_distributions(
-        data1: List[float],
-        data2: List[float],
-        test: str = "auto"
+        data1: List[float], data2: List[float], test: str = "auto"
     ) -> Tuple[bool, float, str]:
         """Compare two distributions for statistical significance.
 
@@ -203,7 +196,7 @@ class StatisticalUtils:
                 statistic, p_value = stats.ttest_ind(data1, data2)
             elif test == "mannwhitney":
                 statistic, p_value = stats.mannwhitneyu(
-                    data1, data2, alternative='two-sided'
+                    data1, data2, alternative="two-sided"
                 )
             else:
                 raise ValueError(f"Unknown test: {test}")
@@ -217,8 +210,7 @@ class StatisticalUtils:
 
     @staticmethod
     def calculate_effect_size(
-        data1: List[float],
-        data2: List[float]
+        data1: List[float], data2: List[float]
     ) -> Tuple[float, str]:
         """Calculate Cohen's d effect size between two groups.
 
@@ -237,8 +229,10 @@ class StatisticalUtils:
 
         # Calculate pooled standard deviation
         n1, n2 = len(array1), len(array2)
-        pooled_std = np.sqrt(((n1 - 1) * np.var(array1, ddof=1) +
-                             (n2 - 1) * np.var(array2, ddof=1)) / (n1 + n2 - 2))
+        pooled_std = np.sqrt(
+            ((n1 - 1) * np.var(array1, ddof=1) + (n2 - 1) * np.var(array2, ddof=1))
+            / (n1 + n2 - 2)
+        )
 
         if pooled_std == 0:
             return 0.0, "no_variance"
@@ -261,8 +255,7 @@ class StatisticalUtils:
 
     @staticmethod
     def aggregate_trials(
-        trial_results: Dict[str, List[float]],
-        aggregation: str = "mean"
+        trial_results: Dict[str, List[float]], aggregation: str = "mean"
     ) -> Dict[str, Dict[str, float]]:
         """Aggregate results from multiple trials.
 
@@ -278,11 +271,11 @@ class StatisticalUtils:
         for metric_name, values in trial_results.items():
             if not values:
                 aggregated[metric_name] = {
-                    'value': 0.0,
-                    'std': 0.0,
-                    'min': 0.0,
-                    'max': 0.0,
-                    'count': 0
+                    "value": 0.0,
+                    "std": 0.0,
+                    "min": 0.0,
+                    "max": 0.0,
+                    "count": 0,
                 }
                 continue
 
@@ -296,18 +289,19 @@ class StatisticalUtils:
                 # Use median after removing outliers
                 filtered_values = StatisticalUtils.filter_outliers(values)
                 central_value = (
-                    np.median(filtered_values) if filtered_values
+                    np.median(filtered_values)
+                    if filtered_values
                     else np.median(values_array)
                 )
             else:
                 raise ValueError(f"Unknown aggregation method: {aggregation}")
 
             aggregated[metric_name] = {
-                'value': float(central_value),
-                'std': float(np.std(values_array, ddof=1)),
-                'min': float(np.min(values_array)),
-                'max': float(np.max(values_array)),
-                'count': len(values)
+                "value": float(central_value),
+                "std": float(np.std(values_array, ddof=1)),
+                "min": float(np.min(values_array)),
+                "max": float(np.max(values_array)),
+                "count": len(values),
             }
 
         return aggregated

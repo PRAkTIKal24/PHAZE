@@ -71,7 +71,7 @@ This is the legacy benchmark system. For new projects, use:
   uv run phaze --help       # See modern options
 
 Available legacy benchmarks:
-{chr(10).join(f'  {name}' for name in benchmark_choices)}
+{chr(10).join(f"  {name}" for name in benchmark_choices)}
 
 Example usage:
   # Run legacy basic benchmark

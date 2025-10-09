@@ -24,7 +24,7 @@ def register_all_plotters():
             plotter_class=FingerprintPlotter,
             description="Performance analysis plots for cryptographic fingerprinting algorithms",
             category="crypto",
-            priority=10
+            priority=10,
         )
 
     # Register zkML framework plotters
@@ -34,7 +34,7 @@ def register_all_plotters():
             plotter_class=ZKMLPlotter,
             description="Performance analysis plots for zkML proof generation and verification",
             category="zkml",
-            priority=10
+            priority=10,
         )
 
     if "zkml-verify" not in registry._plot_types:
@@ -43,7 +43,7 @@ def register_all_plotters():
             plotter_class=ZKMLPlotter,
             description="Verification performance analysis plots for zkML frameworks",
             category="zkml",
-            priority=9
+            priority=9,
         )
 
     _plotters_registered = True

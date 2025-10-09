@@ -55,7 +55,7 @@ class BasePlotter(ABC):
         figures: List[matplotlib.figure.Figure],
         output_dir: Path,
         prefix: str = "",
-        formats: Optional[List[str]] = None
+        formats: Optional[List[str]] = None,
     ) -> List[Path]:
         """Save plots to specified directory.
 
@@ -76,14 +76,14 @@ class BasePlotter(ABC):
 
         for i, fig in enumerate(figures):
             # Get plot title or use index
-            title = getattr(fig, '_suptitle', None)
-            if title and hasattr(title, 'get_text'):
-                plot_name = title.get_text().lower().replace(' ', '_').replace('/', '_')
+            title = getattr(fig, "_suptitle", None)
+            if title and hasattr(title, "get_text"):
+                plot_name = title.get_text().lower().replace(" ", "_").replace("/", "_")
             else:
-                plot_name = f"plot_{i+1}"
+                plot_name = f"plot_{i + 1}"
 
             # Remove invalid filename characters
-            plot_name = "".join(c for c in plot_name if c.isalnum() or c in ('_', '-'))
+            plot_name = "".join(c for c in plot_name if c.isalnum() or c in ("_", "-"))
 
             for fmt in formats:
                 filename = f"{prefix}{plot_name}.{fmt}"
@@ -94,9 +94,9 @@ class BasePlotter(ABC):
                     filepath,
                     format=fmt,
                     dpi=self.config.dpi,
-                    bbox_inches='tight',
-                    facecolor='white',
-                    edgecolor='none'
+                    bbox_inches="tight",
+                    facecolor="white",
+                    edgecolor="none",
                 )
                 saved_files.append(filepath)
 

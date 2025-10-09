@@ -50,11 +50,11 @@ class CryptoMemoryProfiler:
         self.monitoring = False
 
         return {
-            'start_mb': self.start_memory,
-            'peak_mb': self.peak_memory,
-            'end_mb': self.end_memory,
-            'peak_increase_mb': self.peak_memory - self.start_memory,
-            'net_increase_mb': self.end_memory - self.start_memory
+            "start_mb": self.start_memory,
+            "peak_mb": self.peak_memory,
+            "end_mb": self.end_memory,
+            "peak_increase_mb": self.peak_memory - self.start_memory,
+            "net_increase_mb": self.end_memory - self.start_memory,
         }
 
     def _get_memory_usage(self) -> float:
@@ -86,21 +86,24 @@ class EnhancedCryptoBenchmark:
         for algorithm in self.config.experiment.hashing_algorithms:
             if algorithm == "rabin":
                 systems["rabin"] = {
-                    'instance': RabinFingerprint(field_size=2**31 - 1, degree=100),
-                    'operations': ['hash']
+                    "instance": RabinFingerprint(field_size=2**31 - 1, degree=100),
+                    "operations": ["hash"],
                 }
             elif algorithm == "shamir":
                 systems["shamir"] = {
-                    'instance': ShamirSecretSharing(threshold=3, num_shares=5),
-                    'operations': ['share', 'reconstruct']
+                    "instance": ShamirSecretSharing(threshold=3, num_shares=5),
+                    "operations": ["share", "reconstruct"],
                 }
             # Future: more algo down here
 
-        logger.info(f"Initialized {len(systems)} crypto systems: {list(systems.keys())}")
+        logger.info(
+            f"Initialized {len(systems)} crypto systems: {list(systems.keys())}"
+        )
         return systems
 
-    def extract_model_outputs(self, model: nn.Module, model_info: Dict[str, Any],
-                             num_samples: int = 100) -> List[np.ndarray]:
+    def extract_model_outputs(
+        self, model: nn.Module, model_info: Dict[str, Any], num_samples: int = 100
+    ) -> List[np.ndarray]:
         """Extract outputs from model for fingerprinting.
 
         Args:
@@ -117,12 +120,14 @@ class EnhancedCryptoBenchmark:
         with torch.no_grad():
             for _ in range(num_samples):
                 # Generate sample input based on architecture
-                if model_info['architecture'] == "conv":
-                    input_channels = model_info.get('input_channels', 1)
-                    spatial_size = model_info.get('spatial_size', 28)
-                    sample_input = torch.randn(1, input_channels, spatial_size, spatial_size)
+                if model_info["architecture"] == "conv":
+                    input_channels = model_info.get("input_channels", 1)
+                    spatial_size = model_info.get("spatial_size", 28)
+                    sample_input = torch.randn(
+                        1, input_channels, spatial_size, spatial_size
+                    )
                 else:
-                    input_size = model_info.get('input_size', 784)
+                    input_size = model_info.get("input_size", 784)
                     sample_input = torch.randn(1, input_size)
 
                 # Get model output
@@ -132,8 +137,9 @@ class EnhancedCryptoBenchmark:
         logger.info(f"Extracted {len(outputs)} outputs from {model_info['model_id']}")
         return outputs
 
-    def prepare_fingerprint_data(self, outputs: List[np.ndarray],
-                                target_sizes: Optional[List[int]] = None) -> List[Tuple[int, bytes]]:
+    def prepare_fingerprint_data(
+        self, outputs: List[np.ndarray], target_sizes: Optional[List[int]] = None
+    ) -> List[Tuple[int, bytes]]:
         """Prepare model outputs for fingerprinting with different input sizes.
 
         Args:
@@ -169,8 +175,12 @@ class EnhancedCryptoBenchmark:
 
         return fingerprint_data
 
-    def benchmark_crypto_algorithm(self, algorithm_name: str, operation: str,
-                                 fingerprint_data: List[Tuple[int, bytes]]) -> List[Dict[str, Any]]:
+    def benchmark_crypto_algorithm(
+        self,
+        algorithm_name: str,
+        operation: str,
+        fingerprint_data: List[Tuple[int, bytes]],
+    ) -> List[Dict[str, Any]]:
         """Benchmark a specific crypto algorithm and operation.
 
         Args:
@@ -185,22 +195,22 @@ class EnhancedCryptoBenchmark:
             logger.error(f"Algorithm {algorithm_name} not available")
             return []
 
-        crypto_system = self.crypto_systems[algorithm_name]['instance']
+        crypto_system = self.crypto_systems[algorithm_name]["instance"]
         results = []
 
         logger.info(f"Benchmarking {algorithm_name} {operation} operation")
 
         for input_size, data in fingerprint_data:
             result = {
-                'primitive_name': algorithm_name,
-                'operation': operation,
-                'input_size': input_size,
-                'success': False,
-                'execution_time': 0.0,
-                'memory_usage_mb': 0.0,
-                'throughput_ops_per_sec': 0.0,
-                'output_size': 0,
-                'error_message': None
+                "primitive_name": algorithm_name,
+                "operation": operation,
+                "input_size": input_size,
+                "success": False,
+                "execution_time": 0.0,
+                "memory_usage_mb": 0.0,
+                "throughput_ops_per_sec": 0.0,
+                "output_size": 0,
+                "error_message": None,
             }
 
             try:
@@ -217,20 +227,24 @@ class EnhancedCryptoBenchmark:
                     # Execute the operation
                     if algorithm_name == "rabin" and operation == "hash":
                         output = crypto_system.compute_hash(list(data))
-                        result['output_size'] = len(str(output))
+                        result["output_size"] = len(str(output))
 
                     elif algorithm_name == "shamir" and operation == "share":
                         shares = crypto_system.generate_shares(data)
-                        result['output_size'] = sum(len(share[1]) for share in shares)
+                        result["output_size"] = sum(len(share[1]) for share in shares)
 
                     elif algorithm_name == "shamir" and operation == "reconstruct":
                         # First generate shares, then reconstruct
                         shares = crypto_system.generate_shares(data)
-                        reconstructed = crypto_system.reconstruct_secret(shares[:crypto_system.threshold])
-                        result['output_size'] = len(reconstructed)
+                        reconstructed = crypto_system.reconstruct_secret(
+                            shares[: crypto_system.threshold]
+                        )
+                        result["output_size"] = len(reconstructed)
 
                     else:
-                        raise ValueError(f"Unknown operation {operation} for {algorithm_name}")
+                        raise ValueError(
+                            f"Unknown operation {operation} for {algorithm_name}"
+                        )
 
                     memory_profiler.update_peak()
                     end_time = time.perf_counter()
@@ -242,40 +256,44 @@ class EnhancedCryptoBenchmark:
                     memory_stats.append(memory_stat)
 
                 # Calculate statistics
-                result['execution_time'] = np.mean(execution_times)
-                result['execution_time_std'] = np.std(execution_times)
-                result['execution_time_min'] = np.min(execution_times)
-                result['execution_time_max'] = np.max(execution_times)
+                result["execution_time"] = np.mean(execution_times)
+                result["execution_time_std"] = np.std(execution_times)
+                result["execution_time_min"] = np.min(execution_times)
+                result["execution_time_max"] = np.max(execution_times)
 
                 # Memory statistics
                 if memory_stats:
-                    peak_memories = [m['peak_mb'] for m in memory_stats]
-                    result['memory_usage_mb'] = np.mean(peak_memories)
-                    result['memory_usage_std'] = np.std(peak_memories)
+                    peak_memories = [m["peak_mb"] for m in memory_stats]
+                    result["memory_usage_mb"] = np.mean(peak_memories)
+                    result["memory_usage_std"] = np.std(peak_memories)
 
                 # Throughput calculation
-                if result['execution_time'] > 0:
-                    result['throughput_ops_per_sec'] = 1.0 / result['execution_time']
+                if result["execution_time"] > 0:
+                    result["throughput_ops_per_sec"] = 1.0 / result["execution_time"]
 
-                result['success'] = True
+                result["success"] = True
 
-                logger.info(f"  Size {input_size}: {result['execution_time']:.4f}s, "
-                           f"{result['memory_usage_mb']:.1f}MB, "
-                           f"{result['throughput_ops_per_sec']:.1f} ops/sec")
+                logger.info(
+                    f"  Size {input_size}: {result['execution_time']:.4f}s, "
+                    f"{result['memory_usage_mb']:.1f}MB, "
+                    f"{result['throughput_ops_per_sec']:.1f} ops/sec"
+                )
 
             except Exception as e:
                 logger.error(f"  Size {input_size} failed: {e}")
-                result['error_message'] = str(e)
+                result["error_message"] = str(e)
                 self.failed_benchmarks.append(result)
 
             results.append(result)
 
-            if result['success']:
+            if result["success"]:
                 self.crypto_results.append(result)
 
         return results
 
-    def benchmark_model_fingerprinting(self, model_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def benchmark_model_fingerprinting(
+        self, model_info: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Benchmark fingerprinting for a specific model.
 
         Args:
@@ -284,12 +302,14 @@ class EnhancedCryptoBenchmark:
         Returns:
             List of benchmark results
         """
-        if 'model' not in model_info:
-            logger.error(f"Model object missing for {model_info.get('model_id', 'unknown')}")
+        if "model" not in model_info:
+            logger.error(
+                f"Model object missing for {model_info.get('model_id', 'unknown')}"
+            )
             return []
 
-        model = model_info['model']
-        model_id = model_info['model_id']
+        model = model_info["model"]
+        model_id = model_info["model_id"]
 
         logger.info(f"Starting fingerprint benchmark for {model_id}")
 
@@ -303,26 +323,30 @@ class EnhancedCryptoBenchmark:
 
         # Benchmark each algorithm and operation
         for algorithm_name, algorithm_info in self.crypto_systems.items():
-            for operation in algorithm_info['operations']:
+            for operation in algorithm_info["operations"]:
                 results = self.benchmark_crypto_algorithm(
                     algorithm_name, operation, fingerprint_data
                 )
 
                 # Add model information to results
                 for result in results:
-                    result['model_id'] = model_id
-                    result['model_architecture'] = model_info['architecture']
-                    result['model_complexity'] = model_info['complexity']
-                    result['model_parameters'] = model_info['parameters']
+                    result["model_id"] = model_id
+                    result["model_architecture"] = model_info["architecture"]
+                    result["model_complexity"] = model_info["complexity"]
+                    result["model_parameters"] = model_info["parameters"]
 
                 all_results.extend(results)
 
-        logger.info(f"Completed fingerprint benchmark for {model_id}: "
-                   f"{len(all_results)} total operations")
+        logger.info(
+            f"Completed fingerprint benchmark for {model_id}: "
+            f"{len(all_results)} total operations"
+        )
 
         return all_results
 
-    def benchmark_multiple_models(self, models_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def benchmark_multiple_models(
+        self, models_info: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Benchmark fingerprinting for multiple models.
 
         Args:
@@ -341,15 +365,17 @@ class EnhancedCryptoBenchmark:
                 all_results.extend(results)
 
             except Exception as e:
-                logger.error(f"Failed to benchmark {model_info.get('model_id', 'unknown')}: {e}")
+                logger.error(
+                    f"Failed to benchmark {model_info.get('model_id', 'unknown')}: {e}"
+                )
 
                 # Create error result
                 error_result = {
-                    'model_id': model_info.get('model_id', 'unknown'),
-                    'primitive_name': 'unknown',
-                    'operation': 'unknown',
-                    'success': False,
-                    'error_message': str(e)
+                    "model_id": model_info.get("model_id", "unknown"),
+                    "primitive_name": "unknown",
+                    "operation": "unknown",
+                    "success": False,
+                    "error_message": str(e),
                 }
                 all_results.append(error_result)
                 self.failed_benchmarks.append(error_result)
@@ -363,84 +389,90 @@ class EnhancedCryptoBenchmark:
     def get_benchmark_summary(self) -> Dict[str, Any]:
         """Get summary statistics of crypto benchmark results."""
         if not self.crypto_results:
-            return {'error': 'No successful crypto benchmarks'}
+            return {"error": "No successful crypto benchmarks"}
 
         summary = {
-            'total_operations': len(self.crypto_results),
-            'total_failed': len(self.failed_benchmarks),
-            'algorithms': {},
-            'operations': {},
-            'input_size_analysis': {},
-            'overall_stats': {}
+            "total_operations": len(self.crypto_results),
+            "total_failed": len(self.failed_benchmarks),
+            "algorithms": {},
+            "operations": {},
+            "input_size_analysis": {},
+            "overall_stats": {},
         }
 
         # Group by algorithm
         algorithm_groups = {}
         for result in self.crypto_results:
-            algorithm = result['primitive_name']
+            algorithm = result["primitive_name"]
             if algorithm not in algorithm_groups:
                 algorithm_groups[algorithm] = []
             algorithm_groups[algorithm].append(result)
 
         for algorithm, results in algorithm_groups.items():
-            execution_times = [r['execution_time'] for r in results]
-            throughputs = [r['throughput_ops_per_sec'] for r in results]
-            memory_usage = [r['memory_usage_mb'] for r in results]
+            execution_times = [r["execution_time"] for r in results]
+            throughputs = [r["throughput_ops_per_sec"] for r in results]
+            memory_usage = [r["memory_usage_mb"] for r in results]
 
-            summary['algorithms'][algorithm] = {
-                'count': len(results),
-                'avg_execution_time': np.mean(execution_times),
-                'avg_throughput': np.mean(throughputs),
-                'avg_memory_usage_mb': np.mean(memory_usage),
-                'execution_time_range': [np.min(execution_times), np.max(execution_times)]
+            summary["algorithms"][algorithm] = {
+                "count": len(results),
+                "avg_execution_time": np.mean(execution_times),
+                "avg_throughput": np.mean(throughputs),
+                "avg_memory_usage_mb": np.mean(memory_usage),
+                "execution_time_range": [
+                    np.min(execution_times),
+                    np.max(execution_times),
+                ],
             }
 
         # Group by operation
         operation_groups = {}
         for result in self.crypto_results:
-            operation = result['operation']
+            operation = result["operation"]
             if operation not in operation_groups:
                 operation_groups[operation] = []
             operation_groups[operation].append(result)
 
         for operation, results in operation_groups.items():
-            execution_times = [r['execution_time'] for r in results]
+            execution_times = [r["execution_time"] for r in results]
 
-            summary['operations'][operation] = {
-                'count': len(results),
-                'avg_execution_time': np.mean(execution_times),
-                'algorithms': list(set(r['primitive_name'] for r in results))
+            summary["operations"][operation] = {
+                "count": len(results),
+                "avg_execution_time": np.mean(execution_times),
+                "algorithms": list(set(r["primitive_name"] for r in results)),
             }
 
         # Input size analysis
         size_groups = {}
         for result in self.crypto_results:
-            size = result['input_size']
+            size = result["input_size"]
             if size not in size_groups:
                 size_groups[size] = []
             size_groups[size].append(result)
 
         for size, results in size_groups.items():
-            execution_times = [r['execution_time'] for r in results]
-            throughputs = [r['throughput_ops_per_sec'] for r in results]
+            execution_times = [r["execution_time"] for r in results]
+            throughputs = [r["throughput_ops_per_sec"] for r in results]
 
-            summary['input_size_analysis'][size] = {
-                'count': len(results),
-                'avg_execution_time': np.mean(execution_times),
-                'avg_throughput': np.mean(throughputs)
+            summary["input_size_analysis"][size] = {
+                "count": len(results),
+                "avg_execution_time": np.mean(execution_times),
+                "avg_throughput": np.mean(throughputs),
             }
 
         # Overall statistics
-        all_execution_times = [r['execution_time'] for r in self.crypto_results]
-        all_throughputs = [r['throughput_ops_per_sec'] for r in self.crypto_results]
-        all_memory_usage = [r['memory_usage_mb'] for r in self.crypto_results]
+        all_execution_times = [r["execution_time"] for r in self.crypto_results]
+        all_throughputs = [r["throughput_ops_per_sec"] for r in self.crypto_results]
+        all_memory_usage = [r["memory_usage_mb"] for r in self.crypto_results]
 
-        summary['overall_stats'] = {
-            'avg_execution_time': np.mean(all_execution_times),
-            'avg_throughput': np.mean(all_throughputs),
-            'avg_memory_usage_mb': np.mean(all_memory_usage),
-            'total_input_sizes': len(set(r['input_size'] for r in self.crypto_results)),
-            'execution_time_range': [np.min(all_execution_times), np.max(all_execution_times)]
+        summary["overall_stats"] = {
+            "avg_execution_time": np.mean(all_execution_times),
+            "avg_throughput": np.mean(all_throughputs),
+            "avg_memory_usage_mb": np.mean(all_memory_usage),
+            "total_input_sizes": len(set(r["input_size"] for r in self.crypto_results)),
+            "execution_time_range": [
+                np.min(all_execution_times),
+                np.max(all_execution_times),
+            ],
         }
 
         return summary
@@ -463,14 +495,14 @@ class EnhancedCryptoBenchmark:
         results_file = output_dir / "crypto_benchmark_results.json"
 
         results_data = {
-            'config': self.config.to_dict(),
-            'successful_benchmarks': self.crypto_results,
-            'failed_benchmarks': self.failed_benchmarks,
-            'summary': self.get_benchmark_summary(),
-            'timestamp': time.time()
+            "config": self.config.to_dict(),
+            "successful_benchmarks": self.crypto_results,
+            "failed_benchmarks": self.failed_benchmarks,
+            "summary": self.get_benchmark_summary(),
+            "timestamp": time.time(),
         }
 
-        with open(results_file, 'w') as f:
+        with open(results_file, "w") as f:
             json.dump(results_data, f, indent=2, default=str)
 
         logger.info(f"Crypto benchmark results saved to {results_file}")
@@ -478,7 +510,9 @@ class EnhancedCryptoBenchmark:
 
 
 # Convenience functions
-def benchmark_model_fingerprints(config: PHAZEConfig, models_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def benchmark_model_fingerprints(
+    config: PHAZEConfig, models_info: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
     """Benchmark fingerprinting for a list of models.
 
     Args:
@@ -506,13 +540,13 @@ if __name__ == "__main__":
     )
 
     model_info = {
-        'model_id': 'test_simple_minimal',
-        'model': model,
-        'architecture': 'simple',
-        'complexity': 'minimal',
-        'parameters': sum(p.numel() for p in model.parameters()),
-        'input_size': 784,
-        'output_size': 10
+        "model_id": "test_simple_minimal",
+        "model": model,
+        "architecture": "simple",
+        "complexity": "minimal",
+        "parameters": sum(p.numel() for p in model.parameters()),
+        "input_size": 784,
+        "output_size": 10,
     }
 
     benchmarker = EnhancedCryptoBenchmark(config)
@@ -520,11 +554,11 @@ if __name__ == "__main__":
 
     print(f"Crypto benchmark completed: {len(results)} operations")
 
-    successful = [r for r in results if r['success']]
+    successful = [r for r in results if r["success"]]
     print(f"Successful operations: {len(successful)}")
 
     if successful:
-        avg_time = np.mean([r['execution_time'] for r in successful])
-        avg_throughput = np.mean([r['throughput_ops_per_sec'] for r in successful])
+        avg_time = np.mean([r["execution_time"] for r in successful])
+        avg_throughput = np.mean([r["throughput_ops_per_sec"] for r in successful])
         print(f"Average execution time: {avg_time:.4f}s")
         print(f"Average throughput: {avg_throughput:.1f} ops/sec")

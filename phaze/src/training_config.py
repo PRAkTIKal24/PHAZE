@@ -37,23 +37,23 @@ class ModelConfig:
     """Configuration for model architectures and complexities."""
 
     # Available model types
-    architectures: List[str] = field(default_factory=lambda: [
-        "simple", "conv", "transformer", "multi_exit"
-    ])
-    complexities: List[str] = field(default_factory=lambda: [
-        "minimal", "light", "medium", "heavy"
-    ])
+    architectures: List[str] = field(
+        default_factory=lambda: ["simple", "conv", "transformer", "multi_exit"]
+    )
+    complexities: List[str] = field(
+        default_factory=lambda: ["minimal", "light", "medium", "heavy"]
+    )
 
     # Multi-exit configuration
-    early_exit_ratios: List[float] = field(default_factory=lambda: [
-        0.05, 0.10, 0.25, 0.50, 0.75
-    ])
+    early_exit_ratios: List[float] = field(
+        default_factory=lambda: [0.05, 0.10, 0.25, 0.50, 0.75]
+    )
 
     # Model parameters
     input_size: int = 28 * 28  # MNIST flattened
-    output_size: int = 10      # MNIST classes
-    input_channels: int = 1    # MNIST grayscale
-    spatial_size: int = 28     # MNIST image size
+    output_size: int = 10  # MNIST classes
+    input_channels: int = 1  # MNIST grayscale
+    spatial_size: int = 28  # MNIST image size
 
 
 @dataclass
@@ -150,7 +150,7 @@ class PHAZEConfig:
         if not config_path.exists():
             raise FileNotFoundError(f"Config file not found: {config_path}")
 
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config_dict = yaml.safe_load(f)
 
         return cls.from_dict(config_dict)
@@ -174,9 +174,9 @@ class PHAZEConfig:
         spec.loader.exec_module(config_module)
 
         # Try to get configuration from the module
-        if hasattr(config_module, 'get_default_config'):
+        if hasattr(config_module, "get_default_config"):
             return config_module.get_default_config()
-        elif hasattr(config_module, 'DEFAULT_CONFIG'):
+        elif hasattr(config_module, "DEFAULT_CONFIG"):
             return config_module.DEFAULT_CONFIG
         else:
             raise AttributeError(
@@ -193,9 +193,9 @@ class PHAZEConfig:
             raise FileNotFoundError(f"Config file not found: {config_path}")
 
         # Auto-detect file format
-        if config_path.suffix.lower() in ['.yml', '.yaml']:
+        if config_path.suffix.lower() in [".yml", ".yaml"]:
             return cls.from_yaml(config_path)
-        elif config_path.suffix.lower() == '.py':
+        elif config_path.suffix.lower() == ".py":
             return cls.from_python(config_path)
         else:
             # Try Python first, then YAML
@@ -214,22 +214,24 @@ class PHAZEConfig:
     def from_dict(cls, config_dict: dict) -> "PHAZEConfig":
         """Create configuration from dictionary."""
         # Extract sub-configurations
-        dataset_config = DatasetConfig(**config_dict.get('dataset', {}))
-        model_config = ModelConfig(**config_dict.get('model', {}))
-        training_config = TrainingConfig(**config_dict.get('training', {}))
-        experiment_config = ExperimentConfig(**config_dict.get('experiment', {}))
-        output_config = OutputConfig(**config_dict.get('output', {}))
+        dataset_config = DatasetConfig(**config_dict.get("dataset", {}))
+        model_config = ModelConfig(**config_dict.get("model", {}))
+        training_config = TrainingConfig(**config_dict.get("training", {}))
+        experiment_config = ExperimentConfig(**config_dict.get("experiment", {}))
+        output_config = OutputConfig(**config_dict.get("output", {}))
 
         # Handle plotting config
-        plotting_dict = config_dict.get('plotting', {})
-        if 'style' in plotting_dict and isinstance(plotting_dict['style'], str):
-            plotting_dict['style'] = PlotStyle(plotting_dict['style'])
+        plotting_dict = config_dict.get("plotting", {})
+        if "style" in plotting_dict and isinstance(plotting_dict["style"], str):
+            plotting_dict["style"] = PlotStyle(plotting_dict["style"])
         plotting_config = PlotConfig(**plotting_dict)
 
         # Create main config
         main_config = {
-            k: v for k, v in config_dict.items()
-            if k not in ['dataset', 'model', 'training', 'experiment', 'output', 'plotting']
+            k: v
+            for k, v in config_dict.items()
+            if k
+            not in ["dataset", "model", "training", "experiment", "output", "plotting"]
         }
 
         return cls(
@@ -239,7 +241,7 @@ class PHAZEConfig:
             experiment=experiment_config,
             output=output_config,
             plotting=plotting_config,
-            **main_config
+            **main_config,
         )
 
     def to_yaml(self, config_path: Union[str, Path]) -> None:
@@ -249,26 +251,26 @@ class PHAZEConfig:
 
         config_dict = self.to_dict()
 
-        with open(config_path, 'w') as f:
+        with open(config_path, "w") as f:
             yaml.dump(config_dict, f, default_flow_style=False, indent=2)
 
     def to_dict(self) -> dict:
         """Convert configuration to dictionary."""
         result = {
-            'project_name': self.project_name,
-            'version': self.version,
-            'dataset': self._dataclass_to_dict(self.dataset),
-            'model': self._dataclass_to_dict(self.model),
-            'training': self._dataclass_to_dict(self.training),
-            'experiment': self._dataclass_to_dict(self.experiment),
-            'output': self._dataclass_to_dict(self.output),
-            'plotting': self._dataclass_to_dict(self.plotting)
+            "project_name": self.project_name,
+            "version": self.version,
+            "dataset": self._dataclass_to_dict(self.dataset),
+            "model": self._dataclass_to_dict(self.model),
+            "training": self._dataclass_to_dict(self.training),
+            "experiment": self._dataclass_to_dict(self.experiment),
+            "output": self._dataclass_to_dict(self.output),
+            "plotting": self._dataclass_to_dict(self.plotting),
         }
 
         # Handle PlotStyle enum
-        if 'style' in result['plotting']:
-            if hasattr(result['plotting']['style'], 'value'):
-                result['plotting']['style'] = result['plotting']['style'].value
+        if "style" in result["plotting"]:
+            if hasattr(result["plotting"]["style"], "value"):
+                result["plotting"]["style"] = result["plotting"]["style"].value
             # If it's already a string, keep it as is
 
         return result
@@ -277,7 +279,7 @@ class PHAZEConfig:
         """Convert dataclass to dictionary, handling enums."""
         result = {}
         for key, value in obj.__dict__.items():
-            if hasattr(value, 'value'):  # Enum
+            if hasattr(value, "value"):  # Enum
                 result[key] = value.value
             else:
                 result[key] = value
@@ -337,7 +339,7 @@ class PHAZEConfig:
             base_dir,
             base_dir / self.output.models_dir,
             base_dir / self.output.plots_dir,
-            base_dir / self.output.logs_dir
+            base_dir / self.output.logs_dir,
         ]
 
         for directory in directories:

@@ -69,42 +69,37 @@ class MNISTTrainer:
         """Setup MNIST data loaders with small subsets for fast training."""
         # Data transformations
         if self.config.dataset.normalize:
-            transform = transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize((0.1307,), (0.3081,))  # MNIST normalization
-            ])
+            transform = transforms.Compose(
+                [
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.1307,), (0.3081,)),  # MNIST normalization
+                ]
+            )
         else:
             transform = transforms.ToTensor()
 
         # Load full MNIST dataset
         train_dataset = datasets.MNIST(
-            root='./data',
-            train=True,
-            download=True,
-            transform=transform
+            root="./data", train=True, download=True, transform=transform
         )
 
         test_dataset = datasets.MNIST(
-            root='./data',
-            train=False,
-            download=True,
-            transform=transform
+            root="./data", train=False, download=True, transform=transform
         )
 
         # Create small subsets for fast training
         train_subset = self._create_balanced_subset(
-            train_dataset,
-            self.config.dataset.dataset_size
+            train_dataset, self.config.dataset.dataset_size
         )
 
         val_subset = self._create_balanced_subset(
             test_dataset,
-            min(self.config.dataset.dataset_size // 2, 500)  # Smaller validation set
+            min(self.config.dataset.dataset_size // 2, 500),  # Smaller validation set
         )
 
         test_subset = self._create_balanced_subset(
             test_dataset,
-            min(self.config.dataset.dataset_size // 4, 250)  # Even smaller test set
+            min(self.config.dataset.dataset_size // 4, 250),  # Even smaller test set
         )
 
         # Create data loaders
@@ -113,7 +108,7 @@ class MNISTTrainer:
             batch_size=self.config.dataset.batch_size,
             shuffle=self.config.dataset.shuffle,
             num_workers=self.config.dataset.num_workers,
-            pin_memory=torch.cuda.is_available()
+            pin_memory=torch.cuda.is_available(),
         )
 
         self.val_loader = DataLoader(
@@ -121,7 +116,7 @@ class MNISTTrainer:
             batch_size=self.config.dataset.batch_size,
             shuffle=False,
             num_workers=self.config.dataset.num_workers,
-            pin_memory=torch.cuda.is_available()
+            pin_memory=torch.cuda.is_available(),
         )
 
         self.test_loader = DataLoader(
@@ -129,7 +124,7 @@ class MNISTTrainer:
             batch_size=self.config.dataset.batch_size,
             shuffle=False,
             num_workers=self.config.dataset.num_workers,
-            pin_memory=torch.cuda.is_available()
+            pin_memory=torch.cuda.is_available(),
         )
 
         logger.info("Data loaders created:")
@@ -169,7 +164,7 @@ class MNISTTrainer:
             "minimal": ModelComplexity.MINIMAL,
             "light": ModelComplexity.LIGHT,
             "medium": ModelComplexity.MEDIUM,
-            "heavy": ModelComplexity.HEAVY
+            "heavy": ModelComplexity.HEAVY,
         }
 
         complexity_enum = complexity_map.get(complexity, ModelComplexity.MEDIUM)
@@ -181,21 +176,23 @@ class MNISTTrainer:
                 complexity=complexity_enum,
                 input_channels=self.config.model.input_channels,
                 spatial_size=self.config.model.spatial_size,
-                output_size=self.config.model.output_size
+                output_size=self.config.model.output_size,
             )
         else:
             model = PHAZEModelFactory.create_full_model(
                 architecture=architecture,
                 complexity=complexity_enum,
                 input_size=self.config.model.input_size,
-                output_size=self.config.model.output_size
+                output_size=self.config.model.output_size,
             )
 
         # Move model to device
         model = model.to(self.device)
 
         logger.info(f"Created {architecture} model with {complexity} complexity")
-        logger.info(f"  Parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
+        logger.info(
+            f"  Parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}"
+        )
 
         return model
 
@@ -206,14 +203,14 @@ class MNISTTrainer:
             optimizer = optim.Adam(
                 model.parameters(),
                 lr=self.config.training.learning_rate,
-                weight_decay=self.config.training.weight_decay
+                weight_decay=self.config.training.weight_decay,
             )
         elif self.config.training.optimizer.lower() == "sgd":
             optimizer = optim.SGD(
                 model.parameters(),
                 lr=self.config.training.learning_rate,
                 weight_decay=self.config.training.weight_decay,
-                momentum=0.9
+                momentum=0.9,
             )
         else:
             raise ValueError(f"Unknown optimizer: {self.config.training.optimizer}")
@@ -232,8 +229,13 @@ class MNISTTrainer:
             # Flatten for non-convolutional architectures
             return x.view(x.size(0), -1)
 
-    def train_epoch(self, model: nn.Module, optimizer: optim.Optimizer,
-                   criterion: nn.Module, architecture: str) -> Dict[str, float]:
+    def train_epoch(
+        self,
+        model: nn.Module,
+        optimizer: optim.Optimizer,
+        criterion: nn.Module,
+        architecture: str,
+    ) -> Dict[str, float]:
         """Train model for one epoch."""
         model.train()
         total_loss = 0.0
@@ -241,8 +243,12 @@ class MNISTTrainer:
         total = 0
 
         # Progress bar
-        pbar = tqdm(self.train_loader, desc="Training", leave=False,
-                   disable=not self.config.training.verbose)
+        pbar = tqdm(
+            self.train_loader,
+            desc="Training",
+            leave=False,
+            disable=not self.config.training.verbose,
+        )
 
         for _batch_idx, (data, target) in enumerate(pbar):
             data, target = data.to(self.device), target.to(self.device)
@@ -262,21 +268,21 @@ class MNISTTrainer:
 
             # Update progress bar
             if self.config.training.verbose:
-                pbar.set_postfix({
-                    'Loss': f'{loss.item():.4f}',
-                    'Acc': f'{100. * correct / total:.2f}%'
-                })
+                pbar.set_postfix(
+                    {
+                        "Loss": f"{loss.item():.4f}",
+                        "Acc": f"{100.0 * correct / total:.2f}%",
+                    }
+                )
 
         avg_loss = total_loss / len(self.train_loader)
-        accuracy = 100. * correct / total
+        accuracy = 100.0 * correct / total
 
-        return {
-            'loss': avg_loss,
-            'accuracy': accuracy
-        }
+        return {"loss": avg_loss, "accuracy": accuracy}
 
-    def validate(self, model: nn.Module, criterion: nn.Module,
-                architecture: str) -> Dict[str, float]:
+    def validate(
+        self, model: nn.Module, criterion: nn.Module, architecture: str
+    ) -> Dict[str, float]:
         """Validate model on validation set."""
         model.eval()
         total_loss = 0.0
@@ -297,15 +303,13 @@ class MNISTTrainer:
                 total += target.size(0)
 
         avg_loss = total_loss / len(self.val_loader)
-        accuracy = 100. * correct / total
+        accuracy = 100.0 * correct / total
 
-        return {
-            'loss': avg_loss,
-            'accuracy': accuracy
-        }
+        return {"loss": avg_loss, "accuracy": accuracy}
 
-    def train_model(self, model: nn.Module, architecture: str,
-                   complexity: str, seed: int) -> Dict[str, Any]:
+    def train_model(
+        self, model: nn.Module, architecture: str, complexity: str, seed: int
+    ) -> Dict[str, Any]:
         """Train a model and return training results.
 
         Args:
@@ -326,17 +330,17 @@ class MNISTTrainer:
         optimizer, criterion = self._setup_training(model)
 
         # Training state
-        best_val_loss = float('inf')
+        best_val_loss = float("inf")
         patience_counter = 0
         training_start_time = time.time()
 
         # Training history
         history = {
-            'train_loss': [],
-            'train_acc': [],
-            'val_loss': [],
-            'val_acc': [],
-            'epoch_times': []
+            "train_loss": [],
+            "train_acc": [],
+            "val_loss": [],
+            "val_acc": [],
+            "epoch_times": [],
         }
 
         logger.info(f"Starting training: {architecture} {complexity} (seed {seed})")
@@ -354,16 +358,16 @@ class MNISTTrainer:
             epoch_time = time.time() - epoch_start_time
 
             # Record history
-            history['train_loss'].append(train_metrics['loss'])
-            history['train_acc'].append(train_metrics['accuracy'])
-            history['val_loss'].append(val_metrics['loss'])
-            history['val_acc'].append(val_metrics['accuracy'])
-            history['epoch_times'].append(epoch_time)
+            history["train_loss"].append(train_metrics["loss"])
+            history["train_acc"].append(train_metrics["accuracy"])
+            history["val_loss"].append(val_metrics["loss"])
+            history["val_acc"].append(val_metrics["accuracy"])
+            history["epoch_times"].append(epoch_time)
 
             # Logging
             if self.config.training.verbose:
                 logger.info(
-                    f"Epoch {epoch+1}/{self.config.training.epochs}: "
+                    f"Epoch {epoch + 1}/{self.config.training.epochs}: "
                     f"Train Loss: {train_metrics['loss']:.4f}, "
                     f"Train Acc: {train_metrics['accuracy']:.2f}%, "
                     f"Val Loss: {val_metrics['loss']:.4f}, "
@@ -373,13 +377,13 @@ class MNISTTrainer:
 
             # Early stopping
             if self.config.training.early_stopping:
-                if val_metrics['loss'] < best_val_loss:
-                    best_val_loss = val_metrics['loss']
+                if val_metrics["loss"] < best_val_loss:
+                    best_val_loss = val_metrics["loss"]
                     patience_counter = 0
                 else:
                     patience_counter += 1
                     if patience_counter >= self.config.training.patience:
-                        logger.info(f"Early stopping at epoch {epoch+1}")
+                        logger.info(f"Early stopping at epoch {epoch + 1}")
                         break
 
         total_training_time = time.time() - training_start_time
@@ -389,22 +393,22 @@ class MNISTTrainer:
 
         # Training results
         results = {
-            'model_id': f"{architecture}_{complexity}_seed{seed}",
-            'architecture': architecture,
-            'complexity': complexity,
-            'seed': seed,
-            'parameters': sum(p.numel() for p in model.parameters() if p.requires_grad),
-            'training_time': total_training_time,
-            'epochs_completed': len(history['train_loss']),
-            'final_train_loss': history['train_loss'][-1],
-            'final_val_loss': history['val_loss'][-1],
-            'final_test_loss': test_metrics['loss'],
-            'final_train_acc': history['train_acc'][-1],
-            'final_val_acc': history['val_acc'][-1],
-            'final_test_acc': test_metrics['accuracy'],
-            'best_val_loss': best_val_loss,
-            'history': history,
-            'device': str(self.device)
+            "model_id": f"{architecture}_{complexity}_seed{seed}",
+            "architecture": architecture,
+            "complexity": complexity,
+            "seed": seed,
+            "parameters": sum(p.numel() for p in model.parameters() if p.requires_grad),
+            "training_time": total_training_time,
+            "epochs_completed": len(history["train_loss"]),
+            "final_train_loss": history["train_loss"][-1],
+            "final_val_loss": history["val_loss"][-1],
+            "final_test_loss": test_metrics["loss"],
+            "final_train_acc": history["train_acc"][-1],
+            "final_val_acc": history["val_acc"][-1],
+            "final_test_acc": test_metrics["accuracy"],
+            "best_val_loss": best_val_loss,
+            "history": history,
+            "device": str(self.device),
         }
 
         logger.info(f"Training completed: {results['model_id']}")
@@ -413,8 +417,9 @@ class MNISTTrainer:
 
         return results
 
-    def save_model(self, model: nn.Module, model_info: Dict[str, Any],
-                  output_dir: Path) -> Dict[str, str]:
+    def save_model(
+        self, model: nn.Module, model_info: Dict[str, Any], output_dir: Path
+    ) -> Dict[str, str]:
         """Save trained model and metadata.
 
         Args:
@@ -425,7 +430,7 @@ class MNISTTrainer:
         Returns:
             Dictionary with saved file paths
         """
-        model_id = model_info['model_id']
+        model_id = model_info["model_id"]
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -434,23 +439,27 @@ class MNISTTrainer:
         # Save model state dict
         if self.config.output.save_models:
             model_path = output_dir / f"{model_id}.pth"
-            torch.save({
-                'model_state_dict': model.state_dict(),
-                'model_info': model_info,
-                'config': self.config.to_dict()
-            }, model_path)
-            saved_files['model'] = str(model_path)
+            torch.save(
+                {
+                    "model_state_dict": model.state_dict(),
+                    "model_info": model_info,
+                    "config": self.config.to_dict(),
+                },
+                model_path,
+            )
+            saved_files["model"] = str(model_path)
 
         # Save metadata
         metadata_path = output_dir / f"{model_id}_metadata.json"
-        with open(metadata_path, 'w') as f:
+        with open(metadata_path, "w") as f:
             json.dump(model_info, f, indent=2, default=str)
-        saved_files['metadata'] = str(metadata_path)
+        saved_files["metadata"] = str(metadata_path)
 
         return saved_files
 
-    def export_to_onnx(self, model: nn.Module, model_info: Dict[str, Any],
-                      output_dir: Path) -> Optional[str]:
+    def export_to_onnx(
+        self, model: nn.Module, model_info: Dict[str, Any], output_dir: Path
+    ) -> Optional[str]:
         """Export model to ONNX format for ezkl compatibility.
 
         Args:
@@ -464,8 +473,8 @@ class MNISTTrainer:
         if not self.config.output.export_onnx:
             return None
 
-        model_id = model_info['model_id']
-        architecture = model_info['architecture']
+        model_id = model_info["model_id"]
+        architecture = model_info["architecture"]
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -478,10 +487,12 @@ class MNISTTrainer:
                     1,
                     self.config.model.input_channels,
                     self.config.model.spatial_size,
-                    self.config.model.spatial_size
+                    self.config.model.spatial_size,
                 ).to(self.device)
             else:
-                dummy_input = torch.randn(1, self.config.model.input_size).to(self.device)
+                dummy_input = torch.randn(1, self.config.model.input_size).to(
+                    self.device
+                )
 
             # Export to ONNX
             export_start_time = time.time()
@@ -495,10 +506,7 @@ class MNISTTrainer:
                 do_constant_folding=True,
                 input_names=["input"],
                 output_names=["output"],
-                dynamic_axes={
-                    "input": {0: "batch_size"},
-                    "output": {0: "batch_size"}
-                }
+                dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
             )
 
             export_time = time.time() - export_start_time
@@ -507,8 +515,8 @@ class MNISTTrainer:
             logger.info(f"  Export time: {export_time:.2f}s")
 
             # Update model info with export time
-            model_info['onnx_export_time'] = export_time
-            model_info['onnx_path'] = str(onnx_path)
+            model_info["onnx_export_time"] = export_time
+            model_info["onnx_path"] = str(onnx_path)
 
             return str(onnx_path)
 
@@ -530,15 +538,16 @@ class MNISTTrainer:
                 1,
                 self.config.model.input_channels,
                 self.config.model.spatial_size,
-                self.config.model.spatial_size
+                self.config.model.spatial_size,
             ).to(self.device)
         else:
             return torch.randn(1, self.config.model.input_size).to(self.device)
 
 
 # Convenience functions
-def train_single_model(config: PHAZEConfig, architecture: str,
-                      complexity: str, seed: int) -> Dict[str, Any]:
+def train_single_model(
+    config: PHAZEConfig, architecture: str, complexity: str, seed: int
+) -> Dict[str, Any]:
     """Train a single model with given parameters.
 
     Args:
@@ -558,12 +567,12 @@ def train_single_model(config: PHAZEConfig, architecture: str,
     if config.output.save_models or config.output.export_onnx:
         output_dir = Path(config.output.output_dir) / config.output.models_dir
         saved_files = trainer.save_model(model, results, output_dir)
-        results['saved_files'] = saved_files
+        results["saved_files"] = saved_files
 
         # Export to ONNX
         onnx_path = trainer.export_to_onnx(model, results, output_dir)
         if onnx_path:
-            results['onnx_path'] = onnx_path
+            results["onnx_path"] = onnx_path
 
     return results
 

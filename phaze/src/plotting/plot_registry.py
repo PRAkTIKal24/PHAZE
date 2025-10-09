@@ -9,6 +9,7 @@ from .base_plotter import BasePlotter
 @dataclass
 class PlotTypeInfo:
     """Information about a registered plot type."""
+
     name: str
     description: str
     plotter_class: Type[BasePlotter]
@@ -18,7 +19,9 @@ class PlotTypeInfo:
     def __post_init__(self):
         """Validate plotter class."""
         if not issubclass(self.plotter_class, BasePlotter):
-            raise ValueError(f"Plotter class {self.plotter_class} must inherit from BasePlotter")
+            raise ValueError(
+                f"Plotter class {self.plotter_class} must inherit from BasePlotter"
+            )
 
 
 class PlotRegistry:
@@ -38,7 +41,7 @@ class PlotRegistry:
         plotter_class: Type[BasePlotter],
         description: str,
         category: str = "general",
-        priority: int = 0
+        priority: int = 0,
     ) -> None:
         """Register a new plot type.
 
@@ -57,7 +60,7 @@ class PlotRegistry:
             description=description,
             plotter_class=plotter_class,
             category=category,
-            priority=priority
+            priority=priority,
         )
 
         self._plot_types[name] = plot_info
@@ -69,8 +72,7 @@ class PlotRegistry:
 
         # Sort by priority within category
         self._categories[category].sort(
-            key=lambda x: self._plot_types[x].priority,
-            reverse=True
+            key=lambda x: self._plot_types[x].priority, reverse=True
         )
 
     def get_plot_type(self, name: str) -> Optional[PlotTypeInfo]:
@@ -98,7 +100,7 @@ class PlotRegistry:
             return sorted(
                 self._plot_types.keys(),
                 key=lambda x: self._plot_types[x].priority,
-                reverse=True
+                reverse=True,
             )
         else:
             return self._categories.get(category, [])
@@ -112,9 +114,7 @@ class PlotRegistry:
         return sorted(self._categories.keys())
 
     def create_plotter(
-        self,
-        plot_type: str,
-        config: Optional[Any] = None
+        self, plot_type: str, config: Optional[Any] = None
     ) -> BasePlotter:
         """Create an instance of a registered plotter.
 
@@ -167,25 +167,25 @@ class PlotRegistry:
             Dictionary with summary information
         """
         summary = {
-            'total_plot_types': len(self._plot_types),
-            'categories': {},
-            'plot_types': {}
+            "total_plot_types": len(self._plot_types),
+            "categories": {},
+            "plot_types": {},
         }
 
         # Category summary
         for category, plot_types in self._categories.items():
-            summary['categories'][category] = {
-                'count': len(plot_types),
-                'plot_types': plot_types
+            summary["categories"][category] = {
+                "count": len(plot_types),
+                "plot_types": plot_types,
             }
 
         # Individual plot type info
         for name, plot_info in self._plot_types.items():
-            summary['plot_types'][name] = {
-                'description': plot_info.description,
-                'category': plot_info.category,
-                'priority': plot_info.priority,
-                'class_name': plot_info.plotter_class.__name__
+            summary["plot_types"][name] = {
+                "description": plot_info.description,
+                "category": plot_info.category,
+                "priority": plot_info.priority,
+                "class_name": plot_info.plotter_class.__name__,
             }
 
         return summary
@@ -200,7 +200,7 @@ def register_plot_type(
     plotter_class: Type[BasePlotter],
     description: str,
     category: str = "general",
-    priority: int = 0
+    priority: int = 0,
 ) -> None:
     """Register a plot type with the global registry.
 
@@ -211,7 +211,9 @@ def register_plot_type(
         category: Category for grouping
         priority: Priority for ordering
     """
-    _global_registry.register_plot_type(name, plotter_class, description, category, priority)
+    _global_registry.register_plot_type(
+        name, plotter_class, description, category, priority
+    )
 
 
 def get_global_registry() -> PlotRegistry:

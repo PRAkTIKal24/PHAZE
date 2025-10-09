@@ -9,15 +9,15 @@ import pytest
 # Add project root to path for legacy imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
-from legacy.src.phaze_benchmark_suite import PHAZEBenchmarkSuite
-from phaze.src.zkml_framework_interface import CryptographicPrimitiveBenchmark
 from legacy.src.comprehensive_benchmark import (
     BenchmarkResult,
     CryptoBenchmarkResult,
     PerformanceMonitor,
     ZKMLFrameworkBenchmark,
+    run_phaze_benchmarks,
 )
+from legacy.src.phaze_benchmark_suite import PHAZEBenchmarkSuite
+from phaze.src.zkml_framework_interface import CryptographicPrimitiveBenchmark
 
 
 class TestPerformanceMonitor:

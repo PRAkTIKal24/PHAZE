@@ -13,6 +13,8 @@ import torch
 # Add project root to path for legacy imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
+from legacy.src.phaze_benchmark_suite import PHAZEBenchmarkSuite
 from phaze import (
     ConvolutionalEarlyExitModel,
     ModelComplexity,
@@ -23,8 +25,6 @@ from phaze import (
     create_simple_early_exit_model,
     create_simple_full_model,
 )
-from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
-from legacy.src.phaze_benchmark_suite import PHAZEBenchmarkSuite
 
 
 class TestPHAZEIntegration:

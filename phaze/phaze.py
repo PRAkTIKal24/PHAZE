@@ -10,6 +10,7 @@ def get_available_plot_types():
     """Get list of available plot types."""
     try:
         from .src.plotting.plot_registry import get_global_registry
+
         registry = get_global_registry()
         return registry.list_plot_types()
     except ImportError:
@@ -20,6 +21,7 @@ def get_plot_categories():
     """Get list of available plot categories."""
     try:
         from .src.plotting.plot_registry import get_global_registry
+
         registry = get_global_registry()
         return registry.list_categories()
     except ImportError:
@@ -34,7 +36,7 @@ async def run_training_command(
     epochs: Optional[int] = None,
     quick: bool = False,
     train_only: bool = False,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> int:
     """Run training and benchmarking pipeline."""
     try:
@@ -106,6 +108,7 @@ async def run_training_command(
         print(f"Error during training: {e}", file=sys.stderr)
         if verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
@@ -118,7 +121,7 @@ async def run_plotting_command(
     style: str = "neurips",
     formats: Optional[List[str]] = None,
     trials: int = 10,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> int:
     """Run plotting command with specified parameters."""
     try:
@@ -137,7 +140,7 @@ async def run_plotting_command(
         config = PlotConfig(
             style=style_enum,
             export_formats=formats or ["png", "pdf"],
-            num_trials=trials
+            num_trials=trials,
         )
 
         # Initialize plot suite
@@ -159,7 +162,7 @@ async def run_plotting_command(
                 print(f"Error: Data file not found: {data_file}", file=sys.stderr)
                 return 1
 
-            with open(data_path, 'r') as f:
+            with open(data_path, "r") as f:
                 data = json.load(f)
         else:
             # Run benchmarks to generate data
@@ -173,13 +176,13 @@ async def run_plotting_command(
                 "architectures": ["simple", "multi_exit"],
                 "complexities": ["light", "medium", "heavy"],
                 "input_sizes": [10, 50, 100],
-                "num_trials": max(3, trials // 3)  # Fewer trials for benchmarking
+                "num_trials": max(3, trials // 3),  # Fewer trials for benchmarking
             }
 
             crypto_config = {
                 "rabin_input_sizes": [64, 256, 1024],
                 "shamir_secret_sizes": [32, 64, 128],
-                "num_trials": trials
+                "num_trials": trials,
             }
 
             # Run comprehensive benchmarks
@@ -221,6 +224,7 @@ async def run_plotting_command(
         print(f"Error during plotting: {e}", file=sys.stderr)
         if verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
@@ -417,23 +421,27 @@ Default behavior (if no options specified):
     # Handle training commands
     if args.train or args.train_only:
         if args.verbose:
-            print(f"Running training command: {'train-only' if args.train_only else 'full pipeline'}")
+            print(
+                f"Running training command: {'train-only' if args.train_only else 'full pipeline'}"
+            )
 
         # Parse training-specific arguments
         architectures = args.architectures.split(",") if args.architectures else None
         complexities = args.complexities.split(",") if args.complexities else None
 
         # Run training asynchronously
-        return asyncio.run(run_training_command(
-            config_file=args.config,
-            output_dir=args.output,
-            architectures=architectures,
-            complexities=complexities,
-            epochs=args.epochs,
-            quick=args.quick,
-            train_only=args.train_only,
-            verbose=args.verbose
-        ))
+        return asyncio.run(
+            run_training_command(
+                config_file=args.config,
+                output_dir=args.output,
+                architectures=architectures,
+                complexities=complexities,
+                epochs=args.epochs,
+                quick=args.quick,
+                train_only=args.train_only,
+                verbose=args.verbose,
+            )
+        )
 
     # Handle plotting commands
     if args.plot:
@@ -446,16 +454,18 @@ Default behavior (if no options specified):
         formats = args.format.split(",") if args.format else None
 
         # Run plotting asynchronously
-        return asyncio.run(run_plotting_command(
-            plot_types=plot_types,
-            components=components,
-            output_dir=args.output,
-            data_file=args.data_file,
-            style=args.style,
-            formats=formats,
-            trials=args.trials,
-            verbose=args.verbose
-        ))
+        return asyncio.run(
+            run_plotting_command(
+                plot_types=plot_types,
+                components=components,
+                output_dir=args.output,
+                data_file=args.data_file,
+                style=args.style,
+                formats=formats,
+                trials=args.trials,
+                verbose=args.verbose,
+            )
+        )
 
     # Default behavior: run quick training pipeline
     if args.verbose:
@@ -464,16 +474,18 @@ Default behavior (if no options specified):
             "full pipeline in quick mode (fast training + benchmarking + plots)"
         )
 
-    return asyncio.run(run_training_command(
-        config_file=None,
-        output_dir="benchmark_results",
-        architectures=None,
-        complexities=None,
-        epochs=None,
-        quick=True,  # Default to quick mode
-        train_only=False,
-        verbose=args.verbose
-    ))
+    return asyncio.run(
+        run_training_command(
+            config_file=None,
+            output_dir="benchmark_results",
+            architectures=None,
+            complexities=None,
+            epochs=None,
+            quick=True,  # Default to quick mode
+            train_only=False,
+            verbose=args.verbose,
+        )
+    )
 
 
 if __name__ == "__main__":

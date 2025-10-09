@@ -22,7 +22,9 @@ from .plotting.plot_suite import PHAZEPlotSuite
 from .training_config import PHAZEConfig
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -37,12 +39,12 @@ class TrainingOrchestrator:
         """
         self.config = config
         self.results = {
-            'training_results': {},
-            'early_exit_models': [],
-            'zkml_results': [],
-            'crypto_results': [],
-            'timing_info': {},
-            'config': config.to_dict()
+            "training_results": {},
+            "early_exit_models": [],
+            "zkml_results": [],
+            "crypto_results": [],
+            "timing_info": {},
+            "config": config.to_dict(),
         }
 
         # Initialize components
@@ -74,9 +76,11 @@ class TrainingOrchestrator:
         training_results = {}
 
         # Calculate total number of models to train
-        total_models = (len(self.config.model.architectures) *
-                       len(self.config.model.complexities) *
-                       len(self.config.experiment.seeds))
+        total_models = (
+            len(self.config.model.architectures)
+            * len(self.config.model.complexities)
+            * len(self.config.experiment.seeds)
+        )
 
         logger.info(f"Training {total_models} model variants...")
 
@@ -91,35 +95,51 @@ class TrainingOrchestrator:
 
                         # Create and train model
                         model = self.trainer.create_model(architecture, complexity)
-                        results = self.trainer.train_model(model, architecture, complexity, seed)
+                        results = self.trainer.train_model(
+                            model, architecture, complexity, seed
+                        )
 
                         # Save model if configured
-                        if self.config.output.save_models or self.config.output.export_onnx:
-                            output_dir = Path(self.config.output.output_dir) / self.config.output.models_dir
-                            saved_files = self.trainer.save_model(model, results, output_dir)
-                            results['saved_files'] = saved_files
+                        if (
+                            self.config.output.save_models
+                            or self.config.output.export_onnx
+                        ):
+                            output_dir = (
+                                Path(self.config.output.output_dir)
+                                / self.config.output.models_dir
+                            )
+                            saved_files = self.trainer.save_model(
+                                model, results, output_dir
+                            )
+                            results["saved_files"] = saved_files
 
                             # Export to ONNX
-                            onnx_path = self.trainer.export_to_onnx(model, results, output_dir)
+                            onnx_path = self.trainer.export_to_onnx(
+                                model, results, output_dir
+                            )
                             if onnx_path:
-                                results['onnx_path'] = onnx_path
+                                results["onnx_path"] = onnx_path
 
                         # Store model for later use
-                        results['model'] = model
-                        results['model_training_time'] = time.time() - model_start_time
+                        results["model"] = model
+                        results["model_training_time"] = time.time() - model_start_time
 
                         # Store results
-                        model_id = results['model_id']
+                        model_id = results["model_id"]
                         training_results[model_id] = results
 
-                        progress_bar.set_postfix({
-                            'current': f"{architecture}_{complexity}",
-                            'acc': f"{results['final_test_acc']:.1f}%"
-                        })
+                        progress_bar.set_postfix(
+                            {
+                                "current": f"{architecture}_{complexity}",
+                                "acc": f"{results['final_test_acc']:.1f}%",
+                            }
+                        )
                         progress_bar.update(1)
 
                     except Exception as e:
-                        logger.error(f"Training failed for {architecture}_{complexity}_seed{seed}: {e}")
+                        logger.error(
+                            f"Training failed for {architecture}_{complexity}_seed{seed}: {e}"
+                        )
                         progress_bar.update(1)
                         continue
 
@@ -135,12 +155,14 @@ class TrainingOrchestrator:
             raise RuntimeError("No models were successfully trained")
 
         # Update results
-        self.results['training_results'] = training_results
-        self.results['timing_info']['training_phase'] = phase_time
+        self.results["training_results"] = training_results
+        self.results["timing_info"]["training_phase"] = phase_time
 
         return training_results
 
-    def run_early_exit_generation(self, training_results: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def run_early_exit_generation(
+        self, training_results: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Generate early exit models from the largest trained models.
 
         Args:
@@ -164,22 +186,30 @@ class TrainingOrchestrator:
             try:
                 logger.info(f"Generating early exit variants for {architecture}")
 
-                model = model_info['model']
+                model = model_info["model"]
                 early_variants = self.exit_generator.generate_early_exit_variants(
-                    model, architecture, model_info['complexity'], model_info
+                    model, architecture, model_info["complexity"], model_info
                 )
 
                 # Save early exit models
                 if self.config.output.save_models:
-                    output_dir = Path(self.config.output.output_dir) / self.config.output.models_dir / "early_exit"
+                    output_dir = (
+                        Path(self.config.output.output_dir)
+                        / self.config.output.models_dir
+                        / "early_exit"
+                    )
 
                     for early_info in early_variants:
-                        saved_files = self.exit_generator.save_early_exit_model(early_info, output_dir)
-                        early_info['saved_files'] = saved_files
+                        saved_files = self.exit_generator.save_early_exit_model(
+                            early_info, output_dir
+                        )
+                        early_info["saved_files"] = saved_files
 
                 all_early_exit_models.extend(early_variants)
 
-                logger.info(f"Generated {len(early_variants)} early exit variants for {architecture}")
+                logger.info(
+                    f"Generated {len(early_variants)} early exit variants for {architecture}"
+                )
 
             except Exception as e:
                 logger.error(f"Early exit generation failed for {architecture}: {e}")
@@ -191,12 +221,14 @@ class TrainingOrchestrator:
         logger.info(f"Generated {len(all_early_exit_models)} early exit models total")
 
         # Update results
-        self.results['early_exit_models'] = all_early_exit_models
-        self.results['timing_info']['early_exit_phase'] = phase_time
+        self.results["early_exit_models"] = all_early_exit_models
+        self.results["timing_info"]["early_exit_phase"] = phase_time
 
         return all_early_exit_models
 
-    async def run_zkml_benchmarking(self, training_results: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def run_zkml_benchmarking(
+        self, training_results: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Run zkML benchmarking on trained models.
 
         Args:
@@ -217,7 +249,7 @@ class TrainingOrchestrator:
         # Select representative models: one from each architecture-complexity combination
         arch_complexity_combinations = set()
         for model_info in training_results.values():
-            arch_complexity = (model_info['architecture'], model_info['complexity'])
+            arch_complexity = (model_info["architecture"], model_info["complexity"])
             if arch_complexity not in arch_complexity_combinations:
                 arch_complexity_combinations.add(arch_complexity)
                 models_to_benchmark.append(model_info)
@@ -226,24 +258,29 @@ class TrainingOrchestrator:
 
         # Run zkML benchmarks
         zkml_results = await self.zkml_benchmarker.benchmark_multiple_models(
-            models_to_benchmark,
-            self.config.experiment.zkml_frameworks
+            models_to_benchmark, self.config.experiment.zkml_frameworks
         )
 
         phase_time = time.time() - phase_start_time
 
-        successful_benchmarks = len([r for r in zkml_results if r.get('success', False)])
+        successful_benchmarks = len(
+            [r for r in zkml_results if r.get("success", False)]
+        )
 
         logger.info(f"zkML benchmarking completed in {phase_time:.2f}s")
-        logger.info(f"Successful benchmarks: {successful_benchmarks}/{len(zkml_results)}")
+        logger.info(
+            f"Successful benchmarks: {successful_benchmarks}/{len(zkml_results)}"
+        )
 
         # Update results
-        self.results['zkml_results'] = zkml_results
-        self.results['timing_info']['zkml_phase'] = phase_time
+        self.results["zkml_results"] = zkml_results
+        self.results["timing_info"]["zkml_phase"] = phase_time
 
         return zkml_results
 
-    def run_crypto_benchmarking(self, early_exit_models: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def run_crypto_benchmarking(
+        self, early_exit_models: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Run crypto benchmarking on early exit models.
 
         Args:
@@ -259,18 +296,24 @@ class TrainingOrchestrator:
         phase_start_time = time.time()
 
         # Run crypto benchmarks on early exit models
-        crypto_results = self.crypto_benchmarker.benchmark_multiple_models(early_exit_models)
+        crypto_results = self.crypto_benchmarker.benchmark_multiple_models(
+            early_exit_models
+        )
 
         phase_time = time.time() - phase_start_time
 
-        successful_benchmarks = len([r for r in crypto_results if r.get('success', False)])
+        successful_benchmarks = len(
+            [r for r in crypto_results if r.get("success", False)]
+        )
 
         logger.info(f"Crypto benchmarking completed in {phase_time:.2f}s")
-        logger.info(f"Successful benchmarks: {successful_benchmarks}/{len(crypto_results)}")
+        logger.info(
+            f"Successful benchmarks: {successful_benchmarks}/{len(crypto_results)}"
+        )
 
         # Update results
-        self.results['crypto_results'] = crypto_results
-        self.results['timing_info']['crypto_phase'] = phase_time
+        self.results["crypto_results"] = crypto_results
+        self.results["timing_info"]["crypto_phase"] = phase_time
 
         return crypto_results
 
@@ -296,18 +339,20 @@ class TrainingOrchestrator:
 
             # Prepare data for plotting
             plot_data = {
-                'zkml_results': self.results['zkml_results'],
-                'crypto_results': self.results['crypto_results'],
-                'training_results': self.results['training_results'],
-                'early_exit_models': self.results['early_exit_models']
+                "zkml_results": self.results["zkml_results"],
+                "crypto_results": self.results["crypto_results"],
+                "training_results": self.results["training_results"],
+                "early_exit_models": self.results["early_exit_models"],
             }
 
             # Generate plots
-            output_dir = Path(self.config.output.output_dir) / self.config.output.plots_dir
+            output_dir = (
+                Path(self.config.output.output_dir) / self.config.output.plots_dir
+            )
             plot_results = plot_suite.generate_plots(
                 data=plot_data,
                 output_dir=output_dir,
-                save_plots=self.config.output.save_plots
+                save_plots=self.config.output.save_plots,
             )
 
             # Generate summary report
@@ -320,20 +365,24 @@ class TrainingOrchestrator:
 
             logger.info(f"Plot generation completed in {phase_time:.2f}s")
 
-            if plot_results and 'plots' in plot_results:
-                num_plot_types = len(plot_results['plots'])
-                total_plots = sum(p.get('num_plots', 0) for p in plot_results['plots'].values())
-                logger.info(f"Generated {total_plots} plots across {num_plot_types} plot types")
+            if plot_results and "plots" in plot_results:
+                num_plot_types = len(plot_results["plots"])
+                total_plots = sum(
+                    p.get("num_plots", 0) for p in plot_results["plots"].values()
+                )
+                logger.info(
+                    f"Generated {total_plots} plots across {num_plot_types} plot types"
+                )
 
             # Update results
-            self.results['plot_results'] = plot_results
-            self.results['timing_info']['plotting_phase'] = phase_time
+            self.results["plot_results"] = plot_results
+            self.results["timing_info"]["plotting_phase"] = phase_time
 
             return plot_results
 
         except Exception as e:
             logger.error(f"Plot generation failed: {e}")
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     def save_final_results(self) -> str:
         """Save complete results to file.
@@ -348,31 +397,31 @@ class TrainingOrchestrator:
         serializable_results = {}
 
         for key, value in self.results.items():
-            if key == 'training_results':
+            if key == "training_results":
                 # Remove model objects from training results
                 serializable_results[key] = {}
                 for model_id, model_info in value.items():
-                    clean_info = {k: v for k, v in model_info.items() if k != 'model'}
+                    clean_info = {k: v for k, v in model_info.items() if k != "model"}
                     serializable_results[key][model_id] = clean_info
 
-            elif key == 'early_exit_models':
+            elif key == "early_exit_models":
                 # Remove model objects from early exit models
                 serializable_results[key] = []
                 for model_info in value:
-                    clean_info = {k: v for k, v in model_info.items() if k != 'model'}
+                    clean_info = {k: v for k, v in model_info.items() if k != "model"}
                     serializable_results[key].append(clean_info)
 
             else:
                 serializable_results[key] = value
 
         # Add timestamp and summary
-        serializable_results['completion_timestamp'] = time.time()
-        serializable_results['total_runtime'] = sum(
-            self.results['timing_info'].values()
+        serializable_results["completion_timestamp"] = time.time()
+        serializable_results["total_runtime"] = sum(
+            self.results["timing_info"].values()
         )
 
         # Save to file
-        with open(results_file, 'w') as f:
+        with open(results_file, "w") as f:
             json.dump(serializable_results, f, indent=2, default=str)
 
         logger.info(f"Complete results saved to {results_file}")
@@ -413,11 +462,17 @@ class TrainingOrchestrator:
             logger.info("=" * 60)
             logger.info("🎉 PIPELINE COMPLETED SUCCESSFULLY")
             logger.info("=" * 60)
-            logger.info(f"Total runtime: {total_time:.2f}s ({total_time/3600:.2f} hours)")
+            logger.info(
+                f"Total runtime: {total_time:.2f}s ({total_time / 3600:.2f} hours)"
+            )
             logger.info(f"Models trained: {len(training_results)}")
             logger.info(f"Early exit models: {len(early_exit_models)}")
-            logger.info(f"zkML benchmarks: {len([r for r in zkml_results if r.get('success')])}")
-            logger.info(f"Crypto benchmarks: {len([r for r in crypto_results if r.get('success')])}")
+            logger.info(
+                f"zkML benchmarks: {len([r for r in zkml_results if r.get('success')])}"
+            )
+            logger.info(
+                f"Crypto benchmarks: {len([r for r in crypto_results if r.get('success')])}"
+            )
             logger.info(f"Results saved to: {results_file}")
 
             return self.results
@@ -438,11 +493,11 @@ class TrainingOrchestrator:
             Dictionary with progress information
         """
         summary = {
-            'trained_models': len(self.results['training_results']),
-            'early_exit_models': len(self.results['early_exit_models']),
-            'zkml_benchmarks': len(self.results['zkml_results']),
-            'crypto_benchmarks': len(self.results['crypto_results']),
-            'timing_info': self.results['timing_info']
+            "trained_models": len(self.results["training_results"]),
+            "early_exit_models": len(self.results["early_exit_models"]),
+            "zkml_benchmarks": len(self.results["zkml_results"]),
+            "crypto_benchmarks": len(self.results["crypto_results"]),
+            "timing_info": self.results["timing_info"],
         }
 
         return summary
