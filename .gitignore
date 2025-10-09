@@ -70,3 +70,5 @@ phaze/workspaces/
 /rust_bindings/Cargo.lock
 *.rs.bk
 plots/
+data/
+benchmark_results/
