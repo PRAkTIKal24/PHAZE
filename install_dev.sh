@@ -24,6 +24,10 @@ else
     echo "✅ uv is already installed"
 fi
 
+# Create venv for installation
+uv venv
+source .venv/bin/activate
+
 # Install the package in editable mode
 echo "📦 Installing package..."
 uv pip install -e .
