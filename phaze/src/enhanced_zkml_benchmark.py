@@ -335,9 +335,9 @@ class EnhancedZKMLBenchmark:
         """Create risc-zero zkML system using Rust backend."""
         from .rust_zkml_backend import RustRiscZeroBackend
         
-        # Create the actual RISC Zero backend
+        # Create the RISC Zero backend
         risc_zero_system = RiscZeroBackendWrapper(model, model_info)
-        logger.info("Using actual RISC Zero backend implementation")
+        logger.info("Using RISC Zero backend implementation")
         return risc_zero_system
 
     async def _setup_risc_zero(self, system, sample_input: torch.Tensor):
