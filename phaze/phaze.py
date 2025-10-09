@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 import json
-import subprocess
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -25,6 +24,90 @@ def get_plot_categories():
         return registry.list_categories()
     except ImportError:
         return []
+
+
+async def run_training_command(
+    config_file: Optional[str] = None,
+    output_dir: str = "benchmark_results",
+    architectures: Optional[List[str]] = None,
+    complexities: Optional[List[str]] = None,
+    epochs: Optional[int] = None,
+    quick: bool = False,
+    train_only: bool = False,
+    verbose: bool = False
+) -> int:
+    """Run training and benchmarking pipeline."""
+    try:
+        from .src.training_config import PHAZEConfig, load_config
+        from .src.training_orchestrator import run_full_pipeline, run_training_only
+
+        # Load configuration
+        if config_file:
+            config = PHAZEConfig.from_file(config_file)
+        else:
+            config = load_config()
+
+        # Override configuration with command line arguments
+        if output_dir != "benchmark_results":
+            config.output.output_dir = output_dir
+
+        if architectures:
+            config.model.architectures = architectures
+
+        if complexities:
+            config.model.complexities = complexities
+
+        if epochs is not None:
+            config.training.epochs = epochs
+
+        # Quick mode adjustments
+        if quick:
+            config.training.epochs = 1
+            config.dataset.dataset_size = 500
+            config.experiment.benchmark_iterations = 3
+            config.experiment.seeds = [42, 123]  # Fewer seeds
+            if not architectures:
+                config.model.architectures = ["simple", "conv"]  # Subset
+            if not complexities:
+                config.model.complexities = ["minimal", "light"]  # Subset
+
+        config.training.verbose = verbose
+
+        # Validate configuration
+        warnings = config.validate()
+        if warnings:
+            print("Configuration warnings:")
+            for warning in warnings:
+                print(f"  - {warning}")
+            print()
+
+        if verbose:
+            print(f"Configuration loaded: {config.project_name} v{config.version}")
+            print(f"Output directory: {config.output.output_dir}")
+            print(f"Architectures: {config.model.architectures}")
+            print(f"Complexities: {config.model.complexities}")
+            print(f"Training epochs: {config.training.epochs}")
+            print(f"Dataset size: {config.dataset.dataset_size}")
+            print()
+
+        # Run pipeline
+        if train_only:
+            print("Running training only...")
+            results = run_training_only(config)
+            print(f"Training completed: {len(results)} models trained")
+        else:
+            print("Running complete pipeline...")
+            results = await run_full_pipeline(config)
+            print("Pipeline completed successfully!")
+
+        return 0
+
+    except Exception as e:
+        print(f"Error during training: {e}", file=sys.stderr)
+        if verbose:
+            import traceback
+            traceback.print_exc()
+        return 1
 
 
 async def run_plotting_command(
@@ -142,64 +225,13 @@ async def run_plotting_command(
         return 1
 
 
-def get_available_benchmarks():
-    """Get list of available benchmarks from the examples directory."""
-    examples_dir = Path(__file__).parent.parent / "examples"
-    if not examples_dir.exists():
-        return {}
-
-    benchmarks = {}
-    for file_path in examples_dir.glob("run_*.py"):
-        # Extract benchmark name from filename:
-        # run_basic_benchmark.py -> basic_benchmark
-        benchmark_name = file_path.name[4:-3]  # Remove "run_" prefix and ".py" suffix
-        benchmarks[benchmark_name] = str(file_path)
-
-    return benchmarks
-
-
-def get_benchmark_help(benchmark_name, benchmark_path):
-    """Get help text for a specific benchmark by running it with --help."""
-    try:
-        cmd = [sys.executable, benchmark_path, "--help"]
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-        return result.stdout
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-        return f"Help not available for {benchmark_name}"
-
-
-def run_benchmark(benchmark_name, benchmark_path, benchmark_args):
-    """Run the specified benchmark with given arguments."""
-    # Construct the command to run the benchmark
-    cmd = [sys.executable, benchmark_path] + benchmark_args
-
-    try:
-        # Run the benchmark script
-        result = subprocess.run(cmd, check=True)
-        return result.returncode
-    except subprocess.CalledProcessError as e:
-        print(f"Error running benchmark '{benchmark_name}': {e}", file=sys.stderr)
-        return e.returncode
-    except FileNotFoundError:
-        print(f"Error: Benchmark file not found: {benchmark_path}", file=sys.stderr)
-        return 1
-
-
 def main():
     """
     Main function for the phaze CLI.
     """
-    # Get available benchmarks and plot types
-    available_benchmarks = get_available_benchmarks()
+    # Get available plot types
     available_plot_types = get_available_plot_types()
     plot_categories = get_plot_categories()
-
-    # Format benchmark list for help text
-    if available_benchmarks:
-        benchmark_names = [f"  {name}" for name in available_benchmarks.keys()]
-        benchmark_list = chr(10).join(benchmark_names)
-    else:
-        benchmark_list = "  No benchmarks found"
 
     # Format plot types for help text
     if available_plot_types:
@@ -215,16 +247,16 @@ def main():
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"""
-Available benchmarks:
-{benchmark_list}
-
 Available plot types:
 {plot_type_list}
 
 Example usage:
-  # Run benchmarks
-  uv run phaze -b basic_benchmark --mode standard --quick
-  uv run phaze --benchmark risc_zero --mode standalone
+  # Run full pipeline (default)
+  uv run phaze                                            # Full pipeline in quick mode (default)
+  uv run phaze --train                                    # Full pipeline with default config
+  uv run phaze --config my_config.py                     # Full pipeline with custom config
+  uv run phaze --architectures simple,conv --epochs 1    # Full pipeline with specific models
+  uv run phaze --train-only                              # Training only, no benchmarking
 
   # Generate plots
   uv run phaze --plot fingerprint --output plots/fingerprint/
@@ -235,35 +267,58 @@ Example usage:
   uv run phaze --plot comparative --components fingerprint,zkml-proof
 
   # List available options
-  uv run phaze --list-benchmarks
   uv run phaze --list-plot-types
-  uv run phaze --help-benchmark basic_benchmark
+
+  # Legacy benchmarks (deprecated - use phaze-legacy instead)
+  uv run phaze-legacy basic_benchmark --mode standard --quick
+  uv run phaze-legacy risc_zero --mode standalone
 
 Default behavior (if no options specified):
-  uv run phaze  # Runs basic_benchmark with --mode all --output-dir plots/
+  uv run phaze  # Full pipeline in quick mode (fast training + benchmarking + plots)
         """,
     )
 
-    # Benchmark-related arguments
+    # Training-related arguments
     parser.add_argument(
-        "-b",
-        "--benchmark",
-        type=str,
-        choices=list(available_benchmarks.keys()),
-        help="Run a specific benchmark from the examples directory",
-    )
-
-    parser.add_argument(
-        "--list-benchmarks",
+        "--train",
         action="store_true",
-        help="List all available benchmarks and exit",
+        help="Run full training and benchmarking pipeline (not quick mode)",
     )
 
     parser.add_argument(
-        "--help-benchmark",
+        "--config",
         type=str,
-        choices=list(available_benchmarks.keys()),
-        help="Show help for a specific benchmark",
+        help="Path to configuration file (.py, .yml, or .yaml)",
+    )
+
+    parser.add_argument(
+        "--architectures",
+        type=str,
+        help="Comma-separated list of model architectures (e.g., 'simple,conv,transformer')",
+    )
+
+    parser.add_argument(
+        "--complexities",
+        type=str,
+        help="Comma-separated list of model complexities (e.g., 'minimal,light,medium')",
+    )
+
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        help="Number of training epochs (overrides config)",
+    )
+
+    parser.add_argument(
+        "--quick",
+        action="store_true",
+        help="Quick mode: reduced epochs, dataset size, and model variants for testing",
+    )
+
+    parser.add_argument(
+        "--train-only",
+        action="store_true",
+        help="Run training only (skip benchmarking and plotting)",
     )
 
     # Plotting-related arguments
@@ -343,17 +398,8 @@ Default behavior (if no options specified):
         "-v", "--verbose", action="store_true", help="Enable verbose output."
     )
 
-    # Parse known args to separate PHAZE args from benchmark args
-    args, benchmark_args = parser.parse_known_args()
-
-    if args.list_benchmarks:
-        print("Available benchmarks:")
-        if available_benchmarks:
-            for name, path in available_benchmarks.items():
-                print(f"  {name}: {path}")
-        else:
-            print("  No benchmarks found in examples directory")
-        return 0
+    # Parse arguments
+    args = parser.parse_args()
 
     if args.list_plot_types:
         print("Available plot types:")
@@ -365,23 +411,29 @@ Default behavior (if no options specified):
             print("  No plot types available")
         return 0
 
-    if args.help_benchmark:
-        if args.help_benchmark not in available_benchmarks:
-            print(
-                f"Error: Benchmark '{args.help_benchmark}' not found.",
-                file=sys.stderr,
-            )
-            return 1
-
-        benchmark_path = available_benchmarks[args.help_benchmark]
-        help_text = get_benchmark_help(args.help_benchmark, benchmark_path)
-        print(f"Help for benchmark '{args.help_benchmark}':")
-        print("=" * 50)
-        print(help_text)
-        return 0
-
     if args.verbose:
         print("Verbose mode enabled.")
+
+    # Handle training commands
+    if args.train or args.train_only:
+        if args.verbose:
+            print(f"Running training command: {'train-only' if args.train_only else 'full pipeline'}")
+
+        # Parse training-specific arguments
+        architectures = args.architectures.split(",") if args.architectures else None
+        complexities = args.complexities.split(",") if args.complexities else None
+
+        # Run training asynchronously
+        return asyncio.run(run_training_command(
+            config_file=args.config,
+            output_dir=args.output,
+            architectures=architectures,
+            complexities=complexities,
+            epochs=args.epochs,
+            quick=args.quick,
+            train_only=args.train_only,
+            verbose=args.verbose
+        ))
 
     # Handle plotting commands
     if args.plot:
@@ -405,47 +457,23 @@ Default behavior (if no options specified):
             verbose=args.verbose
         ))
 
-    # Handle benchmark execution
-    if args.benchmark:
-        if args.benchmark not in available_benchmarks:
-            print(f"Error: Benchmark '{args.benchmark}' not found.", file=sys.stderr)
-            print(
-                f"Available benchmarks: {', '.join(available_benchmarks.keys())}",
-                file=sys.stderr,
-            )
-            sys.exit(1)
-
-        benchmark_path = available_benchmarks[args.benchmark]
-        if args.verbose:
-            print(f"Running benchmark: {args.benchmark}")
-            if benchmark_args:
-                print(f"Benchmark arguments: {' '.join(benchmark_args)}")
-            print(f"Executing: {benchmark_path} {' '.join(benchmark_args)}")
-
-        return run_benchmark(args.benchmark, benchmark_path, benchmark_args)
-
-    # Default behavior: run basic_benchmark with default arguments
-    if "basic_benchmark" in available_benchmarks:
-        default_args = ["--mode", "all", "--output-dir", "plots/"]
-        if args.verbose:
-            print(
-                "No benchmark specified, running default: "
-                "basic_benchmark --mode all --output-dir plots/"
-            )
-            print(
-                f"Executing: {available_benchmarks['basic_benchmark']} "
-                f"{' '.join(default_args)}"
-            )
-
-        return run_benchmark(
-            "basic_benchmark",
-            available_benchmarks["basic_benchmark"],
-            default_args,
+    # Default behavior: run quick training pipeline
+    if args.verbose:
+        print(
+            "No command specified, running default: "
+            "full pipeline in quick mode (fast training + benchmarking + plots)"
         )
-    else:
-        print("Error: Default benchmark 'basic_benchmark' not found.", file=sys.stderr)
-        parser.print_help()
-        return 1
+
+    return asyncio.run(run_training_command(
+        config_file=None,
+        output_dir="benchmark_results",
+        architectures=None,
+        complexities=None,
+        epochs=None,
+        quick=True,  # Default to quick mode
+        train_only=False,
+        verbose=args.verbose
+    ))
 
 
 if __name__ == "__main__":
