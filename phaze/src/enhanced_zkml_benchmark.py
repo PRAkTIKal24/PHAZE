@@ -551,9 +551,6 @@ class RiscZeroBackendWrapper:
         # Setup the backend
         setup_result = self.backend.setup(params)
         self.is_setup = True
-        
-        # Add small delay to simulate setup time
-        await asyncio.sleep(0.1)
 
     async def generate_proof(self, sample_input: torch.Tensor):
         """Generate proof using the RISC Zero backend."""
@@ -562,13 +559,6 @@ class RiscZeroBackendWrapper:
         
         # Get model state dict as weights
         model_weights = self.model.state_dict()
-        
-        # Add small delay to simulate proof generation time
-        complexity_delays = {"minimal": 0.05, "light": 0.1, "medium": 0.2, "heavy": 0.5}
-        complexity = self.model_info.get("complexity", "medium")
-        base_complexity = complexity.split("_")[0]  # Handle early exit complexities
-        delay = complexity_delays.get(base_complexity, 0.2)
-        await asyncio.sleep(delay)
         
         # Generate proof using the Rust backend
         proof_dict = self.backend.prove(sample_input, model_weights)
@@ -583,9 +573,6 @@ class RiscZeroBackendWrapper:
         """Verify proof using the RISC Zero backend."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
-        
-        # Add small delay to simulate verification time
-        await asyncio.sleep(0.01)
         
         # Get expected outputs
         with torch.no_grad():
