@@ -23,9 +23,8 @@ from phaze import (
     create_simple_early_exit_model,
     create_simple_full_model,
 )
-from legacy.src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
-    run_phaze_benchmarks,
-)
+from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
+from legacy.src.phaze_benchmark_suite import PHAZEBenchmarkSuite
 
 
 class TestPHAZEIntegration:
@@ -173,7 +172,7 @@ class TestPHAZEIntegration:
     def test_comprehensive_benchmark_suite_setup(self):
         """Test comprehensive benchmark suite initialization."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            suite = ComprehensiveBenchmarkSuite(temp_dir)
+            suite = PHAZEBenchmarkSuite(temp_dir)
 
             assert suite.output_dir == Path(temp_dir)
             assert suite.output_dir.exists()

@@ -10,10 +10,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
-from legacy.src.phaze_benchmark_suite import (
-    ComprehensiveBenchmarkSuite,
-    CryptographicPrimitiveBenchmark,
-)
+from legacy.src.phaze_benchmark_suite import PHAZEBenchmarkSuite
+from phaze.src.zkml_framework_interface import CryptographicPrimitiveBenchmark
 from legacy.src.comprehensive_benchmark import (
     BenchmarkResult,
     CryptoBenchmarkResult,
@@ -124,13 +122,13 @@ class TestZKMLFrameworkBenchmark:
             assert result.input_size == 10
 
 
-class TestComprehensiveBenchmarkSuite:
-    """Test the comprehensive benchmark suite."""
+class TestPHAZEBenchmarkSuite:
+    """Test the phaze benchmark suite."""
 
     def setup_method(self):
         """Setup for each test method."""
         self.temp_dir = tempfile.mkdtemp()
-        self.suite = ComprehensiveBenchmarkSuite(self.temp_dir)
+        self.suite = PHAZEBenchmarkSuite(self.temp_dir)
 
     def teardown_method(self):
         """Cleanup after each test method."""
