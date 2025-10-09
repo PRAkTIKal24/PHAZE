@@ -102,7 +102,7 @@ Then begin installation either directly using the installation script or manuall
 
 # Verify installation and CLI
 uv run phaze --help
-uv run phaze --list-benchmarks
+uv run phaze-legacy --list-benchmarks
 ```
 
 Alternatively, you can manually install the `maturin` based rust backend and then added the required `.pth` file that the `dev_setup.py` file will take care for you. You might have to create the venv yourself using `uv venv` and source it to begin installation.
@@ -114,7 +114,7 @@ uv run python dev_setup.py
 
 # Verify installation and CLI
 uv run phaze --help
-uv run phaze --list-benchmarks
+uv run phaze-legacy --list-benchmarks
 ```
 
 > **Note**: PHAZE uses a mixed Python/Rust architecture. The additional setup step (`dev_setup.py`) is required to ensure the CLI works correctly with editable installs.
