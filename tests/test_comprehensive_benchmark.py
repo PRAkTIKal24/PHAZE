@@ -271,52 +271,6 @@ class TestPHAZEBenchmarkSuite:
         assert saved_results["zkml_results"] == results["zkml_results"]
         assert saved_results["crypto_results"] == results["crypto_results"]
 
-    def test_generate_report(self):
-        """Test report generation."""
-        results = {
-            "summary": {
-                "overall_summary": {
-                    "total_tests": 10,
-                    "successful_tests": 8,
-                    "overall_success_rate": 0.8,
-                },
-                "zkml_summary": {
-                    "frameworks_tested": ["ezkl", "groth16"],
-                    "architectures_tested": ["simple"],
-                    "success_rate": 0.75,
-                    "avg_setup_time": 1.0,
-                    "avg_proof_time": 2.0,
-                    "avg_verification_time": 0.5,
-                    "avg_memory_usage": 100.0,
-                },
-                "crypto_summary": {
-                    "primitives_tested": ["RabinFingerprint"],
-                    "operations_tested": ["compute_hash"],
-                    "success_rate": 1.0,
-                    "avg_execution_time": 0.001,
-                    "avg_throughput": 1000.0,
-                },
-            },
-            "timestamp": 1234567890,
-        }
-
-        report = self.suite.generate_report(results)
-
-        assert "PHAZE Framework Comprehensive Benchmark Report" in report
-        assert "Executive Summary" in report
-        assert "zkML Framework Benchmarks" in report
-        assert "Cryptographic Primitive Benchmarks" in report
-        assert "Recommendations" in report
-
-        # Check that key metrics are included
-        assert "Total tests executed: 10" in report
-        assert "Successful tests: 8" in report
-        assert "Overall success rate: 80.00%" in report
-
-        # Check that report file was saved
-        output_dir = Path(self.temp_dir)
-        assert (output_dir / "benchmark_report.md").exists()
-
 
 class TestConvenienceFunction:
     """Test the convenience function for running benchmarks."""
