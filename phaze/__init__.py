@@ -5,16 +5,6 @@ with Zero-knowledge proofs and Early-exit models
 A framework for cryptographic and ZKML-based low latency inference at LHC.
 """
 
-from .src.benchmarking import (
-    run_early_exit_benchmark,
-    run_full_pipeline_benchmark,
-    run_hashing_benchmark,
-    run_zkml_benchmark,
-)
-from .src.comprehensive_benchmark import (
-    ComprehensiveBenchmarkSuite,
-    run_phaze_benchmarks,
-)
 from .src.crypto_primitives import RabinFingerprint
 from .src.early_exit_models import SimpleEarlyExitModel as LegacySimpleEarlyExitModel
 from .src.model_architectures import (
@@ -26,11 +16,6 @@ from .src.model_architectures import (
     TransformerEarlyExitModel,
     create_simple_early_exit_model,
     create_simple_full_model,
-)
-from .src.phaze_benchmark_suite import (
-    PHAZEBenchmarkConfig,
-    PHAZEBenchmarkResults,
-    PHAZEBenchmarkSuite,
 )
 from .src.plotter_registry import register_all_plotters
 
@@ -89,14 +74,6 @@ __all__ = [
     "RustZKMLBackend",
     # zkML integration
     "ZKMLProverVerifier",
-    # Legacy benchmarking
-    "run_early_exit_benchmark",
-    "run_hashing_benchmark",
-    "run_zkml_benchmark",
-    "run_full_pipeline_benchmark",
-    # Comprehensive benchmarking
-    "ComprehensiveBenchmarkSuite",
-    "run_phaze_benchmarks",
     # Model architectures
     "PHAZEModelFactory",
     "ModelComplexity",
@@ -121,10 +98,6 @@ __all__ = [
     "RiscZeroBackend",
     "StarkBackend",
     "create_backend",
-    # Comprehensive benchmarking
-    "PHAZEBenchmarkConfig",
-    "PHAZEBenchmarkResults",
-    "PHAZEBenchmarkSuite",
     # Plotting system
     "PHAZEPlotSuite",
     "PlotConfig",
