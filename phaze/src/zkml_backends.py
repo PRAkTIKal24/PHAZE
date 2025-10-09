@@ -292,20 +292,75 @@ class PlonkyBackend(MockZKMLBackend):
         }
 
 
-class RiscZeroBackend(MockZKMLBackend):
-    """RISC Zero framework backend (placeholder implementation)."""
+class RiscZeroBackend(ZKMLBackendInterface):
+    """RISC Zero framework backend implementation using Rust backend."""
 
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.RISC_ZERO, model, name)
+        from .rust_zkml_backend import RustRiscZeroBackend
+        self.rust_backend = RustRiscZeroBackend()
+
+    async def setup(self, input_data: torch.Tensor, **kwargs) -> None:
+        """Setup the RISC Zero system."""
+        # Extract model parameters for setup
+        params = {
+            "model_type": "neural_network",
+            "input_size": str(input_data.numel()),
+            "output_size": str(list(self.model.parameters())[-1].shape[0] if list(self.model.parameters()) else "10"),
+        }
+        
+        # Setup the Rust backend
+        setup_result = self.rust_backend.setup(params)
+        self.is_setup = True
+
+    async def generate_proof(
+        self, input_data: torch.Tensor, **kwargs
+    ) -> Tuple[Any, Any]:
+        """Generate a zero-knowledge proof using RISC Zero."""
+        if not self.is_setup:
+            raise RuntimeError("Backend not setup. Call setup() first.")
+
+        # Get model weights
+        model_weights = self.model.state_dict()
+        
+        # Generate proof using Rust backend
+        proof_dict = self.rust_backend.prove(input_data, model_weights)
+        
+        # Run model to get output
+        with torch.no_grad():
+            output = self.model(input_data)
+
+        return proof_dict, output.numpy().tolist()
+
+    async def verify_proof(
+        self, proof: Any, input_data: torch.Tensor, **kwargs
+    ) -> bool:
+        """Verify a zero-knowledge proof using RISC Zero."""
+        if not self.is_setup:
+            raise RuntimeError("Backend not setup. Call setup() first.")
+
+        # Get expected outputs
+        with torch.no_grad():
+            expected_outputs = self.model(input_data)
+        
+        # Verify using Rust backend
+        return self.rust_backend.verify(proof, expected_outputs)
+
+    def cleanup(self) -> None:
+        """Clean up RISC Zero backend resources."""
+        # The Rust backend handles its own cleanup
+        pass
 
     def get_framework_info(self) -> Dict[str, Any]:
         """Get RISC Zero framework information."""
+        config = self.rust_backend.get_config()
         return {
             "framework": "RISC Zero",
-            "version": "placeholder_v1.0",
+            "version": "1.0.0",
             "backend": "RISC-V zkVM",
             "proof_system": "STARK",
-            "status": "placeholder_implementation",
+            "status": "active",
+            "config": config,
         }
 
 

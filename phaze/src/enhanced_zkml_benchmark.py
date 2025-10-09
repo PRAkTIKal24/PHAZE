@@ -332,21 +332,24 @@ class EnhancedZKMLBenchmark:
     async def _create_risc_zero_system(
         self, model: nn.Module, model_info: Dict[str, Any]
     ):
-        """Create risc-zero zkML system (placeholder implementation)."""
-        # This would be implemented when risc-zero integration is available
-        logger.warning("risc-zero integration not yet implemented, using mock")
-        return MockRiscZeroSystem(model, model_info)
+        """Create risc-zero zkML system using Rust backend."""
+        from .rust_zkml_backend import RustRiscZeroBackend
+        
+        # Create the actual RISC Zero backend
+        risc_zero_system = RiscZeroBackendWrapper(model, model_info)
+        logger.info("Using actual RISC Zero backend implementation")
+        return risc_zero_system
 
     async def _setup_risc_zero(self, system, sample_input: torch.Tensor):
-        """Setup risc-zero system (placeholder)."""
+        """Setup risc-zero system."""
         await system.setup(sample_input)
 
     async def _generate_risc_zero_proof(self, system, sample_input: torch.Tensor):
-        """Generate proof with risc-zero (placeholder)."""
+        """Generate proof with risc-zero."""
         return await system.generate_proof(sample_input)
 
     async def _verify_risc_zero_proof(self, system, proof, sample_input: torch.Tensor):
-        """Verify proof with risc-zero (placeholder)."""
+        """Verify proof with risc-zero."""
         return await system.verify_proof(proof, sample_input)
 
     async def benchmark_multiple_models(
@@ -525,50 +528,71 @@ class EnhancedZKMLBenchmark:
         return str(results_file)
 
 
-class MockRiscZeroSystem:
-    """Mock risc-zero system for testing when actual integration is not available."""
+class RiscZeroBackendWrapper:
+    """Wrapper for the Rust RISC Zero backend to work with the benchmark system."""
 
     def __init__(self, model: nn.Module, model_info: Dict[str, Any]):
         self.model = model
         self.model_info = model_info
+        from .rust_zkml_backend import RustRiscZeroBackend
+        self.backend = RustRiscZeroBackend()
+        self.is_setup = False
 
     async def setup(self, sample_input: torch.Tensor):
-        """Mock setup - just add some delay."""
-        await asyncio.sleep(0.1)  # Simulate setup time
+        """Setup the RISC Zero backend with model parameters."""
+        # Extract model parameters
+        params = {
+            "model_type": self.model_info.get("architecture", "simple"),
+            "input_size": str(sample_input.numel()),
+            "output_size": str(self.model_info.get("output_size", 10)),
+            "complexity": self.model_info.get("complexity", "minimal"),
+        }
+        
+        # Setup the backend
+        setup_result = self.backend.setup(params)
+        self.is_setup = True
+        
+        # Add small delay to simulate setup time
+        await asyncio.sleep(0.1)
 
     async def generate_proof(self, sample_input: torch.Tensor):
-        """Mock proof generation."""
-        # Simulate proof generation time based on model complexity
+        """Generate proof using the RISC Zero backend."""
+        if not self.is_setup:
+            raise RuntimeError("Backend not setup. Call setup() first.")
+        
+        # Get model state dict as weights
+        model_weights = self.model.state_dict()
+        
+        # Add small delay to simulate proof generation time
         complexity_delays = {"minimal": 0.05, "light": 0.1, "medium": 0.2, "heavy": 0.5}
-
         complexity = self.model_info.get("complexity", "medium")
         base_complexity = complexity.split("_")[0]  # Handle early exit complexities
         delay = complexity_delays.get(base_complexity, 0.2)
-
         await asyncio.sleep(delay)
-
-        # Mock proof with the model
+        
+        # Generate proof using the Rust backend
+        proof_dict = self.backend.prove(sample_input, model_weights)
+        
+        # Run actual model to get expected output for comparison
         with torch.no_grad():
             output = self.model(sample_input)
-
-        mock_proof = {
-            "proof": f"mock_risc_zero_proof_{hash(str(output.tolist()))}",
-            "public_outputs": output.flatten().tolist()[:3],
-            "framework": "risc_zero",
-        }
-
-        return mock_proof, output.numpy().tolist()
+        
+        return proof_dict, output.numpy().tolist()
 
     async def verify_proof(self, proof, sample_input: torch.Tensor):
-        """Mock proof verification."""
-        await asyncio.sleep(0.01)  # Verification is typically faster
-
-        # Mock verification - check if proof looks valid
-        return (
-            isinstance(proof, dict)
-            and "proof" in proof
-            and "risc_zero" in proof.get("framework", "")
-        )
+        """Verify proof using the RISC Zero backend."""
+        if not self.is_setup:
+            raise RuntimeError("Backend not setup. Call setup() first.")
+        
+        # Add small delay to simulate verification time
+        await asyncio.sleep(0.01)
+        
+        # Get expected outputs
+        with torch.no_grad():
+            expected_outputs = self.model(sample_input)
+        
+        # Verify using the Rust backend
+        return self.backend.verify(proof, expected_outputs)
 
 
 # Convenience functions
