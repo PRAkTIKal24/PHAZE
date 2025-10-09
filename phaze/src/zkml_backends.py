@@ -115,7 +115,7 @@ class EZKLBackend(ZKMLBackendInterface):
         # Get the model output from the witness
         with open(self.witness_path, "r") as f:
             witness = json.load(f)
-        output = witness["output_data"]
+        output = witness["outputs"]
 
         return proof, output
 
@@ -135,7 +135,7 @@ class EZKLBackend(ZKMLBackendInterface):
 
         # Verify proof
         verified = ezkl.verify(
-            proof, self.settings_path, self.vk_path, srs_path=self.srs_path
+            self.proof_path, self.settings_path, self.vk_path, srs_path=self.srs_path
         )
 
         return verified

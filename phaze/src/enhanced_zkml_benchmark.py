@@ -155,7 +155,7 @@ class EnhancedZKMLBenchmark:
 
             try:
                 if framework == "ezkl":
-                    await zkml_system._async_setup(sample_input)
+                    await zkml_system.async_setup(sample_input)
                 else:
                     await self._setup_risc_zero(zkml_system, sample_input)
 
