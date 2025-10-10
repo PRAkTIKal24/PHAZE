@@ -198,9 +198,12 @@ class EnhancedZKMLBenchmark:
         }
 
         try:
-            # Create sample input
+            # Create sample input and ensure device consistency
             sample_input = self.create_sample_input(model_info)
             sample_input = sample_input.to(self.device)
+            
+            # Ensure model is on the same device as input
+            model = model.to(self.device)
 
             # Initialize zkML system
             if framework == "ezkl":
@@ -210,7 +213,13 @@ class EnhancedZKMLBenchmark:
             else:
                 raise ValueError(f"Unknown framework: {framework}")
 
-            # Benchmark setup phase\n            setup_start_time = time.time()\n            memory_profiler = MemoryProfiler()\n            # Pass device info to memory profiler\n            if hasattr(self, 'device_type'):\n                memory_profiler.device_type = self.device_type\n            memory_profiler.start_monitoring()
+            # Benchmark setup phase
+            setup_start_time = time.time()
+            memory_profiler = MemoryProfiler()
+            # Pass device info to memory profiler
+            if hasattr(self, 'device_type'):
+                memory_profiler.device_type = self.device_type
+            memory_profiler.start_monitoring()
 
             try:
                 if framework == "ezkl":
@@ -230,6 +239,9 @@ class EnhancedZKMLBenchmark:
             except Exception as e:
                 logger.error(f"  Setup failed: {e}")
                 result["error_message"] = f"Setup failed: {str(e)}"
+                # Make sure to stop memory profiler even on error
+                if 'memory_profiler' in locals():
+                    memory_profiler.stop_monitoring()
                 return result
 
             # Benchmark proof generation
@@ -615,6 +627,11 @@ class RiscZeroBackendWrapper:
 
     async def setup(self, sample_input: torch.Tensor):
         """Setup the RISC Zero backend with model parameters."""
+        # Ensure model and input are on CPU for RISC Zero processing
+        # (RISC Zero backend currently works with CPU tensors)
+        self.model = self.model.cpu()
+        sample_input = sample_input.cpu()
+        
         # Extract model parameters
         params = {
             "model_type": self.model_info.get("architecture", "simple"),
@@ -632,6 +649,10 @@ class RiscZeroBackendWrapper:
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
         
+        # Ensure tensors are on CPU for RISC Zero processing
+        sample_input = sample_input.cpu()
+        self.model = self.model.cpu()
+        
         # Get model state dict as weights
         model_weights = self.model.state_dict()
         
@@ -648,6 +669,10 @@ class RiscZeroBackendWrapper:
         """Verify proof using the RISC Zero backend."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
+        
+        # Ensure tensors are on CPU for RISC Zero processing
+        sample_input = sample_input.cpu()
+        self.model = self.model.cpu()
         
         # Get expected outputs
         with torch.no_grad():
