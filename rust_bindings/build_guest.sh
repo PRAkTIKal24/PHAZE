@@ -9,8 +9,12 @@ echo "🔨 Building RISC Zero guest program..."
 
 # Verify prerequisites
 if ! command -v cargo-risczero &> /dev/null; then
-    echo "❌ cargo-risczero not found. Please run ../setup_risc_zero.sh first"
-    exit 1
+    echo "❌ cargo-risczero not found. Installing via rzup..."
+    if ! command -v rzup &> /dev/null; then
+        echo "❌ rzup not found. Please run ../setup_risc_zero.sh first"
+        exit 1
+    fi
+    rzup install cargo-risczero
 fi
 
 if ! command -v rzup &> /dev/null; then
@@ -19,6 +23,10 @@ if ! command -v rzup &> /dev/null; then
 fi
 
 echo "✅ RISC Zero toolchain detected"
+
+# Ensure we have the Rust toolchain
+echo "🦀 Installing RISC Zero Rust toolchain..."
+rzup install rust || echo "⚠️  Rust toolchain installation may have issues, continuing..."
 
 # Navigate to guest directory
 cd "$(dirname "$0")/risc0_guest"
@@ -38,3 +46,7 @@ else
     echo "❌ ELF file not found!"
     exit 1
 fi
+
+echo ""
+echo "🎉 RISC Zero guest program build complete!"
+echo "💡 You can now run PHAZE with full RISC Zero support"

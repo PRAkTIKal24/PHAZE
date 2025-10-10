@@ -20,8 +20,8 @@ num-traits = "0.2"
 bincode = "1.3"
 chrono = "0.4"
 
-# RISC Zero dependencies - temporarily comment out to build core functionality first
-# risc0-zkvm = { version = "3.0.3", features = ["prove"] }
+# RISC Zero dependencies - now enabled for full implementation
+risc0-zkvm = { version = "3.0.3", features = ["prove"] }
 
 [build-dependencies]
 pyo3-build-config = "0.20"

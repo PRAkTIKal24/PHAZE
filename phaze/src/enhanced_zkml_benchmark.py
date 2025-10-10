@@ -447,7 +447,12 @@ class EnhancedZKMLBenchmark:
         is_real = RustZKMLBackend.is_using_real_bindings()
         
         if is_real:
-            logger.info(f"✅ Using REAL RISC Zero backend implementation: {binding_info}")
+            risc_zero_status = binding_info.get("risc_zero_status", "unknown")
+            if risc_zero_status == "enabled":
+                logger.info(f"🚀 Using FULL RISC Zero implementation: {binding_info}")
+            else:
+                logger.info(f"✅ Using REAL RISC Zero backend: {binding_info}")
+                logger.info("ℹ️  Note: RISC Zero proof generation requires guest program to be built")
         else:
             logger.warning(f"⚠️  Using MOCK RISC Zero backend implementation: {binding_info}")
         

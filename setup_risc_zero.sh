@@ -21,6 +21,7 @@ fi
 echo "📦 Installing RISC Zero components..."
 rzup install cargo-risczero
 rzup install r0vm
+rzup install rust
 
 # Verify installation
 echo "🔍 Verifying installation..."
@@ -38,5 +39,6 @@ fi
 echo "🎉 RISC Zero setup complete!"
 echo ""
 echo "Next steps:"
-echo "1. Build the guest program: ./build_guest.sh"
-echo "2. Run tests: python -m pytest tests/test_risc_zero_*.py -v"
+echo "1. Build the Rust bindings: python build_rust_bindings.py"
+echo "2. Build the guest program: cd rust_bindings && ./build_guest.sh"
+echo "3. Run tests: uv run phaze"
