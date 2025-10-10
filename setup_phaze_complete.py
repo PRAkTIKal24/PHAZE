@@ -232,7 +232,7 @@ def build_rust_bindings():
             )
             maturin_cmd = ["uv", "run", "maturin"]
             print("✅ Using uv run maturin")
-        except:
+        except Exception:
             # Fallback to direct maturin
             if check_command_exists("maturin"):
                 maturin_cmd = ["maturin"]
