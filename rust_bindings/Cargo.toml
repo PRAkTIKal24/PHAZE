@@ -19,8 +19,7 @@ num-bigint = "0.4"
 num-traits = "0.2"
 bincode = "1.3"
 
-# For now, commented out until we're ready to integrate
-risc0-zkvm = { version = "0.20.1", features = ["prove"] }
+risc0-zkvm = { version = "3.0.3", features = ["prove"] }
 
 [build-dependencies]
 pyo3-build-config = "0.20"
