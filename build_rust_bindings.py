@@ -27,7 +27,7 @@ def check_rust_installation():
     try:
         result = run_command(["cargo", "--version"], check=False)
         if result.returncode == 0:
-            print(f"✅ Rust/Cargo found: {result.stdout.strip()}")
+            print(f"✅ Rust/Cargo found")
             return True
         else:
             return False
