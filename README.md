@@ -6,7 +6,22 @@
 [![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
-PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledge machine learning (zkML) systems with support for early-exit models and privacy-preserving inference at the Large Hadron Collider (LHC). The framework provides tools for comparing different zkML frameworks, cryptographic primitives, and model architectures with a focus on low-latency ML inference for high energy physics applications.
+PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledge machine learning (zkML) systems with support for early-exit models and privacy-preserving inference at the Large Hadron Collider (LHC).
+
+## 🚀 Quick Install
+
+```bash
+git clone https://github.com/PRAkTIKal24/PHAZE.git && cd PHAZE
+python setup_phaze_complete.py --development  # Full setup with RISC Zero
+uv run phaze --help  # Verify installation
+```
+
+> **Note**: The above setup is recommended since it sets up the correct rust-python bindings required for PHAZE, but if you are sure you dont want to use RISC-Zero, a quicker way to install would be:
+
+```bash
+python setup_phaze_complete.py --development --skip-risc-zero  # Quick setup
+uv run phaze --help  # Verify installation
+```
 
 ## 📋 Table of Contents
 
@@ -83,60 +98,32 @@ PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledg
 
 **Prerequisites**: Python 3.10+, [uv](https://docs.astral.sh/uv/) package manager
 
-First check for uv and install it if it doesn't exist. Alternative: see [uv docs](https://docs.astral.sh/uv/getting-started/installation/) to install uv.
-
 ```bash
-# Install uv package manager (if not already installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Clone the repository
+# Clone and install
 git clone https://github.com/PRAkTIKal24/PHAZE.git
 cd PHAZE
-```
 
-Then begin installation either directly using the installation script or manually:
+# Option 1: Complete setup with RISC Zero (recommended)
+python setup_phaze_complete.py --development
 
-```bash
-# Option 1: Automated installation (recommended)
+# Option 2: Quick setup without RISC Zero (faster)
+python setup_phaze_complete.py --development --skip-risc-zero
+
+# Option 3: Legacy installation
 ./install_dev.sh
 
-# Verify installation and CLI
+# Verify installation
 uv run phaze --help
-uv run phaze-legacy --list-benchmarks
 ```
-
-Alternatively, you can manually install the `maturin` based rust backend and then added the required `.pth` file that the `dev_setup.py` file will take care for you. You might have to create the venv yourself using `uv venv` and source it to begin installation.
-
-```bash
-# Option 2: Manual installation
-uv pip install -e .
-uv run python dev_setup.py
-
-# Verify installation and CLI
-uv run phaze --help
-uv run phaze-legacy --list-benchmarks
-```
-
-> **Note**: PHAZE uses a mixed Python/Rust architecture. The additional setup step (`dev_setup.py`) is required to ensure the CLI works correctly with editable installs.
 
 ### Development Installation
 
 ```bash
-# Install uv if not already available
-curl -LsSf https://astral.sh/uv/install.sh | sh
-# Alternative: pip install uv
-
-# Install with all development dependencies
+# Full development environment
 uv sync --group dev --group test
-
-# Setup editable install (required for CLI)
 uv run python dev_setup.py
 
-# Verify installation and CLI
-uv run phaze --help
-uv run phaze --list-benchmarks
-
-# Run tests
+# Test installation
 uv run pytest
 ```
 
@@ -735,167 +722,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation**: Comprehensive API docs in source code
 - **Examples**: Check the `legacy/examples/` directory for legacy usage patterns
 
----
+## 📚 Additional Examples
 
-## 📚 Legacy Usage Examples
-
-> **⚠️ Note**: The examples below use the legacy benchmark system. For new projects, use the modern training pipeline with `uv run phaze` as shown in the main usage section above.
-
-### Direct Python Examples
-
-**Legacy Benchmark Scripts**
-```bash
-# Use the dedicated legacy CLI (recommended)
-uv run phaze-legacy basic_benchmark --mode standard --quick
-
-# Run RISC Zero specific benchmarks (legacy)
-uv run phaze-legacy risc_zero --mode standalone
-
-# Run comprehensive benchmarks (legacy - all frameworks)
-uv run phaze-legacy basic_benchmark --mode all
-
-# List available legacy benchmarks
-uv run phaze-legacy --list-benchmarks
-```
-
-**Using the Legacy Python API**
-```python
-import asyncio
-from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
-
-async def main():
-    # Run comprehensive benchmarks (legacy)
-    results = await run_phaze_benchmarks(
-        output_dir="./benchmark_results",
-        quick_mode=True  # For demonstration
-    )
-    
-    # Print summary
-    summary = results["results"]["summary"]
-    print(f"Success rate: {summary['overall_summary']['overall_success_rate']:.1%}")
-    print(f"Frameworks tested: {summary['zkml_summary']['frameworks_tested']}")
-
-asyncio.run(main())
-```
-
-### Model Creation and Testing
-
-```python
-from phaze import PHAZEModelFactory, ModelComplexity
-import torch
-
-# Create different model architectures
-simple_model = PHAZEModelFactory.create_early_exit_model(
-    architecture="simple",
-    complexity=ModelComplexity.LIGHT,
-    input_size=128,
-    output_size=10
-)
-
-conv_model = PHAZEModelFactory.create_early_exit_model(
-    architecture="conv",
-    complexity=ModelComplexity.MEDIUM,
-    input_size=32*32*3,  # CIFAR-10 sized input
-    output_size=10
-)
-
-multi_exit_model = PHAZEModelFactory.create_early_exit_model(
-    architecture="multi_exit",
-    complexity=ModelComplexity.HEAVY,
-    input_size=256,
-    output_size=100
-)
-
-# Test inference
-input_data = torch.randn(1, 128)
-output = simple_model(input_data)
-confidence = simple_model.get_confidence(input_data)
-
-print(f"Output shape: {output.shape}")
-print(f"Confidence: {confidence.item():.3f}")
-```
-
-### Zero-Knowledge ML Integration
-
-```python
-import asyncio
-from phaze import create_backend, ZKMLFramework
-from phaze.src.model_architectures import PHAZEModelFactory
-import torch
-
-async def zkml_example():
-    # Create a model
-    model = PHAZEModelFactory.create_early_exit_model("simple", "light")
-    
-    # Create zkML backend (EZKL, RISC Zero, etc.)
-    backend = create_backend(ZKMLFramework.EZKL, model, "test_circuit")
-    
-    # Prepare input
-    input_data = torch.randn(1, 10)
-    
-    # Setup (compile model, generate circuits)
-    await backend.setup(input_data)
-    
-    # Generate proof
-    proof, output = await backend.generate_proof(input_data)
-    
-    # Verify proof
-    is_valid = await backend.verify_proof(proof, input_data)
-    
-    print(f"Proof generated: {len(proof)} bytes")
-    print(f"Verification: {'✅ Valid' if is_valid else '❌ Invalid'}")
-
-asyncio.run(zkml_example())
-```
-
-### Cryptographic Primitives
-
-```python
-from phaze import RabinFingerprint, ShamirSecretSharing
-
-# Rabin Fingerprinting for data integrity
-rabin = RabinFingerprint(field_size=2**31 - 1, degree=5)
-data = [1, 2, 3, 4, 5]
-hash_value = rabin.compute_hash(data)
-print(f"Rabin hash: {hash_value}")
-
-# Shamir Secret Sharing
-sss = ShamirSecretSharing(threshold=3, num_shares=5, field_size=2**31 - 1)
-secret_data = b"my_secret_key_data"
-
-# Generate shares
-shares = sss.generate_shares(secret_data)
-print(f"Generated {len(shares)} shares")
-
-# Reconstruct from subset
-reconstructed = sss.reconstruct_secret(shares[:3])  # Use any 3 shares
-print(f"Reconstruction: {'✅ Success' if reconstructed == secret_data else '❌ Failed'}")
-```
-
-### Custom Benchmarking
-
-```python
-from legacy.src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
-
-# Create legacy benchmark suite
-suite = ComprehensiveBenchmarkSuite("./my_benchmarks")
-
-# Configure test parameters
-config = {
-    "architectures": ["simple", "conv", "multi_exit"],
-    "complexities": ["light", "medium", "heavy"], 
-    "input_sizes": [10, 50, 100, 500],
-    "frameworks": ["ezkl", "risc_zero", "groth16"],
-    "num_trials": 3
-}
-
-# Run benchmarks
-results = await suite.run_full_benchmark_suite(config)
-
-# Generate report
-report = suite.generate_report(results)
-print(report)
-```
+For more examples and legacy usage patterns, see the [examples directory](legacy/examples/) and API documentation.
 
 ---
 
