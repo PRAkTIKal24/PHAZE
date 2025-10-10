@@ -400,11 +400,19 @@ class EnhancedZKMLBenchmark:
         self, model: nn.Module, model_info: Dict[str, Any]
     ):
         """Create risc-zero zkML system using Rust backend."""
-        from .rust_zkml_backend import RustRiscZeroBackend
+        from .rust_zkml_backend import RustRiscZeroBackend, RustZKMLBackend
+        
+        # Check if we're using real bindings
+        binding_info = RustZKMLBackend.get_binding_info()
+        is_real = RustZKMLBackend.is_using_real_bindings()
+        
+        if is_real:
+            logger.info(f"✅ Using REAL RISC Zero backend implementation: {binding_info}")
+        else:
+            logger.warning(f"⚠️  Using MOCK RISC Zero backend implementation: {binding_info}")
         
         # Create the RISC Zero backend
         risc_zero_system = RiscZeroBackendWrapper(model, model_info)
-        logger.info("Using RISC Zero backend implementation")
         return risc_zero_system
 
     async def _setup_risc_zero(self, system, sample_input: torch.Tensor):
