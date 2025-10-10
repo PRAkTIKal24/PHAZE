@@ -25,6 +25,3 @@ risc0-zkvm = { version = "3.0.3", features = ["prove"] }
 
 [build-dependencies]
 pyo3-build-config = "0.20"
-
-[build-dependencies]
-pyo3-build-config = "0.20"
