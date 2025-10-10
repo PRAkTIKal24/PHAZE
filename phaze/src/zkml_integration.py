@@ -180,7 +180,9 @@ class ZKMLProverVerifier:
     async def generate_proof(self, input_data: torch.Tensor):
         """Generates a zero-knowledge proof for the model inference."""
         if not EZKL_AVAILABLE:
-            # Mock proof for testing
+            # Mock proof for testing - ensure model and input are on CPU
+            input_data = input_data.cpu()
+            self.model = self.model.cpu()
             with torch.no_grad():
                 output = self.model(input_data)
             mock_proof = {
@@ -190,9 +192,10 @@ class ZKMLProverVerifier:
                 ],  # First 3 outputs as public
                 "transcript_type": "EVM",
             }
-            return mock_proof, output.numpy().tolist()
+            return mock_proof, output.cpu().numpy().tolist()
 
-        # Prepare input data for ezkl
+        # Prepare input data for ezkl - ensure on CPU
+        input_data = input_data.cpu()
         input_array = (input_data.detach().numpy() * 2**15).astype(np.int64)
         data = dict(input_data=[input_array.flatten().tolist()])
         with open(self.input_json_path, "w") as f:
@@ -225,7 +228,8 @@ class ZKMLProverVerifier:
             # Mock verification
             return isinstance(proof, dict) and "proof" in proof
 
-        # Prepare input data for ezkl (same as generate_proof)
+        # Prepare input data for ezkl (same as generate_proof) - ensure on CPU
+        input_data = input_data.cpu()
         input_array = (input_data.detach().numpy() * 2**15).astype(np.int64)
         data = dict(input_data=[input_array.flatten().tolist()])
         with open(self.input_json_path, "w") as f:

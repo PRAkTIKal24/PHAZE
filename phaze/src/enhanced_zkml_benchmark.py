@@ -212,6 +212,8 @@ class EnhancedZKMLBenchmark:
                 sample_input_for_zkml = sample_input.cpu()
                 zkml_system = ZKMLProverVerifier(model_for_zkml, framework)
             elif framework == "risc_zero":
+                # For RISC Zero, we handle device placement in the wrapper
+                sample_input_for_zkml = sample_input  # Will be handled in wrapper
                 zkml_system = await self._create_risc_zero_system(model, model_info)
             else:
                 raise ValueError(f"Unknown framework: {framework}")
@@ -258,11 +260,19 @@ class EnhancedZKMLBenchmark:
                 proof_start_time = time.time()
 
                 try:
+                    # Add timeout to prevent hanging
+                    timeout_seconds = 300  # 5 minutes timeout
+                    
                     if framework == "ezkl":
-                        proof, output = await zkml_system.generate_proof(sample_input_for_zkml)
+                        # Use asyncio.wait_for to add timeout
+                        proof, output = await asyncio.wait_for(
+                            zkml_system.generate_proof(sample_input_for_zkml),
+                            timeout=timeout_seconds
+                        )
                     else:
-                        proof, output = await self._generate_risc_zero_proof(
-                            zkml_system, sample_input
+                        proof, output = await asyncio.wait_for(
+                            self._generate_risc_zero_proof(zkml_system, sample_input),
+                            timeout=timeout_seconds
                         )
 
                     memory_profiler.update_peak()
@@ -280,6 +290,13 @@ class EnhancedZKMLBenchmark:
                             proof_str = json.dumps(proof)
                             result["proof_size_bytes"] = len(proof_str.encode("utf-8"))
 
+                except asyncio.TimeoutError:
+                    logger.error(f"  Proof generation {i + 1} timed out after {timeout_seconds}s")
+                    if i == 0:  # If first proof fails, stop benchmarking
+                        result["error_message"] = f"Proof generation timed out"
+                        return result
+                    # Otherwise continue with successful proofs
+                    continue
                 except Exception as e:
                     logger.error(f"  Proof generation {i + 1} failed: {e}")
                     if i == 0:  # If first proof fails, stop benchmarking
@@ -323,13 +340,18 @@ class EnhancedZKMLBenchmark:
                 verification_start_time = time.time()
 
                 try:
+                    # Add timeout to prevent hanging
+                    timeout_seconds = 60  # 1 minute timeout for verification
+                    
                     if framework == "ezkl":
-                        verified = await zkml_system.verify_proof(
-                            stored_proof, sample_input_for_zkml
+                        verified = await asyncio.wait_for(
+                            zkml_system.verify_proof(stored_proof, sample_input_for_zkml),
+                            timeout=timeout_seconds
                         )
                     else:
-                        verified = await self._verify_risc_zero_proof(
-                            zkml_system, stored_proof, sample_input
+                        verified = await asyncio.wait_for(
+                            self._verify_risc_zero_proof(zkml_system, stored_proof, sample_input),
+                            timeout=timeout_seconds
                         )
 
                     memory_profiler.update_peak()
@@ -342,6 +364,9 @@ class EnhancedZKMLBenchmark:
                     if not verified and i == 0:
                         logger.warning(f"  Proof verification failed for {model_id}")
 
+                except asyncio.TimeoutError:
+                    logger.error(f"  Verification {i + 1} timed out after {timeout_seconds}s")
+                    continue
                 except Exception as e:
                     logger.error(f"  Verification {i + 1} failed: {e}")
                     continue
