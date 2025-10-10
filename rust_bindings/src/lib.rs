@@ -942,34 +942,6 @@ impl ZKMLBackend for RiscZeroBackend {
         }
     }
 }
-    
-    fn verify(&self, proof_data: &[u8], public_outputs: &[u8]) -> Result<bool, String> {
-        if !self.is_setup {
-            return Err("Setup not completed".to_string());
-        }
-        
-        // Deserialize the proof
-        let proof: ZKMLProof = match serde_json::from_slice(proof_data) {
-            Ok(p) => p,
-            Err(e) => return Err(format!("Failed to deserialize proof: {}", e)),
-        };
-        
-        // Check framework
-        if proof.framework != "RISC0" {
-            return Ok(false);
-        }
-        
-        // Decode the receipt from the hex-encoded proof data
-        let receipt_bytes = match hex::decode(&proof.proof_data) {
-            Ok(bytes) => bytes,
-            Err(e) => return Err(format!("Failed to decode proof hex: {}", e)),
-        };
-        
-        */
-        
-        Ok(false)
-    }
-}
 
 #[pymethods]
 impl RiscZeroBackend {
