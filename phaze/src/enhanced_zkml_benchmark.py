@@ -207,7 +207,10 @@ class EnhancedZKMLBenchmark:
 
             # Initialize zkML system
             if framework == "ezkl":
-                zkml_system = ZKMLProverVerifier(model, framework)
+                # EZKL requires CPU tensors for ONNX export and numpy operations
+                model_for_zkml = model.cpu()
+                sample_input_for_zkml = sample_input.cpu()
+                zkml_system = ZKMLProverVerifier(model_for_zkml, framework)
             elif framework == "risc_zero":
                 zkml_system = await self._create_risc_zero_system(model, model_info)
             else:
@@ -223,7 +226,7 @@ class EnhancedZKMLBenchmark:
 
             try:
                 if framework == "ezkl":
-                    await zkml_system.async_setup(sample_input)
+                    await zkml_system.async_setup(sample_input_for_zkml)
                 else:
                     await self._setup_risc_zero(zkml_system, sample_input)
 
@@ -256,7 +259,7 @@ class EnhancedZKMLBenchmark:
 
                 try:
                     if framework == "ezkl":
-                        proof, output = await zkml_system.generate_proof(sample_input)
+                        proof, output = await zkml_system.generate_proof(sample_input_for_zkml)
                     else:
                         proof, output = await self._generate_risc_zero_proof(
                             zkml_system, sample_input
@@ -322,7 +325,7 @@ class EnhancedZKMLBenchmark:
                 try:
                     if framework == "ezkl":
                         verified = await zkml_system.verify_proof(
-                            stored_proof, sample_input
+                            stored_proof, sample_input_for_zkml
                         )
                     else:
                         verified = await self._verify_risc_zero_proof(
@@ -663,7 +666,7 @@ class RiscZeroBackendWrapper:
         with torch.no_grad():
             output = self.model(sample_input)
         
-        return proof_dict, output.numpy().tolist()
+        return proof_dict, output.cpu().numpy().tolist()
 
     async def verify_proof(self, proof, sample_input: torch.Tensor):
         """Verify proof using the RISC Zero backend."""
