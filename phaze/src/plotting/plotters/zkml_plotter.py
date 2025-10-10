@@ -24,7 +24,6 @@ class ZKMLPlotter(BasePlotter):
             "proof_generation_time",
             "verification_time", 
             "memory_usage",
-            "cpu_gpu_memory_breakdown",
             "framework_comparison",
             "proof_size_analysis",
             "performance_matrix",
@@ -61,7 +60,6 @@ class ZKMLPlotter(BasePlotter):
         figures.append(self._plot_proof_generation_time(framework_data))
         figures.append(self._plot_verification_time(framework_data))
         figures.append(self._plot_memory_usage(framework_data))
-        figures.append(self._plot_cpu_gpu_memory_breakdown(framework_data))
         figures.append(self._plot_framework_comparison(framework_data))
         figures.append(self._plot_proof_size_analysis(framework_data))
         figures.append(self._plot_performance_matrix(framework_data))
@@ -368,134 +366,7 @@ class ZKMLPlotter(BasePlotter):
 
         plt.tight_layout()
         return fig
-
-    def _plot_cpu_gpu_memory_breakdown(
-        self, data: Dict[str, Dict[str, List[Any]]]
-    ) -> matplotlib.figure.Figure:
-        """Plot CPU vs GPU memory usage with overlaid breakdown."""
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.config.figure_size[0], self.config.figure_size[1] * 1.5))
-        colors = self.config.get_framework_colors()
-
-        for i, (framework, framework_data) in enumerate(data.items()):
-            complexities = framework_data["complexities"]
-            cpu_memory = framework_data["cpu_memory"]
-            gpu_memory = framework_data["gpu_memory"]
-            device_types = framework_data["device_types"]
-
-            if not complexities or not cpu_memory:
-                continue
-
-            # Group by complexity and calculate statistics
-            complexity_groups_cpu = {}
-            complexity_groups_gpu = {}
-            device_type_groups = {}
-            
-            for complexity, cpu_mem, gpu_mem, device_type in zip(
-                complexities, cpu_memory, gpu_memory, device_types, strict=False
-            ):
-                if complexity not in complexity_groups_cpu:
-                    complexity_groups_cpu[complexity] = []
-                    complexity_groups_gpu[complexity] = []
-                    device_type_groups[complexity] = []
-                complexity_groups_cpu[complexity].append(cpu_mem)
-                complexity_groups_gpu[complexity].append(gpu_mem)
-                device_type_groups[complexity].append(device_type)
-
-            # Sort complexities in logical order
-            complexity_order = ["minimal", "light", "medium", "heavy", "extreme"]
-            sorted_complexities = [
-                c for c in complexity_order if c in complexity_groups_cpu
-            ]
-
-            if not sorted_complexities:
-                sorted_complexities = sorted(complexity_groups_cpu.keys())
-
-            cpu_means, cpu_errors = StatisticalUtils.calculate_error_bars(
-                [complexity_groups_cpu[c] for c in sorted_complexities]
-            )
-            gpu_means, gpu_errors = StatisticalUtils.calculate_error_bars(
-                [complexity_groups_gpu[c] for c in sorted_complexities]
-            )
-
-            # Get color for this framework
-            color = colors.get(
-                framework,
-                self.config.primary_colors[i % len(self.config.primary_colors)],
-            )
-
-            x_pos = np.arange(len(sorted_complexities))
-
-            # Plot 1: Overlaid CPU/GPU memory
-            ax1.errorbar(
-                x_pos - 0.1 + i * 0.05,
-                cpu_means,
-                yerr=cpu_errors,
-                marker="o",
-                linewidth=2,
-                markersize=6,
-                label=f"{framework.replace('_', ' ').title()} (CPU)",
-                color=color,
-                alpha=0.7,
-                capsize=3,
-            )
-            
-            # Only plot GPU if there's actual GPU usage
-            if any(gpu_means):
-                ax1.errorbar(
-                    x_pos + 0.1 + i * 0.05,
-                    gpu_means,
-                    yerr=gpu_errors,
-                    marker="^",
-                    linewidth=2,
-                    markersize=6,
-                    label=f"{framework.replace('_', ' ').title()} (GPU)",
-                    color=color,
-                    alpha=1.0,
-                    linestyle="--",
-                    capsize=3,
-                )
-
-            # Plot 2: Stacked bar chart
-            ax2.bar(
-                x_pos + i * 0.2,
-                cpu_means,
-                width=0.15,
-                label=f"{framework.replace('_', ' ').title()} (CPU)" if i == 0 else "",
-                color=color,
-                alpha=0.7,
-            )
-            ax2.bar(
-                x_pos + i * 0.2,
-                gpu_means,
-                width=0.15,
-                bottom=cpu_means,
-                label=f"{framework.replace('_', ' ').title()} (GPU)" if i == 0 else "",
-                color=color,
-                alpha=1.0,
-                hatch="//",
-            )
-
-        # Configure plot 1 (overlaid)
-        ax1.set_xlabel("Model Complexity")
-        ax1.set_ylabel("Memory Usage (MB)")
-        ax1.set_title("CPU vs GPU Memory Usage by Framework")
-        ax1.set_xticks(range(len(sorted_complexities)))
-        ax1.set_xticklabels([c.title() for c in sorted_complexities])
-        ax1.legend()
-        ax1.grid(True, alpha=0.3)
-
-        # Configure plot 2 (stacked)
-        ax2.set_xlabel("Model Complexity")
-        ax2.set_ylabel("Total Memory Usage (MB)")
-        ax2.set_title("Stacked CPU/GPU Memory Breakdown")
-        ax2.set_xticks(range(len(sorted_complexities)))
-        ax2.set_xticklabels([c.title() for c in sorted_complexities])
-        ax2.legend()
-        ax2.grid(True, alpha=0.3)
-
-        plt.tight_layout()
-        return fig
-
+ 
     def _plot_framework_comparison(
         self, data: Dict[str, Dict[str, List[Any]]]
     ) -> matplotlib.figure.Figure:
