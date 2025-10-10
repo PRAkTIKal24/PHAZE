@@ -941,33 +941,7 @@ impl ZKMLBackend for RiscZeroBackend {
             Err(e) => Err(format!("Receipt verification failed: {}", e)),
         }
     }
-            Ok(r) => r,
-            Err(e) => return Err(format!("Failed to deserialize receipt: {}", e)),
-        };
-        */
-        
-        Ok(false)
-        let output: ModelOutput = receipt
-            .journal
-            .decode()
-            .map_err(|e| format!("Failed to decode receipt journal: {}", e))?;
-        
-        // Create a proof structure with the receipt
-        let proof_data = bincode::serialize(&receipt)
-            .map_err(|e| format!("Failed to serialize receipt: {}", e))?;
-        
-        let proof = ZKMLProof::new(
-            hex::encode(&proof_data),
-            output.output_tensor.iter().map(|x| x.to_string()).collect(),
-            "RISC0".to_string(),
-        );
-        
-        // Serialize the proof to bytes
-        match serde_json::to_vec(&proof) {
-            Ok(bytes) => Ok(bytes),
-            Err(e) => Err(format!("Failed to serialize proof: {}", e)),
-        }
-    }
+}
     
     fn verify(&self, proof_data: &[u8], public_outputs: &[u8]) -> Result<bool, String> {
         if !self.is_setup {

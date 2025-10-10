@@ -11,14 +11,11 @@ import shutil
 from pathlib import Path
 
 def run_command(cmd, cwd=None, check=True):
-    """Run a command and return the result."""
+    """Run a command and show output in real-time."""
     print(f"Running: {' '.join(cmd)}")
-    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
     
-    if result.stdout:
-        print(result.stdout)
-    if result.stderr:
-        print(result.stderr, file=sys.stderr)
+    # Use subprocess.run without capture_output to show real-time output
+    result = subprocess.run(cmd, cwd=cwd)
     
     if check and result.returncode != 0:
         raise RuntimeError(f"Command failed with return code {result.returncode}")
