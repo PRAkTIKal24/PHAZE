@@ -7,7 +7,6 @@ use std::fs;
 use rand::Rng;
 use num_bigint::BigUint;
 use num_traits::{Zero, One};
-use chrono::{DateTime, Utc};
 
 // RISC Zero imports - now enabled
 use risc0_zkvm::{default_prover, ExecutorEnv};
@@ -655,37 +654,9 @@ fn benchmark_field_operations(field_size: String, num_operations: usize) -> PyRe
     Ok(results)
 }
 
-/// Python module definition
-#[pymodule]
-fn rust_zkml_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
-    // Hash functions
-    m.add_function(wrap_pyfunction!(sha256_hash, m)?)?;
-    m.add_function(wrap_pyfunction!(keccak256_hash, m)?)?;
-    
-    // Finite field arithmetic
-    m.add_class::<FiniteField>()?;
-    m.add_class::<Polynomial>()?;
-    
-    // zkML proof structure
-    m.add_class::<ZKMLProof>()?;
-    
-    // Mock zkML frameworks
-    m.add_class::<MockGroth16>()?;
-    m.add_class::<MockPlonky>()?;
-    m.add_class::<MockHalo>()?;
-    m.add_class::<RiscZeroBackend>()?;
-    
-    // Utility functions
-    m.add_function(wrap_pyfunction!(generate_random_field_element, m)?)?;
-    m.add_function(wrap_pyfunction!(compute_merkle_root, m)?)?;
-    m.add_function(wrap_pyfunction!(benchmark_field_operations, m)?)?;
-    
-    Ok(())
-}
-
-/// RISC Zero backend for zkML
+/// RISC Zero backend structure
 #[pyclass]
-struct RiscZeroBackend {
+pub struct RiscZeroBackend {
     config: HashMap<String, String>,
     is_setup: bool,
 }
@@ -834,8 +805,7 @@ impl ZKMLBackend for RiscZeroBackend {
             .map_err(|e| format!("Failed to generate proof: {}", e))?;
         
         // Extract the output from the receipt journal
-        let output: ModelOutput = receipt
-            .journal
+        let output: ModelOutput = receipt.receipt.journal
             .decode()
             .map_err(|e| format!("Failed to decode receipt journal: {}", e))?;
         
@@ -1081,4 +1051,6 @@ fn rust_zkml_bindings(_py: Python, m: &PyModule) -> PyResult<()> {
     
     Ok(())
 }
+
+
 
