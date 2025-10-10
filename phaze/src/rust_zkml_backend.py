@@ -17,7 +17,6 @@ try:
         _binding_info = rust_zkml_bindings.get_binding_info()
     except AttributeError:
         _binding_info = {"implementation": "real_rust_bindings", "version": "unknown"}
-    print(f"✅ REAL Rust bindings loaded: {_binding_info}")
 except ImportError:
     print("❌ rust_zkml_bindings not found. Using mock implementation for testing.")
     from . import mock_rust_zkml_bindings as rust_zkml_bindings
