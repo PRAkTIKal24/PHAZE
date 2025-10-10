@@ -61,9 +61,59 @@ class MemoryProfiler:
         }
 
     def _get_memory_usage(self) -> float:
-        """Get current memory usage in MB."""
+        """Get current memory usage in MB (CPU + GPU if available)."""
         process = psutil.Process()
-        return process.memory_info().rss / 1024 / 1024  # Convert to MB
+        cpu_memory = process.memory_info().rss / 1024 / 1024  # Convert to MB
+        
+        # Add GPU memory if available
+        gpu_memory = 0.0
+        try:
+            if hasattr(self, 'device_type'):
+                if self.device_type == "cuda" and torch.cuda.is_available():
+                    gpu_memory = torch.cuda.memory_allocated() / 1024 / 1024  # Convert to MB
+                elif self.device_type == "mps" and torch.backends.mps.is_available():
+                    # MPS doesn't have direct memory query, use approximation
+                    gpu_memory = torch.mps.current_allocated_memory() / 1024 / 1024
+        except (AttributeError, RuntimeError):
+            # Fallback if GPU memory query fails
+            pass
+            
+        return cpu_memory + gpu_memory
+
+    def get_detailed_memory_stats(self) -> dict:
+        """Get detailed breakdown of CPU and GPU memory usage."""
+        process = psutil.Process()
+        cpu_memory = process.memory_info().rss / 1024 / 1024
+        
+        stats = {
+            "cpu_memory_mb": cpu_memory,
+            "gpu_memory_mb": 0.0,
+            "total_memory_mb": cpu_memory,
+            "device_type": getattr(self, "device_type", "cpu")
+        }
+        
+        try:
+            if hasattr(self, 'device_type'):
+                if self.device_type == "cuda" and torch.cuda.is_available():
+                    gpu_allocated = torch.cuda.memory_allocated() / 1024 / 1024
+                    gpu_reserved = torch.cuda.memory_reserved() / 1024 / 1024
+                    stats.update({
+                        "gpu_memory_mb": gpu_allocated,
+                        "gpu_reserved_mb": gpu_reserved,
+                        "total_memory_mb": cpu_memory + gpu_allocated,
+                        "gpu_device_name": torch.cuda.get_device_name()
+                    })
+                elif self.device_type == "mps" and torch.backends.mps.is_available():
+                    gpu_memory = torch.mps.current_allocated_memory() / 1024 / 1024
+                    stats.update({
+                        "gpu_memory_mb": gpu_memory,
+                        "total_memory_mb": cpu_memory + gpu_memory,
+                        "gpu_device_name": "Apple Metal GPU"
+                    })
+        except (AttributeError, RuntimeError):
+            pass
+            
+        return stats
 
 
 class EnhancedZKMLBenchmark:
@@ -76,7 +126,16 @@ class EnhancedZKMLBenchmark:
             config: PHAZE configuration object
         """
         self.config = config
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # Enhanced device selection supporting MPS (Mac M1), CUDA, and CPU
+        if torch.backends.mps.is_available():
+            self.device = torch.device("mps")
+            self.device_type = "mps"
+        elif torch.cuda.is_available():
+            self.device = torch.device("cuda")
+            self.device_type = "cuda"
+        else:
+            self.device = torch.device("cpu")
+            self.device_type = "cpu"
         self.benchmark_results = []
         self.failed_benchmarks = []
 
@@ -129,6 +188,9 @@ class EnhancedZKMLBenchmark:
             "verification_time": 0.0,
             "total_time": 0.0,
             "memory_usage_mb": 0.0,
+            "cpu_memory_mb": 0.0,
+            "gpu_memory_mb": 0.0,
+            "device_type": getattr(self, "device_type", "cpu"),
             "proof_size_bytes": 0,
             "setup_memory": {},
             "proof_memory": {},
@@ -148,10 +210,7 @@ class EnhancedZKMLBenchmark:
             else:
                 raise ValueError(f"Unknown framework: {framework}")
 
-            # Benchmark setup phase
-            setup_start_time = time.time()
-            memory_profiler = MemoryProfiler()
-            memory_profiler.start_monitoring()
+            # Benchmark setup phase\n            setup_start_time = time.time()\n            memory_profiler = MemoryProfiler()\n            # Pass device info to memory profiler\n            if hasattr(self, 'device_type'):\n                memory_profiler.device_type = self.device_type\n            memory_profiler.start_monitoring()
 
             try:
                 if framework == "ezkl":
@@ -313,6 +372,14 @@ class EnhancedZKMLBenchmark:
 
             if peak_memories:
                 result["memory_usage_mb"] = max(peak_memories)
+                
+                # Get detailed memory breakdown from the peak phase
+                peak_profiler = MemoryProfiler()
+                if hasattr(self, 'device_type'):
+                    peak_profiler.device_type = self.device_type
+                detailed_stats = peak_profiler.get_detailed_memory_stats()
+                result["cpu_memory_mb"] = detailed_stats["cpu_memory_mb"]
+                result["gpu_memory_mb"] = detailed_stats["gpu_memory_mb"]
 
             result["success"] = True
             logger.info("  ✅ Benchmark completed successfully")
