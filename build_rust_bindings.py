@@ -25,6 +25,54 @@ def run_command(cmd, cwd=None, check=True):
     
     return result
 
+def check_rust_installation():
+    """Check if Rust and Cargo are installed."""
+    try:
+        result = run_command(["cargo", "--version"], check=False)
+        if result.returncode == 0:
+            print(f"✅ Rust/Cargo found: {result.stdout.strip()}")
+            return True
+        else:
+            return False
+    except FileNotFoundError:
+        return False
+
+def install_rust():
+    """Install Rust using rustup."""
+    print("🦀 Installing Rust...")
+    
+    # Download and run rustup installer
+    if sys.platform == "win32":
+        print("Please install Rust manually from https://rustup.rs/")
+        return False
+    else:
+        try:
+            # Download rustup installer
+            curl_cmd = [
+                "curl", "--proto", "=https", "--tlsv1.2", "-sSf", 
+                "https://sh.rustup.rs", "-o", "/tmp/rustup-init.sh"
+            ]
+            run_command(curl_cmd)
+            
+            # Make it executable and run
+            run_command(["chmod", "+x", "/tmp/rustup-init.sh"])
+            run_command(["/tmp/rustup-init.sh", "-y", "--default-toolchain", "stable"])
+            
+            # Source the environment
+            home = os.path.expanduser("~")
+            cargo_env = os.path.join(home, ".cargo", "env")
+            if os.path.exists(cargo_env):
+                # Add cargo to PATH for this session
+                cargo_bin = os.path.join(home, ".cargo", "bin")
+                if cargo_bin not in os.environ.get("PATH", ""):
+                    os.environ["PATH"] = f"{cargo_bin}:{os.environ.get('PATH', '')}"
+            
+            return check_rust_installation()
+            
+        except Exception as e:
+            print(f"❌ Rust installation failed: {e}")
+            return False
+
 def build_rust_bindings():
     """Build the Rust bindings."""
     print("🔨 Building Rust bindings...")
@@ -115,12 +163,26 @@ def main():
         except ImportError:
             pass
         
+        # Check if Rust is installed
+        if not check_rust_installation():
+            print("🦀 Rust not found. Installing...")
+            if not install_rust():
+                print("\n❌ Failed to install Rust. Please install manually:")
+                print("   Visit: https://rustup.rs/")
+                print("   Run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh")
+                print("   Then run this script again.")
+                sys.exit(1)
+        
         # Build and install
         build_rust_bindings()
         print("\n🎉 Build and installation completed successfully!")
         
     except Exception as e:
         print(f"\n❌ Build failed: {e}")
+        print("\n🔧 Alternative approaches:")
+        print("1. Install Rust manually: https://rustup.rs/")
+        print("2. Use the pre-built Python wheels (if available)")
+        print("3. For now, PHAZE will use mock implementations")
         sys.exit(1)
 
 if __name__ == "__main__":
