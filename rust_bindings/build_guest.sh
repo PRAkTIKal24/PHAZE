@@ -1,26 +1,40 @@
 #!/bin/bash
 
 # Build script for RISC Zero guest program
-# This requires cargo-risczero to be installed: cargo install cargo-risczero
+# Prerequisites: RISC Zero toolchain must be installed via rzup
 
 set -e
 
-echo "Building RISC Zero guest program..."
+echo "🔨 Building RISC Zero guest program..."
 
-# Check if cargo-risczero is installed
+# Verify prerequisites
 if ! command -v cargo-risczero &> /dev/null; then
-    echo "cargo-risczero not found. Installing..."
-    cargo install cargo-risczero
+    echo "❌ cargo-risczero not found. Please run ../setup_risc_zero.sh first"
+    exit 1
 fi
 
-# Install the RISC Zero toolchain
-echo "Installing RISC Zero toolchain..."
-cargo risczero install
+if ! command -v rzup &> /dev/null; then
+    echo "❌ rzup not found. Please run ../setup_risc_zero.sh first"
+    exit 1
+fi
+
+echo "✅ RISC Zero toolchain detected"
+
+# Navigate to guest directory
+cd "$(dirname "$0")/risc0_guest"
 
 # Build the guest program
-echo "Building guest program..."
-cd risc0_guest
+echo "🔨 Building guest program..."
 cargo risczero build
 
-echo "Guest program built successfully!"
-echo "ELF location: risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest"
+echo "✅ Guest program built successfully!"
+echo "📁 ELF location: target/riscv32im-risc0-zkvm-elf/release/risc0_guest"
+
+# Verify the ELF was created
+if [ -f "target/riscv32im-risc0-zkvm-elf/release/risc0_guest" ]; then
+    echo "✅ ELF file verified"
+    ls -la target/riscv32im-risc0-zkvm-elf/release/risc0_guest
+else
+    echo "❌ ELF file not found!"
+    exit 1
+fi
