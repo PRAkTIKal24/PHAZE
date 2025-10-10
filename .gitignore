@@ -65,6 +65,7 @@ docs/_build/
 .DS_Store
 
 # Project-specific
+phaze_config.py
 phaze/workspaces/
 /rust_bindings/target/
 /rust_bindings/Cargo.lock
