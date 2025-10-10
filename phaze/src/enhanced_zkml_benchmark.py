@@ -64,55 +64,61 @@ class MemoryProfiler:
         """Get current memory usage in MB (CPU + GPU if available)."""
         process = psutil.Process()
         cpu_memory = process.memory_info().rss / 1024 / 1024  # Convert to MB
-        
+
         # Add GPU memory if available
         gpu_memory = 0.0
         try:
-            if hasattr(self, 'device_type'):
+            if hasattr(self, "device_type"):
                 if self.device_type == "cuda" and torch.cuda.is_available():
-                    gpu_memory = torch.cuda.memory_allocated() / 1024 / 1024  # Convert to MB
+                    gpu_memory = (
+                        torch.cuda.memory_allocated() / 1024 / 1024
+                    )  # Convert to MB
                 elif self.device_type == "mps" and torch.backends.mps.is_available():
                     # MPS doesn't have direct memory query, use approximation
                     gpu_memory = torch.mps.current_allocated_memory() / 1024 / 1024
         except (AttributeError, RuntimeError):
             # Fallback if GPU memory query fails
             pass
-            
+
         return cpu_memory + gpu_memory
 
     def get_detailed_memory_stats(self) -> dict:
         """Get detailed breakdown of CPU and GPU memory usage."""
         process = psutil.Process()
         cpu_memory = process.memory_info().rss / 1024 / 1024
-        
+
         stats = {
             "cpu_memory_mb": cpu_memory,
             "gpu_memory_mb": 0.0,
             "total_memory_mb": cpu_memory,
-            "device_type": getattr(self, "device_type", "cpu")
+            "device_type": getattr(self, "device_type", "cpu"),
         }
-        
+
         try:
-            if hasattr(self, 'device_type'):
+            if hasattr(self, "device_type"):
                 if self.device_type == "cuda" and torch.cuda.is_available():
                     gpu_allocated = torch.cuda.memory_allocated() / 1024 / 1024
                     gpu_reserved = torch.cuda.memory_reserved() / 1024 / 1024
-                    stats.update({
-                        "gpu_memory_mb": gpu_allocated,
-                        "gpu_reserved_mb": gpu_reserved,
-                        "total_memory_mb": cpu_memory + gpu_allocated,
-                        "gpu_device_name": torch.cuda.get_device_name()
-                    })
+                    stats.update(
+                        {
+                            "gpu_memory_mb": gpu_allocated,
+                            "gpu_reserved_mb": gpu_reserved,
+                            "total_memory_mb": cpu_memory + gpu_allocated,
+                            "gpu_device_name": torch.cuda.get_device_name(),
+                        }
+                    )
                 elif self.device_type == "mps" and torch.backends.mps.is_available():
                     gpu_memory = torch.mps.current_allocated_memory() / 1024 / 1024
-                    stats.update({
-                        "gpu_memory_mb": gpu_memory,
-                        "total_memory_mb": cpu_memory + gpu_memory,
-                        "gpu_device_name": "Apple Metal GPU"
-                    })
+                    stats.update(
+                        {
+                            "gpu_memory_mb": gpu_memory,
+                            "total_memory_mb": cpu_memory + gpu_memory,
+                            "gpu_device_name": "Apple Metal GPU",
+                        }
+                    )
         except (AttributeError, RuntimeError):
             pass
-            
+
         return stats
 
 
@@ -201,7 +207,7 @@ class EnhancedZKMLBenchmark:
             # Create sample input and ensure device consistency
             sample_input = self.create_sample_input(model_info)
             sample_input = sample_input.to(self.device)
-            
+
             # Ensure model is on the same device as input
             model = model.to(self.device)
 
@@ -222,7 +228,7 @@ class EnhancedZKMLBenchmark:
             setup_start_time = time.time()
             memory_profiler = MemoryProfiler()
             # Pass device info to memory profiler
-            if hasattr(self, 'device_type'):
+            if hasattr(self, "device_type"):
                 memory_profiler.device_type = self.device_type
             memory_profiler.start_monitoring()
 
@@ -245,7 +251,7 @@ class EnhancedZKMLBenchmark:
                 logger.error(f"  Setup failed: {e}")
                 result["error_message"] = f"Setup failed: {str(e)}"
                 # Make sure to stop memory profiler even on error
-                if 'memory_profiler' in locals():
+                if "memory_profiler" in locals():
                     memory_profiler.stop_monitoring()
                 return result
 
@@ -262,17 +268,17 @@ class EnhancedZKMLBenchmark:
                 try:
                     # Add timeout to prevent hanging
                     timeout_seconds = 300  # 5 minutes timeout
-                    
+
                     if framework == "ezkl":
                         # Use asyncio.wait_for to add timeout
                         proof, output = await asyncio.wait_for(
                             zkml_system.generate_proof(sample_input_for_zkml),
-                            timeout=timeout_seconds
+                            timeout=timeout_seconds,
                         )
                     else:
                         proof, output = await asyncio.wait_for(
                             self._generate_risc_zero_proof(zkml_system, sample_input),
-                            timeout=timeout_seconds
+                            timeout=timeout_seconds,
                         )
 
                     memory_profiler.update_peak()
@@ -291,9 +297,11 @@ class EnhancedZKMLBenchmark:
                             result["proof_size_bytes"] = len(proof_str.encode("utf-8"))
 
                 except asyncio.TimeoutError:
-                    logger.error(f"  Proof generation {i + 1} timed out after {timeout_seconds}s")
+                    logger.error(
+                        f"  Proof generation {i + 1} timed out after {timeout_seconds}s"
+                    )
                     if i == 0:  # If first proof fails, stop benchmarking
-                        result["error_message"] = f"Proof generation timed out"
+                        result["error_message"] = "Proof generation timed out"
                         return result
                     # Otherwise continue with successful proofs
                     continue
@@ -342,16 +350,20 @@ class EnhancedZKMLBenchmark:
                 try:
                     # Add timeout to prevent hanging
                     timeout_seconds = 60  # 1 minute timeout for verification
-                    
+
                     if framework == "ezkl":
                         verified = await asyncio.wait_for(
-                            zkml_system.verify_proof(stored_proof, sample_input_for_zkml),
-                            timeout=timeout_seconds
+                            zkml_system.verify_proof(
+                                stored_proof, sample_input_for_zkml
+                            ),
+                            timeout=timeout_seconds,
                         )
                     else:
                         verified = await asyncio.wait_for(
-                            self._verify_risc_zero_proof(zkml_system, stored_proof, sample_input),
-                            timeout=timeout_seconds
+                            self._verify_risc_zero_proof(
+                                zkml_system, stored_proof, sample_input
+                            ),
+                            timeout=timeout_seconds,
                         )
 
                     memory_profiler.update_peak()
@@ -365,7 +377,9 @@ class EnhancedZKMLBenchmark:
                         logger.warning(f"  Proof verification failed for {model_id}")
 
                 except asyncio.TimeoutError:
-                    logger.error(f"  Verification {i + 1} timed out after {timeout_seconds}s")
+                    logger.error(
+                        f"  Verification {i + 1} timed out after {timeout_seconds}s"
+                    )
                     continue
                 except Exception as e:
                     logger.error(f"  Verification {i + 1} failed: {e}")
@@ -412,10 +426,10 @@ class EnhancedZKMLBenchmark:
 
             if peak_memories:
                 result["memory_usage_mb"] = max(peak_memories)
-                
+
                 # Get detailed memory breakdown from the peak phase
                 peak_profiler = MemoryProfiler()
-                if hasattr(self, 'device_type'):
+                if hasattr(self, "device_type"):
                     peak_profiler.device_type = self.device_type
                 detailed_stats = peak_profiler.get_detailed_memory_stats()
                 result["cpu_memory_mb"] = detailed_stats["cpu_memory_mb"]
@@ -440,22 +454,26 @@ class EnhancedZKMLBenchmark:
         self, model: nn.Module, model_info: Dict[str, Any]
     ):
         """Create risc-zero zkML system using Rust backend."""
-        from .rust_zkml_backend import RustRiscZeroBackend, RustZKMLBackend
-        
+        from .rust_zkml_backend import RustZKMLBackend
+
         # Check if we're using real bindings
         binding_info = RustZKMLBackend.get_binding_info()
         is_real = RustZKMLBackend.is_using_real_bindings()
-        
+
         if is_real:
             risc_zero_status = binding_info.get("risc_zero_status", "unknown")
             if risc_zero_status == "enabled":
                 logger.info(f"🚀 Using FULL RISC Zero implementation: {binding_info}")
             else:
                 logger.info(f"✅ Using REAL RISC Zero backend: {binding_info}")
-                logger.info("ℹ️  Note: RISC Zero proof generation requires guest program to be built")
+                logger.info(
+                    "ℹ️  Note: RISC Zero proof generation requires guest program to be built"
+                )
         else:
-            logger.warning(f"⚠️  Using MOCK RISC Zero backend implementation: {binding_info}")
-        
+            logger.warning(
+                f"⚠️  Using MOCK RISC Zero backend implementation: {binding_info}"
+            )
+
         # Create the RISC Zero backend
         risc_zero_system = RiscZeroBackendWrapper(model, model_info)
         return risc_zero_system
@@ -655,6 +673,7 @@ class RiscZeroBackendWrapper:
         self.model = model
         self.model_info = model_info
         from .rust_zkml_backend import RustRiscZeroBackend
+
         self.backend = RustRiscZeroBackend()
         self.is_setup = False
 
@@ -664,7 +683,7 @@ class RiscZeroBackendWrapper:
         # (RISC Zero backend currently works with CPU tensors)
         self.model = self.model.cpu()
         sample_input = sample_input.cpu()
-        
+
         # Extract model parameters
         params = {
             "model_type": self.model_info.get("architecture", "simple"),
@@ -672,45 +691,45 @@ class RiscZeroBackendWrapper:
             "output_size": str(self.model_info.get("output_size", 10)),
             "complexity": self.model_info.get("complexity", "minimal"),
         }
-        
+
         # Setup the backend
-        setup_result = self.backend.setup(params)
+        self.backend.setup(params)
         self.is_setup = True
 
     async def generate_proof(self, sample_input: torch.Tensor):
         """Generate proof using the RISC Zero backend."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
-        
+
         # Ensure tensors are on CPU for RISC Zero processing
         sample_input = sample_input.cpu()
         self.model = self.model.cpu()
-        
+
         # Get model state dict as weights
         model_weights = self.model.state_dict()
-        
+
         # Generate proof using the Rust backend
         proof_dict = self.backend.prove(sample_input, model_weights)
-        
+
         # Run actual model to get expected output for comparison
         with torch.no_grad():
             output = self.model(sample_input)
-        
+
         return proof_dict, output.cpu().numpy().tolist()
 
     async def verify_proof(self, proof, sample_input: torch.Tensor):
         """Verify proof using the RISC Zero backend."""
         if not self.is_setup:
             raise RuntimeError("Backend not setup. Call setup() first.")
-        
+
         # Ensure tensors are on CPU for RISC Zero processing
         sample_input = sample_input.cpu()
         self.model = self.model.cpu()
-        
+
         # Get expected outputs
         with torch.no_grad():
             expected_outputs = self.model(sample_input)
-        
+
         # Verify using the Rust backend
         return self.backend.verify(proof, expected_outputs)
 

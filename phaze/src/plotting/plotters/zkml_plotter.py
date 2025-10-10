@@ -22,7 +22,7 @@ class ZKMLPlotter(BasePlotter):
         """Get list of plot types supported by this plotter."""
         return [
             "proof_generation_time",
-            "verification_time", 
+            "verification_time",
             "memory_usage",
             "framework_comparison",
             "proof_size_analysis",
@@ -366,7 +366,7 @@ class ZKMLPlotter(BasePlotter):
 
         plt.tight_layout()
         return fig
- 
+
     def _plot_framework_comparison(
         self, data: Dict[str, Dict[str, List[Any]]]
     ) -> matplotlib.figure.Figure:

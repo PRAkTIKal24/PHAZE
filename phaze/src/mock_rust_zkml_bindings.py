@@ -293,5 +293,5 @@ def get_binding_info() -> dict:
         "implementation": "mock",
         "version": "0.1.0",
         "risc_zero_enabled": "false",
-        "timestamp": "mock_timestamp"
+        "timestamp": "mock_timestamp",
     }

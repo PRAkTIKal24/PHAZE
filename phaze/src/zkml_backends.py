@@ -298,6 +298,7 @@ class RiscZeroBackend(ZKMLBackendInterface):
     def __init__(self, model: nn.Module, name: str):
         super().__init__(ZKMLFramework.RISC_ZERO, model, name)
         from .rust_zkml_backend import RustRiscZeroBackend
+
         self.rust_backend = RustRiscZeroBackend()
 
     async def setup(self, input_data: torch.Tensor, **kwargs) -> None:
@@ -306,11 +307,15 @@ class RiscZeroBackend(ZKMLBackendInterface):
         params = {
             "model_type": "neural_network",
             "input_size": str(input_data.numel()),
-            "output_size": str(list(self.model.parameters())[-1].shape[0] if list(self.model.parameters()) else "10"),
+            "output_size": str(
+                list(self.model.parameters())[-1].shape[0]
+                if list(self.model.parameters())
+                else "10"
+            ),
         }
-        
+
         # Setup the Rust backend
-        setup_result = self.rust_backend.setup(params)
+        self.rust_backend.setup(params)
         self.is_setup = True
 
     async def generate_proof(
@@ -322,10 +327,10 @@ class RiscZeroBackend(ZKMLBackendInterface):
 
         # Get model weights
         model_weights = self.model.state_dict()
-        
+
         # Generate proof using Rust backend
         proof_dict = self.rust_backend.prove(input_data, model_weights)
-        
+
         # Run model to get output
         with torch.no_grad():
             output = self.model(input_data)
@@ -342,7 +347,7 @@ class RiscZeroBackend(ZKMLBackendInterface):
         # Get expected outputs
         with torch.no_grad():
             expected_outputs = self.model(input_data)
-        
+
         # Verify using Rust backend
         return self.rust_backend.verify(proof, expected_outputs)
 
