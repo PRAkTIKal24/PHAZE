@@ -23,6 +23,50 @@ python setup_phaze_complete.py --development --skip-risc-zero  # Quick setup
 uv run phaze --help  # Verify installation
 ```
 
+### 🐍 Python Version Issues
+
+If you get Python version errors (e.g., "Python 3.9.16 does not satisfy Python>=3.10"):
+
+```bash
+# Option 1: Use your existing Python 3.11 (if you have it via Homebrew/system)
+which python3.11  # Check if you have Python 3.11 available
+/opt/homebrew/bin/python3.11 setup_phaze_complete.py --development
+
+# Option 2: Keep conda active but force uv to use correct Python
+# (Don't deactivate conda if it's your only Python 3.11)
+uv venv --python python3.11  # Use conda's Python 3.11
+source .venv/bin/activate
+
+# Option 3: If conda is interfering with older Python
+conda deactivate  # Only if you have other Python 3.11 available
+uv python pin 3.11
+uv venv --python 3.11
+source .venv/bin/activate
+
+# Option 4: Use uv to install Python 3.11 for you
+uv python install 3.11
+uv python pin 3.11
+uv venv --python 3.11
+```
+
+### 🦀 Rust Issues on Apple Silicon
+
+If you get Rust target errors on M1/M2 Macs:
+
+```bash
+# Add the required Rust target for Apple Silicon
+rustup target add aarch64-apple-darwin
+
+# If you installed Rust with x86_64 as default, you may need to switch
+rustup default stable-aarch64-apple-darwin
+
+# Or temporarily override the target for this build
+export CARGO_BUILD_TARGET=aarch64-apple-darwin
+
+# Then retry installation
+python setup_phaze_complete.py --development
+```
+
 ## 📋 Table of Contents
 
 - [✨ Features](#-features)
@@ -648,6 +692,30 @@ uv sync --no-dev
 **Common Issues:**
 
 ```bash
+# Python version conflicts (conda/system Python interference)
+# First check what Python versions you have available
+which python3.11 || echo "No system Python 3.11 found"
+conda info --envs  # See your conda environments
+
+# If you have Python 3.11 via conda, keep conda active and use it
+uv venv --python python3.11
+source .venv/bin/activate
+
+# If conda is interfering with system Python, try uv's Python management
+uv python install 3.11  # Let uv install Python 3.11
+uv python pin 3.11 && uv venv --python 3.11
+
+# Rust target issues on Apple Silicon (M1/M2 Macs)
+rustup target add aarch64-apple-darwin  # Add required target
+rustup default stable-aarch64-apple-darwin  # Switch default if needed
+rustup update  # Update Rust toolchain
+
+# To start fresh with Rust (if you have target conflicts):
+rustup self uninstall  # Remove current Rust installation
+rm -rf ~/.rustup ~/.cargo  # Clean up directories
+# Edit ~/.zshrc to remove cargo PATH entries, then restart terminal
+# python setup_phaze_complete.py --development  # Reinstall fresh
+
 # EZKL installation problems
 pip install ezkl --no-binary ezkl
 

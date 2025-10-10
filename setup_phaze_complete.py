@@ -15,6 +15,7 @@ Usage:
 import argparse
 import os
 import platform
+import platform
 import shutil
 import subprocess
 import sys
@@ -166,6 +167,36 @@ def build_rust_bindings():
         return False
     
     try:
+        # Check and add required Rust targets (especially for Apple Silicon)
+        print("🎯 Setting up Rust targets...")
+        try:
+            # Get current target
+            result = run_command(["rustc", "--version", "--verbose"], capture_output=True, check=True)
+            
+            # Check if we're on Apple Silicon but using wrong target
+            if platform.machine() == "arm64" and platform.system() == "Darwin":
+                print("🍎 Detected Apple Silicon Mac")
+                
+                # Add the correct target
+                run_command(["rustup", "target", "add", "aarch64-apple-darwin"], check=False)
+                
+                # Check if default is wrong (x86_64 on arm64)
+                default_result = run_command(["rustup", "default"], capture_output=True, check=False)
+                if "x86_64" in default_result.stdout and "apple-darwin" in default_result.stdout:
+                    print("🔄 Switching from x86_64 to native Apple Silicon target...")
+                    run_command(["rustup", "default", "stable-aarch64-apple-darwin"], check=False)
+                    
+            elif "x86_64-apple-darwin" in result.stdout:
+                # On Intel Mac, ensure we have the target
+                print("💻 Detected Intel Mac, adding x86_64-apple-darwin target...")
+                run_command(["rustup", "target", "add", "x86_64-apple-darwin"], check=False)
+                
+        except Exception as e:
+            # If target detection fails, try adding common targets
+            print(f"⚠️ Target detection failed ({e}), adding common targets...")
+            run_command(["rustup", "target", "add", "aarch64-apple-darwin"], check=False)
+            run_command(["rustup", "target", "add", "x86_64-apple-darwin"], check=False)
+        
         # Clean previous builds
         print("🧹 Cleaning previous builds...")
         run_command(["cargo", "clean"], cwd=rust_dir, check=True)
