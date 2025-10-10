@@ -30,7 +30,7 @@ rzup show
 # Check if cargo-risczero is available
 if command -v cargo-risczero &> /dev/null; then
     echo "✅ cargo-risczero is available"
-    cargo-risczero --version
+    cargo risczero --version
 else
     echo "❌ cargo-risczero not found in PATH"
     exit 1
