@@ -140,20 +140,23 @@ def build_guest_program():
         # Build the guest program
         run_command(["cargo", "risczero", "build"], cwd=guest_dir, check=True)
 
-        # Verify the ELF was created
-        elf_path = (
-            guest_dir
-            / "target"
-            / "riscv32im-risc0-zkvm-elf"
-            / "release"
-            / "risc0_guest"
-        )
-        if elf_path.exists():
-            print(f"✅ Guest program built successfully: {elf_path}")
-            return True
-        else:
-            print("❌ Guest ELF file not found after build")
-            return False
+        # Verify the ELF was created (check both possible locations)
+        elf_paths = [
+            guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release" / "risc0_guest",
+            guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker" / "risc0_guest.bin",
+            guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker" / "risc0_guest",
+        ]
+        
+        for elf_path in elf_paths:
+            if elf_path.exists():
+                print(f"✅ Guest program built successfully: {elf_path}")
+                return True
+        
+        print("❌ Guest ELF file not found after build")
+        print(f"   Checked paths:")
+        for path in elf_paths:
+            print(f"   - {path} (exists: {path.exists()})")
+        return False
 
     except Exception as e:
         print(f"❌ Error building guest program: {e}")
@@ -392,7 +395,7 @@ def main():
         print("🎉 PHAZE setup completed successfully!")
         print("\n🚀 You can now use:")
         print("   uv run phaze --help")
-        print("   uv run phaze --list-benchmarks")
+        print("   uv run phaze-legacy --list-benchmarks")
         print(
             "   uv run python -c \"import rust_zkml_bindings; print('RISC Zero ready!')\""
         )
