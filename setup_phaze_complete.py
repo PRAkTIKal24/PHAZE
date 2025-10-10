@@ -146,14 +146,14 @@ def build_guest_program():
             guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker" / "risc0_guest.bin",
             guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker" / "risc0_guest",
         ]
-        
+
         for elf_path in elf_paths:
             if elf_path.exists():
                 print(f"✅ Guest program built successfully: {elf_path}")
                 return True
-        
+
         print("❌ Guest ELF file not found after build")
-        print(f"   Checked paths:")
+        print("   Checked paths:")
         for path in elf_paths:
             print(f"   - {path} (exists: {path.exists()})")
         return False
