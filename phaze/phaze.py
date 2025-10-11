@@ -35,8 +35,8 @@ async def run_training_command(
     complexities: Optional[List[str]] = None,
     epochs: Optional[int] = None,
     quick: bool = False,
-    train_only: bool = False,
     verbose: bool = False,
+    model_path: Optional[str] = None,
 ) -> int:
     """Run training and benchmarking pipeline."""
     try:
@@ -93,10 +93,16 @@ async def run_training_command(
             print()
 
         # Run pipeline
-        if train_only:
-            print("Running training only...")
-            results = run_training_only(config)
-            print(f"Training completed: {len(results)} models trained")
+        if model_path:
+            print(f"Using pre-trained model: {model_path}")
+            # Load and process pre-trained model
+            from .src.model_architectures import load_pretrained_model
+            model_info = load_pretrained_model(model_path)
+            
+            # Run zkML and crypto benchmarking with plotting
+            print("Running zkML and crypto benchmarking with pre-trained model...")
+            results = await run_pipeline_with_pretrained_model(config, model_info)
+            print("Pipeline completed successfully!")
         else:
             print("Running complete pipeline...")
             results = await run_full_pipeline(config)
@@ -122,6 +128,9 @@ async def run_plotting_command(
     formats: Optional[List[str]] = None,
     trials: int = 10,
     verbose: bool = False,
+    frameworks: Optional[List[str]] = None,
+    algorithms: Optional[List[str]] = None,
+    complexity_range: Optional[List[str]] = None,
 ) -> int:
     """Run plotting command with specified parameters."""
     try:
@@ -174,15 +183,17 @@ async def run_plotting_command(
             # Configure benchmark parameters based on requested plot types
             zkml_config = {
                 "architectures": ["simple", "multi_exit"],
-                "complexities": ["light", "medium", "heavy"],
+                "complexities": complexity_range or ["light", "medium", "heavy"],
                 "input_sizes": [10, 50, 100],
                 "num_trials": max(3, trials // 3),  # Fewer trials for benchmarking
+                "frameworks": frameworks or ["ezkl", "risc_zero"],
             }
 
             crypto_config = {
                 "rabin_input_sizes": [64, 256, 1024],
                 "shamir_secret_sizes": [32, 64, 128],
                 "num_trials": trials,
+                "algorithms": algorithms or ["rabin", "shamir"],
             }
 
             # Run comprehensive benchmarks
@@ -260,7 +271,7 @@ Example usage:
   uv run phaze --train                                    # Full pipeline with default config
   uv run phaze --config my_config.py                     # Full pipeline with custom config
   uv run phaze --architectures simple,conv --epochs 1    # Full pipeline with specific models
-  uv run phaze --train-only                              # Training only, no benchmarking
+  uv run phaze --model-path model.pth                    # Use pre-trained model for zkML/crypto benchmarking
 
   # Generate plots
   uv run phaze --plot fingerprint --output plots/fingerprint/
@@ -320,9 +331,9 @@ Default behavior (if no options specified):
     )
 
     parser.add_argument(
-        "--train-only",
-        action="store_true",
-        help="Run training only (skip benchmarking and plotting)",
+        "--model-path",
+        type=str,
+        help="Path to pre-trained model file (.pth, .pt) - skips training and runs zkML/crypto benchmarking",
     )
 
     # Plotting-related arguments
@@ -419,10 +430,10 @@ Default behavior (if no options specified):
         print("Verbose mode enabled.")
 
     # Handle training commands
-    if args.train or args.train_only:
+    if args.train or args.model_path:
         if args.verbose:
             print(
-                f"Running training command: {'train-only' if args.train_only else 'full pipeline'}"
+                f"Running training command: {'with pre-trained model' if args.model_path else 'full pipeline'}"
             )
 
         # Parse training-specific arguments
@@ -438,8 +449,8 @@ Default behavior (if no options specified):
                 complexities=complexities,
                 epochs=args.epochs,
                 quick=args.quick,
-                train_only=args.train_only,
                 verbose=args.verbose,
+                model_path=args.model_path,
             )
         )
 
@@ -452,6 +463,9 @@ Default behavior (if no options specified):
         plot_types = None if args.plot in ["all", "comparative"] else [args.plot]
         components = args.components.split(",") if args.components else None
         formats = args.format.split(",") if args.format else None
+        frameworks = args.frameworks.split(",") if args.frameworks else None
+        algorithms = args.algorithms.split(",") if args.algorithms else None
+        complexity_range = args.complexity_range.split(",") if args.complexity_range else None
 
         # Run plotting asynchronously
         return asyncio.run(
@@ -464,6 +478,9 @@ Default behavior (if no options specified):
                 formats=formats,
                 trials=args.trials,
                 verbose=args.verbose,
+                frameworks=frameworks,
+                algorithms=algorithms,
+                complexity_range=complexity_range,
             )
         )
 
@@ -482,8 +499,8 @@ Default behavior (if no options specified):
             complexities=None,
             epochs=None,
             quick=True,  # Default to quick mode
-            train_only=False,
             verbose=args.verbose,
+            model_path=None,
         )
     )
 

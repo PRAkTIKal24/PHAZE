@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
+import torch.nn as nn
 from tqdm import tqdm
 
 from .enhanced_crypto_benchmark import EnhancedCryptoBenchmark
@@ -384,6 +385,97 @@ class TrainingOrchestrator:
             logger.error(f"Plot generation failed: {e}")
             return {"error": str(e)}
 
+    def _export_model_to_onnx(self, model: nn.Module, model_metadata: Dict[str, Any]) -> Path:
+        """Export a PyTorch model to ONNX format.
+        
+        Args:
+            model: PyTorch model to export
+            model_metadata: Model metadata dictionary
+            
+        Returns:
+            Path to exported ONNX file
+        """
+        import torch
+        
+        # Create output directory
+        output_dir = Path(self.config.output.output_dir) / self.config.output.models_dir
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create ONNX filename
+        onnx_filename = f"{model_metadata['model_id']}.onnx"
+        onnx_path = output_dir / onnx_filename
+        
+        try:
+            # Create dummy input tensor
+            dummy_input = torch.randn(1, model_metadata['input_size'])
+            
+            # Export to ONNX
+            torch.onnx.export(
+                model,
+                dummy_input,
+                onnx_path,
+                export_params=True,
+                opset_version=11,
+                do_constant_folding=True,
+                input_names=['input'],
+                output_names=['output'],
+                dynamic_axes={
+                    'input': {0: 'batch_size'},
+                    'output': {0: 'batch_size'}
+                }
+            )
+            
+            logger.info(f"Model exported to ONNX: {onnx_path}")
+            return onnx_path
+            
+        except Exception as e:
+            logger.error(f"Failed to export model to ONNX: {e}")
+            raise
+    
+    async def _save_results(self, results: Dict[str, Any]) -> str:
+        """Save pipeline results to file.
+        
+        Args:
+            results: Results dictionary to save
+            
+        Returns:
+            Path to saved results file
+        """
+        output_dir = Path(self.config.output.output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        results_file = output_dir / "complete_benchmark_results.json"
+        
+        # Prepare results for JSON serialization (remove model objects)
+        serializable_results = {}
+        
+        for key, value in results.items():
+            if key == "trained_models" and isinstance(value, list):
+                # Remove model objects from trained models
+                serializable_results[key] = []
+                for model_info in value:
+                    clean_info = {k: v for k, v in model_info.items() if k != "model"}
+                    serializable_results[key].append(clean_info)
+                    
+            elif key == "early_exit_models":
+                # Remove model objects from early exit models  
+                serializable_results[key] = []
+                for model_info in value:
+                    clean_info = {k: v for k, v in model_info.items() if k != "model"}
+                    serializable_results[key].append(clean_info)
+                    
+            else:
+                serializable_results[key] = value
+        
+        # Add timestamp
+        serializable_results["completion_timestamp"] = time.time()
+        
+        # Save to file
+        with open(results_file, "w") as f:
+            json.dump(serializable_results, f, indent=2, default=str)
+            
+        logger.info(f"Results saved to {results_file}")
+        return str(results_file)
+
     def save_final_results(self) -> str:
         """Save complete results to file.
 
@@ -528,6 +620,110 @@ def run_training_only(config: PHAZEConfig) -> Dict[str, Any]:
     """
     orchestrator = TrainingOrchestrator(config)
     return orchestrator.run_training_phase()
+
+
+async def run_pipeline_with_pretrained_model(config: PHAZEConfig, model_info: Dict[str, Any]) -> Dict[str, Any]:
+    """Run PHAZE pipeline with a pre-trained model.
+    
+    This function skips training and runs the zkML and crypto benchmarking
+    with plotting using the provided pre-trained model.
+    
+    Args:
+        config: PHAZE configuration
+        model_info: Model information from load_pretrained_model()
+        
+    Returns:
+        Pipeline results dictionary
+    """
+    logger.info("🚀 Starting PHAZE pipeline with pre-trained model")
+    
+    orchestrator = TrainingOrchestrator(config)
+    start_time = time.time()
+    
+    try:
+        # Step 1: Convert model to ONNX format if needed
+        logger.info("📦 Preparing model for benchmarking...")
+        
+        # Create a dummy model to load the state dict
+        from .model_architectures import PHAZEModelFactory, ModelComplexity
+        
+        # Get complexity enum from string
+        if isinstance(model_info['complexity'], str):
+            complexity = ModelComplexity(model_info['complexity'].lower())
+        else:
+            complexity = model_info['complexity']
+            
+        model = PHAZEModelFactory.create_full_model(
+            model_info['architecture'],
+            complexity,
+            model_info['input_size'], 
+            model_info['output_size']
+        )
+        
+        # Load the pre-trained weights
+        model.load_state_dict(model_info['state_dict'])
+        model.eval()
+        
+        # Prepare model metadata
+        model_metadata = {
+            'model_id': model_info['model_id'],
+            'architecture': model_info['architecture'], 
+            'complexity': model_info['complexity'],
+            'input_size': model_info['input_size'],
+            'output_size': model_info['output_size'],
+            'parameters': sum(p.numel() for p in model.parameters()),
+            'model_path': model_info['model_path'],
+        }
+        
+        # Export to ONNX
+        onnx_path = orchestrator._export_model_to_onnx(model, model_metadata)
+        model_metadata['onnx_path'] = str(onnx_path)
+        
+        # Step 2: Generate early-exit variants  
+        logger.info("🔄 Generating early-exit variants...")
+        # Create a fake training_results dict to work with existing method
+        fake_training_results = {model_metadata['model_id']: model_metadata}
+        early_exit_models = orchestrator.run_early_exit_generation(fake_training_results)
+        
+        # Step 3: Run zkML benchmarking
+        logger.info("🔐 Running zkML benchmarking...")
+        zkml_results = await orchestrator.run_zkml_benchmarking(fake_training_results)
+        
+        # Step 4: Run crypto benchmarking
+        logger.info("🔒 Running crypto benchmarking...")
+        crypto_results = orchestrator.run_crypto_benchmarking(early_exit_models)
+        
+        # Step 5: Generate plots
+        logger.info("📊 Generating plots...")
+        plot_results = orchestrator.run_plotting_phase(fake_training_results, zkml_results, crypto_results)
+        
+        # Compile results
+        total_time = time.time() - start_time
+        
+        results = {
+            'trained_models': [model_metadata],
+            'early_exit_models': early_exit_models,
+            'zkml_results': zkml_results,
+            'crypto_results': crypto_results,
+            'plot_results': plot_results,
+            'timing_info': {
+                'total_pipeline_time': total_time,
+                'model_preparation_time': 0,  # No training time
+                'benchmarking_time': total_time,
+            },
+            'config': config.to_dict(),
+            'pipeline_type': 'pretrained_model'
+        }
+        
+        # Save results
+        await orchestrator._save_results(results)
+        
+        logger.info(f"✅ Pipeline completed successfully in {total_time:.2f}s")
+        return results
+        
+    except Exception as e:
+        logger.error(f"❌ Pipeline failed: {e}")
+        raise
 
 
 if __name__ == "__main__":
