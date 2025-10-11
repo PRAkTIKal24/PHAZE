@@ -429,12 +429,15 @@ Default behavior (if no options specified):
     if args.verbose:
         print("Verbose mode enabled.")
 
-    # Handle training commands
-    if args.train or args.model_path:
+    # Handle training commands (including when config is provided)
+    if args.train or args.model_path or args.config:
         if args.verbose:
-            print(
-                f"Running training command: {'with pre-trained model' if args.model_path else 'full pipeline'}"
-            )
+            if args.model_path:
+                print("Running training command: with pre-trained model")
+            elif args.config:
+                print("Running training command: with custom config")
+            else:
+                print("Running training command: full pipeline")
 
         # Parse training-specific arguments
         architectures = args.architectures.split(",") if args.architectures else None
