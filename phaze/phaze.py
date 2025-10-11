@@ -41,7 +41,7 @@ async def run_training_command(
     """Run training and benchmarking pipeline."""
     try:
         from .src.training_config import PHAZEConfig, load_config
-        from .src.training_orchestrator import run_full_pipeline, run_training_only
+        from .src.training_orchestrator import run_full_pipeline, run_pipeline_with_pretrained_model
 
         # Load configuration
         if config_file:
