@@ -61,9 +61,12 @@ def setup_uv():
             install_cmd = 'powershell -c "irm https://astral.sh/uv/install.ps1 | iex"'
             run_command(install_cmd, check=True)
         else:
-            # Unix-like systems
-            install_cmd = "curl -LsSf https://astral.sh/uv/install.sh | sh"
-            run_command(install_cmd, check=True)
+            # Unix-like systems - use shell=True for pipe operations
+            result = subprocess.run(
+                "curl -LsSf https://astral.sh/uv/install.sh | sh",
+                shell=True,
+                check=True
+            )
 
         # Add to PATH for current session
         home = os.path.expanduser("~")
@@ -93,8 +96,12 @@ def setup_risc_zero():
     else:
         print("📥 Installing rzup...")
         try:
-            install_cmd = "curl -L https://risczero.com/install | bash"
-            run_command(install_cmd, check=True)
+            # Use shell=True for pipe operations
+            result = subprocess.run(
+                "curl -L https://risczero.com/install | bash",
+                shell=True,
+                check=True
+            )
 
             # Add to PATH for current session
             home = os.path.expanduser("~")
