@@ -165,6 +165,7 @@ class MNISTTrainer:
             "light": ModelComplexity.LIGHT,
             "medium": ModelComplexity.MEDIUM,
             "heavy": ModelComplexity.HEAVY,
+            "extreme": ModelComplexity.EXTREME,
         }
 
         complexity_enum = complexity_map.get(complexity, ModelComplexity.MEDIUM)
