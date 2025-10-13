@@ -86,7 +86,7 @@ class SimpleEarlyExitModel(PHAZEModelInterface):
             hidden_size = 128
         elif complexity == ModelComplexity.HEAVY:
             hidden_size = 256
-        else:  # EXTREME
+        elif complexity == ModelComplexity.EXTREME:
             hidden_size = 512
 
         self.hidden_size = hidden_size
@@ -319,8 +319,10 @@ class MultiExitModel(PHAZEModelInterface):
             self.layer_sizes = [input_size, 64, 128, 256]
         elif complexity == ModelComplexity.MEDIUM:
             self.layer_sizes = [input_size, 128, 256, 512, 256]
-        else:  # HEAVY and above
+        elif complexity == ModelComplexity.HEAVY:
             self.layer_sizes = [input_size, 256, 512, 1024, 512, 256]
+        elif complexity == ModelComplexity.EXTREME:
+            self.layer_sizes = [input_size, 512, 1024, 2048, 1024, 512, 256]
 
         # Build the main backbone
         self.backbone_layers = nn.ModuleList()
