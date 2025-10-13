@@ -69,7 +69,12 @@ class PHAZEModelInterface(ABC, nn.Module):
 class SimpleEarlyExitModel(PHAZEModelInterface):
     """Simple early-exit model for basic testing."""
 
-    def __init__(self, input_size: int = 10, output_size: int = 5, complexity: ModelComplexity = ModelComplexity.MINIMAL):
+    def __init__(
+        self,
+        input_size: int = 10,
+        output_size: int = 5,
+        complexity: ModelComplexity = ModelComplexity.MINIMAL,
+    ):
         super().__init__(input_size, output_size, complexity)
 
         # Define hidden layer size based on complexity
@@ -107,7 +112,11 @@ class SimpleEarlyExitModel(PHAZEModelInterface):
             "output_size": self.output_size,
             "hidden_size": self.hidden_size,
             "parameters": self.count_parameters(),
-            "layers": [f"Linear({self.input_size}->{self.hidden_size})", "ReLU", f"Linear({self.hidden_size}->{self.output_size})"],
+            "layers": [
+                f"Linear({self.input_size}->{self.hidden_size})",
+                "ReLU",
+                f"Linear({self.hidden_size}->{self.output_size})",
+            ],
         }
 
 
@@ -479,7 +488,9 @@ class PHAZEModelFactory:
 
 # Convenience functions for backward compatibility
 def create_simple_early_exit_model(
-    input_size: int = 10, output_size: int = 5, complexity: ModelComplexity = ModelComplexity.MINIMAL
+    input_size: int = 10,
+    output_size: int = 5,
+    complexity: ModelComplexity = ModelComplexity.MINIMAL,
 ) -> SimpleEarlyExitModel:
     """Create a simple early-exit model."""
     return SimpleEarlyExitModel(input_size, output_size, complexity)
@@ -496,83 +507,88 @@ def create_simple_full_model(
 
 def load_pretrained_model(model_path: str) -> Dict[str, Any]:
     """Load a pre-trained model and extract metadata.
-    
+
     Args:
         model_path: Path to the pre-trained model file (.pth or .pt)
-        
+
     Returns:
         Dictionary containing model information and loaded state
     """
-    import torch
     from pathlib import Path
-    
+
+    import torch
+
     model_path = Path(model_path)
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
-    
-    if model_path.suffix not in ['.pth', '.pt']:
-        raise ValueError(f"Unsupported model format: {model_path.suffix}. Use .pth or .pt files.")
-    
+
+    if model_path.suffix not in [".pth", ".pt"]:
+        raise ValueError(
+            f"Unsupported model format: {model_path.suffix}. Use .pth or .pt files."
+        )
+
     # Load the model state
     try:
-        state_dict = torch.load(model_path, map_location='cpu')
-        
+        state_dict = torch.load(model_path, map_location="cpu")
+
         # Try to extract metadata if available
         metadata = {}
-        if isinstance(state_dict, dict) and 'metadata' in state_dict:
-            metadata = state_dict['metadata']
-            actual_state_dict = state_dict.get('model_state_dict', state_dict)
+        if isinstance(state_dict, dict) and "metadata" in state_dict:
+            metadata = state_dict["metadata"]
+            actual_state_dict = state_dict.get("model_state_dict", state_dict)
         else:
             actual_state_dict = state_dict
-            
+
         # Infer model architecture from state dict structure
         architecture = infer_architecture_from_state_dict(actual_state_dict)
         complexity = infer_complexity_from_state_dict(actual_state_dict)
-        
+
         # Extract input/output sizes from the state dict
         input_size, output_size = infer_io_sizes_from_state_dict(actual_state_dict)
-        
+
         model_info = {
-            'model_path': str(model_path),
-            'architecture': architecture,
-            'complexity': complexity,
-            'input_size': input_size,
-            'output_size': output_size,
-            'state_dict': actual_state_dict,
-            'metadata': metadata,
-            'model_id': model_path.stem,
+            "model_path": str(model_path),
+            "architecture": architecture,
+            "complexity": complexity,
+            "input_size": input_size,
+            "output_size": output_size,
+            "state_dict": actual_state_dict,
+            "metadata": metadata,
+            "model_id": model_path.stem,
         }
-        
+
         return model_info
-        
+
     except Exception as e:
-        raise RuntimeError(f"Failed to load model from {model_path}: {e}")
+        raise RuntimeError(f"Failed to load model from {model_path}: {e}") from e
 
 
 def infer_architecture_from_state_dict(state_dict: dict) -> str:
     """Infer model architecture from state dict keys."""
     keys = list(state_dict.keys())
-    
+
     # Check for convolutional layers
-    if any('conv' in key.lower() for key in keys):
-        return 'conv'
-    
+    if any("conv" in key.lower() for key in keys):
+        return "conv"
+
     # Check for transformer/attention layers
-    if any(key in ['attention', 'self_attn', 'cross_attn'] for key in keys):
-        return 'transformer'
-    
+    if any(key in ["attention", "self_attn", "cross_attn"] for key in keys):
+        return "transformer"
+
     # Check for multi-exit patterns
-    if any('exit' in key.lower() for key in keys):
-        return 'multi_exit'
-    
+    if any("exit" in key.lower() for key in keys):
+        return "multi_exit"
+
     # Default to simple
-    return 'simple'
+    return "simple"
 
 
 def infer_complexity_from_state_dict(state_dict: dict) -> ModelComplexity:
     """Infer model complexity from parameter count."""
-    total_params = sum(param.numel() for param in state_dict.values() if hasattr(param, 'numel'))
-    
+    total_params = sum(
+        param.numel() for param in state_dict.values() if hasattr(param, "numel")
+    )
+
     if total_params < 1000:
         return ModelComplexity.MINIMAL
     elif total_params < 10000:
@@ -590,14 +606,14 @@ def infer_io_sizes_from_state_dict(state_dict: dict) -> Tuple[int, int]:
     # Find first and last linear layers
     first_linear = None
     last_linear = None
-    
+
     for key, param in state_dict.items():
-        if 'weight' in key and len(param.shape) == 2:
+        if "weight" in key and len(param.shape) == 2:
             if first_linear is None:
                 first_linear = param
             last_linear = param
-    
+
     input_size = first_linear.shape[1] if first_linear is not None else 10
     output_size = last_linear.shape[0] if last_linear is not None else 5
-    
+
     return input_size, output_size
