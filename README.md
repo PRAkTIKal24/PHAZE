@@ -201,7 +201,7 @@ uv run phaze --verbose
 **Training with Custom Parameters:**
 ```bash
 # Specific model architectures and complexities
-uv run phaze --architectures simple,conv,transformer --complexities minimal,light
+uv run phaze --architectures simple,conv,transformer --complexities-train minimal,light
 
 # Custom number of epochs (overrides config)
 uv run phaze --epochs 10
@@ -408,7 +408,7 @@ uv run phaze --plot fingerprint --data-file benchmark_results.json --style publi
 **Fingerprinting Performance Plots:**
 ```bash
 # Time complexity analysis across algorithms
-uv run phaze --plot fingerprint --algorithms rabin,shamir --complexity-range light,medium,heavy
+uv run phaze --plot fingerprint --algorithms rabin,shamir --complexities-plot light,medium,heavy
 
 # Memory and throughput analysis
 uv run phaze --plot fingerprint --trials 20 --style neurips --format png,pdf
@@ -420,7 +420,7 @@ uv run phaze --plot fingerprint --trials 20 --style neurips --format png,pdf
 uv run phaze --plot zkml-proof --frameworks ezkl,risc_zero --style publication
 
 # Framework comparison matrix and scaling analysis
-uv run phaze --plot zkml-verify --complexity-range light,medium --trials 10
+uv run phaze --plot zkml-verify --complexities-plot light,medium --trials 10
 ```
 
 **Cross-Component Comparative Analysis:**
@@ -493,7 +493,7 @@ asyncio.run(custom_plotting())
 uv run phaze --plot zkml-proof --trials 25 --output custom_plots/ --verbose
 
 # Specific framework and complexity combinations
-uv run phaze --plot zkml-proof --frameworks ezkl,risc_zero --complexity-range medium,heavy
+uv run phaze --plot zkml-proof --frameworks ezkl,risc_zero --complexities-plot medium,heavy
 
 # Generate plots with existing data to save time
 uv run phaze --plot all --data-file previous_benchmark.json --style neurips
