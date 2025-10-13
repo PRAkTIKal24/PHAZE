@@ -41,7 +41,10 @@ async def run_training_command(
     """Run training and benchmarking pipeline."""
     try:
         from .src.training_config import PHAZEConfig, load_config
-        from .src.training_orchestrator import run_full_pipeline, run_pipeline_with_pretrained_model
+        from .src.training_orchestrator import (
+            run_full_pipeline,
+            run_pipeline_with_pretrained_model,
+        )
 
         # Load configuration
         if config_file:
@@ -69,7 +72,7 @@ async def run_training_command(
             config.experiment.benchmark_iterations = 3
             config.experiment.seeds = [42, 123]  # Fewer seeds
             if not architectures:
-                config.model.architectures = ["simple", "conv"]  # Subset
+                config.model.architectures = ["simple"]  # Subset
             if not complexities:
                 config.model.complexities = ["minimal", "light"]  # Subset
 
@@ -97,8 +100,9 @@ async def run_training_command(
             print(f"Using pre-trained model: {model_path}")
             # Load and process pre-trained model
             from .src.model_architectures import load_pretrained_model
+
             model_info = load_pretrained_model(model_path)
-            
+
             # Run zkML and crypto benchmarking with plotting
             print("Running zkML and crypto benchmarking with pre-trained model...")
             results = await run_pipeline_with_pretrained_model(config, model_info)
@@ -441,7 +445,9 @@ Default behavior (if no options specified):
 
         # Parse training-specific arguments
         architectures = args.architectures.split(",") if args.architectures else None
-        complexities = args.complexities_train.split(",") if args.complexities_train else None
+        complexities = (
+            args.complexities_train.split(",") if args.complexities_train else None
+        )
 
         # Run training asynchronously
         return asyncio.run(
@@ -468,7 +474,9 @@ Default behavior (if no options specified):
         formats = args.format.split(",") if args.format else None
         frameworks = args.frameworks.split(",") if args.frameworks else None
         algorithms = args.algorithms.split(",") if args.algorithms else None
-        complexities_plot = args.complexities_plot.split(",") if args.complexities_plot else None
+        complexities_plot = (
+            args.complexities_plot.split(",") if args.complexities_plot else None
+        )
 
         # Run plotting asynchronously
         return asyncio.run(
