@@ -33,8 +33,8 @@ DATASET_CONFIG = DatasetConfig(
 
 # Model configuration
 MODEL_CONFIG = ModelConfig(
-    architectures=["simple"],
-    complexities=["medium", "heavy"],
+    architectures=["multi_exit"],
+    complexities=["minimal", "light"],
     early_exit_ratios=[0.50, 0.75],  # Parameter ratios for M_early
     input_size=784,  # MNIST flattened (28*28)
     output_size=10,  # MNIST classes
