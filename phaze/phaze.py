@@ -130,7 +130,7 @@ async def run_plotting_command(
     verbose: bool = False,
     frameworks: Optional[List[str]] = None,
     algorithms: Optional[List[str]] = None,
-    complexity_range: Optional[List[str]] = None,
+    complexities_plot: Optional[List[str]] = None,
 ) -> int:
     """Run plotting command with specified parameters."""
     try:
@@ -183,7 +183,7 @@ async def run_plotting_command(
             # Configure benchmark parameters based on requested plot types
             zkml_config = {
                 "architectures": ["simple", "multi_exit"],
-                "complexities": complexity_range or ["light", "medium", "heavy"],
+                "complexities": complexities_plot or ["light", "medium", "heavy"],
                 "input_sizes": [10, 50, 100],
                 "num_trials": max(3, trials // 3),  # Fewer trials for benchmarking
                 "frameworks": frameworks or ["ezkl", "risc_zero"],
@@ -313,9 +313,9 @@ Default behavior (if no options specified):
     )
 
     parser.add_argument(
-        "--complexities",
+        "--complexities-train",
         type=str,
-        help="Comma-separated list of model complexities (e.g., 'minimal,light,medium')",
+        help="Comma-separated list of model complexities for training (e.g., 'minimal,light,medium')",
     )
 
     parser.add_argument(
@@ -369,9 +369,9 @@ Default behavior (if no options specified):
     )
 
     parser.add_argument(
-        "--complexity-range",
+        "--complexities-plot",
         type=str,
-        help="Comma-separated list of model complexities to test (e.g., 'light,medium,heavy')",
+        help="Comma-separated list of model complexities for plotting (e.g., 'light,medium,heavy')",
     )
 
     parser.add_argument(
@@ -441,7 +441,7 @@ Default behavior (if no options specified):
 
         # Parse training-specific arguments
         architectures = args.architectures.split(",") if args.architectures else None
-        complexities = args.complexities.split(",") if args.complexities else None
+        complexities = args.complexities_train.split(",") if args.complexities_train else None
 
         # Run training asynchronously
         return asyncio.run(
@@ -468,7 +468,7 @@ Default behavior (if no options specified):
         formats = args.format.split(",") if args.format else None
         frameworks = args.frameworks.split(",") if args.frameworks else None
         algorithms = args.algorithms.split(",") if args.algorithms else None
-        complexity_range = args.complexity_range.split(",") if args.complexity_range else None
+        complexities_plot = args.complexities_plot.split(",") if args.complexities_plot else None
 
         # Run plotting asynchronously
         return asyncio.run(
@@ -483,7 +483,7 @@ Default behavior (if no options specified):
                 verbose=args.verbose,
                 frameworks=frameworks,
                 algorithms=algorithms,
-                complexity_range=complexity_range,
+                complexities_plot=complexities_plot,
             )
         )
 
