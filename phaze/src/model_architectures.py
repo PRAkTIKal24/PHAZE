@@ -69,13 +69,26 @@ class PHAZEModelInterface(ABC, nn.Module):
 class SimpleEarlyExitModel(PHAZEModelInterface):
     """Simple early-exit model for basic testing."""
 
-    def __init__(self, input_size: int = 10, output_size: int = 5):
-        super().__init__(input_size, output_size, ModelComplexity.MINIMAL)
+    def __init__(self, input_size: int = 10, output_size: int = 5, complexity: ModelComplexity = ModelComplexity.MINIMAL):
+        super().__init__(input_size, output_size, complexity)
 
-        self.fc1 = nn.Linear(input_size, 20)
+        # Define hidden layer size based on complexity
+        if complexity == ModelComplexity.MINIMAL:
+            hidden_size = 32
+        elif complexity == ModelComplexity.LIGHT:
+            hidden_size = 64
+        elif complexity == ModelComplexity.MEDIUM:
+            hidden_size = 128
+        elif complexity == ModelComplexity.HEAVY:
+            hidden_size = 256
+        else:  # EXTREME
+            hidden_size = 512
+
+        self.hidden_size = hidden_size
+        self.fc1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(20, output_size)
-        self.confidence_head = nn.Linear(20, 1)  # For confidence estimation
+        self.fc2 = nn.Linear(hidden_size, output_size)
+        self.confidence_head = nn.Linear(hidden_size, 1)  # For confidence estimation
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.relu(self.fc1(x))
@@ -92,8 +105,9 @@ class SimpleEarlyExitModel(PHAZEModelInterface):
             "complexity": self.complexity.value,
             "input_size": self.input_size,
             "output_size": self.output_size,
+            "hidden_size": self.hidden_size,
             "parameters": self.count_parameters(),
-            "layers": ["Linear(10->20)", "ReLU", "Linear(20->5)"],
+            "layers": [f"Linear({self.input_size}->{self.hidden_size})", "ReLU", f"Linear({self.hidden_size}->{self.output_size})"],
         }
 
 
@@ -422,7 +436,7 @@ class PHAZEModelFactory:
         """Create an early-exit model."""
 
         if architecture == "simple":
-            return SimpleEarlyExitModel(input_size, output_size)
+            return SimpleEarlyExitModel(input_size, output_size, complexity)
         elif architecture == "conv":
             input_channels = kwargs.get("input_channels", 3)
             spatial_size = kwargs.get("spatial_size", 32)
@@ -444,16 +458,10 @@ class PHAZEModelFactory:
         output_size: int = 5,
         **kwargs,
     ) -> PHAZEModelInterface:
-        """Create a full model (typically more complex than early-exit)."""
+        """Create a full model (M_full) with the specified complexity."""
 
-        # Full models are typically more complex versions of early-exit models
-        if complexity == ModelComplexity.MINIMAL:
-            complexity = ModelComplexity.LIGHT
-        elif complexity == ModelComplexity.LIGHT:
-            complexity = ModelComplexity.MEDIUM
-        elif complexity == ModelComplexity.MEDIUM:
-            complexity = ModelComplexity.HEAVY
-
+        # M_full models use the exact complexity specified
+        # The early exit models (M_early) will be generated later using early_exit_ratios
         return PHAZEModelFactory.create_early_exit_model(
             architecture, complexity, input_size, output_size, **kwargs
         )
@@ -471,10 +479,10 @@ class PHAZEModelFactory:
 
 # Convenience functions for backward compatibility
 def create_simple_early_exit_model(
-    input_size: int = 10, output_size: int = 5
+    input_size: int = 10, output_size: int = 5, complexity: ModelComplexity = ModelComplexity.MINIMAL
 ) -> SimpleEarlyExitModel:
     """Create a simple early-exit model."""
-    return SimpleEarlyExitModel(input_size, output_size)
+    return SimpleEarlyExitModel(input_size, output_size, complexity)
 
 
 def create_simple_full_model(
