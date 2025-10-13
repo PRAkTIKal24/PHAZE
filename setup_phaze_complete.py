@@ -62,10 +62,10 @@ def setup_uv():
             run_command(install_cmd, check=True)
         else:
             # Unix-like systems - use shell=True for pipe operations
-            result = subprocess.run(
+            subprocess.run(
                 "curl -LsSf https://astral.sh/uv/install.sh | sh",
                 shell=True,
-                check=True
+                check=True,
             )
 
         # Add to PATH for current session
@@ -97,10 +97,8 @@ def setup_risc_zero():
         print("📥 Installing rzup...")
         try:
             # Use shell=True for pipe operations
-            result = subprocess.run(
-                "curl -L https://risczero.com/install | bash",
-                shell=True,
-                check=True
+            subprocess.run(
+                "curl -L https://risczero.com/install | bash", shell=True, check=True
             )
 
             # Add to PATH for current session
@@ -149,9 +147,21 @@ def build_guest_program():
 
         # Verify the ELF was created (check both possible locations)
         elf_paths = [
-            guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release" / "risc0_guest",
-            guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker" / "risc0_guest.bin",
-            guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker" / "risc0_guest",
+            guest_dir
+            / "target"
+            / "riscv32im-risc0-zkvm-elf"
+            / "release"
+            / "risc0_guest",
+            guest_dir
+            / "target"
+            / "riscv32im-risc0-zkvm-elf"
+            / "docker"
+            / "risc0_guest.bin",
+            guest_dir
+            / "target"
+            / "riscv32im-risc0-zkvm-elf"
+            / "docker"
+            / "risc0_guest",
         ]
 
         for elf_path in elf_paths:

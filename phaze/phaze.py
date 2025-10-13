@@ -105,11 +105,11 @@ async def run_training_command(
 
             # Run zkML and crypto benchmarking with plotting
             print("Running zkML and crypto benchmarking with pre-trained model...")
-            results = await run_pipeline_with_pretrained_model(config, model_info)
+            await run_pipeline_with_pretrained_model(config, model_info)
             print("Pipeline completed successfully!")
         else:
             print("Running complete pipeline...")
-            results = await run_full_pipeline(config)
+            await run_full_pipeline(config)
             print("Pipeline completed successfully!")
 
         return 0
