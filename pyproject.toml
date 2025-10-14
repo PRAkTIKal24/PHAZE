@@ -70,6 +70,7 @@ ci = [
 [project.scripts]
 phaze = "phaze.phaze:main"
 phaze-legacy = "phaze.phaze_legacy:main"
+phaze-risc-build = "phaze_risc_build:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
