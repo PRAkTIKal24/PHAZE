@@ -6,23 +6,149 @@
 [![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
-PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledge machine learning (zkML) systems with support for early-exit models and privacy-preserving inference at the Large Hadron Collider (LHC).
+PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledge machine learning (zkML) systems with support for early-exit models, multi-dataset compatibility, and privacy-preserving inference. Built for research applications including high-energy physics and the Large Hadron Collider (LHC).
 
-## 🚀 Quick Install
+## 📋 Table of Contents
+
+- [✨ Features](#-features)
+- [🚀 Quick Start](#-quick-start)
+  - [Installation](#installation)
+  - [Development Installation](#development-installation)
+- [💡 Usage](#-usage)
+  - [PHAZE CLI (Recommended)](#phaze-cli-recommended)
+- [🏗️ Architecture](#️-architecture)
+- [📊 Performance Analysis & Plotting](#-performance-analysis--plotting)
+  - [Publication-Ready Plots](#publication-ready-plots)
+  - [Plot Types and Styles](#plot-types-and-styles)
+  - [Statistical Analysis](#statistical-analysis)
+- [📊 Benchmarking](#-benchmarking)
+  - [Performance Metrics](#performance-metrics)
+  - [Typical Performance (Reference Hardware)](#typical-performance-reference-hardware)
+- [🧪 Testing](#-testing)
+  - [Running Tests](#running-tests)
+  - [Test Structure](#test-structure)
+- [🔧 Configuration](#-configuration)
+  - [Environment Variables](#environment-variables)
+  - [Dependency Groups](#dependency-groups)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [📞 Support](#-support)
+- [📚 Legacy Examples](#-legacy-examples)
+## ✨ Features
+
+- **Dynamic RISC Zero Integration**: Automatically generates and builds guest programs for any model architecture
+- **Multi-Dataset Support**: Works with MNIST, CIFAR-10/100, Fashion-MNIST, ImageNet, and custom datasets
+- **Architecture-Agnostic**: Supports simple dense, convolutional, transformer, and multi-exit models
+- **Comprehensive Benchmarking**: End-to-end performance evaluation with statistical analysis
+- **Privacy-Preserving**: Zero-knowledge proofs for model inference verification
+- **High-Performance**: Optimized Rust bindings with parallel processing
+- **Research-Ready**: Built for LHC applications and high-energy physics research
+- **CLI Tools**: Command-line utilities for easy build and dataset management
+- **Extensive Testing**: Full test coverage with integration tests
+- **Modular Design**: Pluggable components for custom workflows
+
+### 🔐 Zero-Knowledge ML Support
+- **EZKL Integration**: Full PyTorch model compilation and proof generation
+- **RISC Zero**: High-performance zkVM integration for ML inference
+- **Groth16, Plonky, Halo**: Mock implementations for comparative benchmarking
+- **Unified Interface**: Consistent API across different zkML backends
+
+### 🧠 Model Architectures  
+- **Early-Exit Models**: Adaptive inference with confidence-based termination
+- **Multi-Exit Networks**: Multiple decision points for optimal latency/accuracy trade-offs
+- **Convolutional Models**: CNN architectures for image-like data
+- **Transformer Models**: Attention-based architectures for sequence data
+- **Complexity Scaling**: Minimal to extreme complexity levels for performance testing
+
+### 🔒 Cryptographic Primitives
+- **Rabin Fingerprinting**: Polynomial-based hashing for data integrity verification
+- **Shamir Secret Sharing**: Threshold secret sharing with configurable parameters
+- **Field Operations**: Finite field arithmetic with multiple field sizes
+- **Hash Functions**: Rust-optimized SHA256 and Keccak256 implementations
+
+### 📊 Comprehensive Benchmarking
+- **Performance Metrics**: Setup time, proof generation, verification time, memory usage
+- **Scalability Testing**: Performance across different input sizes and model complexities
+- **Framework Comparison**: Side-by-side evaluation of zkML approaches
+- **Automated Reporting**: Markdown reports with performance recommendations
+
+### 📈 Publication-Ready Plotting
+- **Statistical Analysis**: Error bars, confidence intervals, significance testing
+- **Multiple Plot Types**: Time complexity, memory usage, throughput, comparative analysis
+- **Publication Styles**: NeurIPS, IEEE/ACM, presentation, and web-optimized formats
+- **Export Formats**: High-resolution PNG, PDF, SVG for papers and presentations
+- **Colorblind-Friendly**: Accessible color schemes and consistent styling
+
+## 🚀 Quick Start
+
+By default, the setup script configures PHAZE for the MNIST dataset. To use other datasets, specify the `--dataset` option.
 
 ```bash
 git clone https://github.com/PRAkTIKal24/PHAZE.git && cd PHAZE
-python setup_phaze_complete.py --development  # Full setup with RISC Zero
+python setup_phaze_complete.py --development  # Full setup for MNIST with dynamic RISC Zero
 uv run phaze --help  # Verify installation
 ```
 
-> **Note**: The above setup is recommended since it sets up the correct rust-python bindings required for PHAZE, but if you are sure you dont want to use RISC-Zero, a quicker way to install would be:
+> **Note**: The above setup includes dynamic RISC Zero integration that automatically supports all model architectures and datasets. For faster setup without RISC Zero:
 
 ```bash
-python setup_phaze_complete.py --development --skip-risc-zero  # Quick setup
+python setup_phaze_complete.py --development --skip-risc-zero  # Quick setup for MNIST
 uv run phaze --help  # Verify installation
 ```
 
+### 🎯 Multi-Dataset Support
+
+PHAZE now supports multiple datasets out of the box:
+
+```bash
+# Setup for CIFAR-10
+python setup_phaze_complete.py --development --dataset cifar10
+
+# Setup for CIFAR-100  
+python setup_phaze_complete.py --development --dataset cifar100
+
+# Setup for Fashion-MNIST
+python setup_phaze_complete.py --development --dataset fashion_mnist
+
+# List all supported datasets
+uv run phaze-risc-build datasets
+```
+
+### Installation
+
+**Prerequisites**: Python 3.10+, [uv](https://docs.astral.sh/uv/) package manager
+
+```bash
+# Clone and install
+git clone https://github.com/PRAkTIKal24/PHAZE.git
+cd PHAZE
+
+# Option 1: Complete setup with dynamic RISC Zero (recommended)
+python setup_phaze_complete.py --development
+
+# Option 2: Setup for specific dataset
+python setup_phaze_complete.py --development --dataset cifar10
+
+# Option 3: Quick setup without RISC Zero (faster, limited features)
+python setup_phaze_complete.py --development --skip-risc-zero
+
+# Verify installation
+uv run phaze --help
+uv run phaze-risc-build --help  # RISC Zero build utilities
+```
+
+### Development Installation
+
+```bash
+# Full development environment with all dependencies
+uv sync --group dev --group test
+uv run python setup_phaze_complete.py --development
+
+# Test installation (includes integration tests)
+uv run pytest
+```
+## Known Build Issues
 ### 🐍 Python Version Issues
 
 If you get Python version errors (e.g., "Python 3.9.16 does not satisfy Python>=3.10"):
@@ -67,111 +193,7 @@ export CARGO_BUILD_TARGET=aarch64-apple-darwin
 python setup_phaze_complete.py --development
 ```
 
-## 📋 Table of Contents
-
-- [✨ Features](#-features)
-- [🚀 Quick Start](#-quick-start)
-  - [Installation](#installation)
-  - [Development Installation](#development-installation)
-- [💡 Usage Examples](#-usage-examples)
-  - [PHAZE CLI (Recommended)](#phaze-cli-recommended)
-- [📊 Performance Analysis & Plotting](#-performance-analysis--plotting)
-  - [Publication-Ready Plots](#publication-ready-plots)
-  - [Plot Types and Styles](#plot-types-and-styles)
-  - [Statistical Analysis](#statistical-analysis)
-- [📊 Benchmarking](#-benchmarking)
-  - [Performance Metrics](#performance-metrics)
-  - [Typical Performance (Reference Hardware)](#typical-performance-reference-hardware)
-- [🧪 Testing](#-testing)
-  - [Running Tests](#running-tests)
-  - [Test Structure](#test-structure)
-- [🔧 Configuration](#-configuration)
-  - [Environment Variables](#environment-variables)
-  - [Dependency Groups](#dependency-groups)
-- [🚨 Known Limitations](#-known-limitations)
-  - [Current Constraints](#current-constraints)
-  - [Performance Considerations](#performance-considerations)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [🙏 Acknowledgments](#-acknowledgments)
-- [📞 Support](#-support)
-- [📚 Legacy Usage Examples](#-legacy-usage-examples)
-  - [Direct Python Examples](#direct-python-examples)
-  - [Model Creation and Testing](#model-creation-and-testing)
-  - [Zero-Knowledge ML Integration](#zero-knowledge-ml-integration)
-  - [Cryptographic Primitives](#cryptographic-primitives)
-  - [Custom Benchmarking](#custom-benchmarking)
-
-## ✨ Features
-
-### 🔐 Zero-Knowledge ML Support
-- **EZKL Integration**: Full PyTorch model compilation and proof generation
-- **RISC Zero**: High-performance zkVM integration for ML inference
-- **Groth16, Plonky, Halo**: Mock implementations for comparative benchmarking
-- **Unified Interface**: Consistent API across different zkML backends
-
-### 🧠 Model Architectures  
-- **Early-Exit Models**: Adaptive inference with confidence-based termination
-- **Multi-Exit Networks**: Multiple decision points for optimal latency/accuracy trade-offs
-- **Convolutional Models**: CNN architectures for image-like data
-- **Transformer Models**: Attention-based architectures for sequence data
-- **Complexity Scaling**: Minimal to extreme complexity levels for performance testing
-
-### 🔒 Cryptographic Primitives
-- **Rabin Fingerprinting**: Polynomial-based hashing for data integrity verification
-- **Shamir Secret Sharing**: Threshold secret sharing with configurable parameters
-- **Field Operations**: Finite field arithmetic with multiple field sizes
-- **Hash Functions**: Rust-optimized SHA256 and Keccak256 implementations
-
-### 📊 Comprehensive Benchmarking
-- **Performance Metrics**: Setup time, proof generation, verification time, memory usage
-- **Scalability Testing**: Performance across different input sizes and model complexities
-- **Framework Comparison**: Side-by-side evaluation of zkML approaches
-- **Automated Reporting**: Markdown reports with performance recommendations
-
-### 📈 Publication-Ready Plotting
-- **Statistical Analysis**: Error bars, confidence intervals, significance testing
-- **Multiple Plot Types**: Time complexity, memory usage, throughput, comparative analysis
-- **Publication Styles**: NeurIPS, IEEE/ACM, presentation, and web-optimized formats
-- **Export Formats**: High-resolution PNG, PDF, SVG for papers and presentations
-- **Colorblind-Friendly**: Accessible color schemes and consistent styling
-
-## 🚀 Quick Start
-
-### Installation
-
-**Prerequisites**: Python 3.10+, [uv](https://docs.astral.sh/uv/) package manager
-
-```bash
-# Clone and install
-git clone https://github.com/PRAkTIKal24/PHAZE.git
-cd PHAZE
-
-# Option 1: Complete setup with RISC Zero (recommended)
-python setup_phaze_complete.py --development
-
-# Option 2: Quick setup without RISC Zero (faster)
-python setup_phaze_complete.py --development --skip-risc-zero
-
-# Option 3: Legacy installation
-./install_dev.sh
-
-# Verify installation
-uv run phaze --help
-```
-
-### Development Installation
-
-```bash
-# Full development environment
-uv sync --group dev --group test
-uv run python dev_setup.py
-
-# Test installation
-uv run pytest
-```
-
-## � Latest Integration: Python Configuration & Training Pipeline
+## �💡 Usage
 
 PHAZE now includes a comprehensive training pipeline with flexible Python-based configuration system, replacing the previous YAML-only approach. This system provides better IDE support, type safety, and more flexible configuration management.
 
@@ -223,7 +245,7 @@ uv run phaze --architectures simple,conv --epochs 1
 5. **Plot Generation**: Create publication-ready performance plots
 
 **Key Benefits:**
-- **MNIST Integration**: Fast training with balanced subsets for consistent benchmarks
+- **Multi-Dataset Integration**: Fast training with balanced subsets for consistent benchmarks across all supported datasets
 - **ONNX Export**: Automatic model export for ezkl compatibility
 - **Multi-Seed Training**: Reproducible results across multiple random seeds
 - **Automatic Plotting**: Real benchmark data integration with plotting system
@@ -342,14 +364,144 @@ Each trained model includes comprehensive metadata:
 }
 ```
 
-## �💡 Usage Examples
+### 🔧 Dynamic RISC Zero Integration
+
+PHAZE features a revolutionary dynamic RISC Zero integration that automatically generates and builds guest programs for any model architecture, eliminating the need for hardcoded implementations.
+
+### How It Works
+
+1. **Architecture Detection**: Automatically analyzes your model to extract layer dimensions and structure
+2. **Template Generation**: Creates optimized Rust guest programs using dynamic templates
+3. **One-Time Build**: Builds all necessary guest programs for your dataset configuration
+4. **Runtime Selection**: Automatically selects the correct guest program during benchmarking
+
+### CLI Commands
+
+```bash
+# List all supported datasets
+uv run phaze-risc-build datasets
+
+# Build guest programs for all model architectures (MNIST)
+uv run phaze-risc-build build --dataset mnist
+
+# Build for specific dataset
+uv run phaze-risc-build build --dataset cifar10
+
+# Scan model factory and show available architectures
+uv run phaze-risc-build scan
+
+# Clean and rebuild everything
+uv run phaze-risc-build clean
+uv run phaze-risc-build build --dataset your_dataset
+```
+
+### Supported Model Architectures
+
+- **Simple Dense**: Basic feedforward networks with configurable layers
+- **Convolutional**: CNN architectures with conv2d, pooling, and dense layers
+- **Transformer**: Self-attention based models with configurable heads
+- **Multi-Exit**: Early-exit models with multiple confidence-based exit points
+
+### Architecture Examples
+
+```python
+from phaze.src.model_architectures import ModelFactory
+
+# Create any model - RISC Zero will adapt automatically
+model = ModelFactory.create_model("simple", dataset_config)  # Works!
+model = ModelFactory.create_model("conv", dataset_config)    # Works!
+model = ModelFactory.create_model("transformer", dataset_config)  # Works!
+model = ModelFactory.create_model("multi_exit", dataset_config)   # Works!
+```
+
+### 🗃️ Multi-Dataset Support
+
+PHAZE supports multiple datasets with automatic configuration:
+
+### Supported Datasets
+
+| Dataset | Input Shape | Classes | Description |
+|---------|-------------|---------|-------------|
+| **MNIST** | 28×28×1 | 10 | Handwritten digits |
+| **Fashion-MNIST** | 28×28×1 | 10 | Fashion items |
+| **CIFAR-10** | 32×32×3 | 10 | Natural images |
+| **CIFAR-100** | 32×32×3 | 100 | Natural images (fine-grained) |
+| **ImageNet** | 224×224×3 | 1000 | Large-scale natural images |
+| **Custom** | Configurable | Configurable | User-defined datasets |
+
+### Dataset Configuration
+
+```python
+from phaze.src.dataset_config import DATASET_CONFIGS, DatasetConfig
+
+# Use predefined dataset
+config = DATASET_CONFIGS["cifar10"]
+
+# Create custom dataset
+custom_config = DatasetConfig(
+    name="my_dataset",
+    input_shape=(64, 64, 3),
+    num_classes=20,
+    data_loader="my_custom_loader"
+)
+```
+
+### Setup for Different Datasets
+
+```bash
+# Setup with dataset selection
+python setup_phaze_complete.py --development --dataset cifar10
+
+# Batch setup for multiple datasets
+for dataset in mnist cifar10 cifar100; do
+    uv run phaze-risc-build build --dataset $dataset
+done
+
+# Verify dataset support
+uv run phaze-risc-build datasets --verbose
+```
 
 ### PHAZE CLI (Recommended)
 
-**Run Default Pipeline in Quick Mode**
+**Run Default Pipeline with Dynamic RISC Zero**
 ```bash
-# Runs full training and benchmarking pipeline in quick mode
+# Runs full training and benchmarking pipeline with automatic architecture detection
 uv run phaze
+
+# Run with specific dataset
+uv run phaze --dataset cifar10
+
+# Run with specific model architecture
+uv run phaze --model conv --dataset cifar10
+```
+
+**Multi-Dataset Workflow**
+```bash
+# Setup and benchmark across multiple datasets
+python setup_phaze_complete.py --development --dataset cifar10
+uv run phaze --dataset cifar10 --model transformer
+
+# Switch to different dataset (guest programs auto-selected)
+uv run phaze --dataset mnist --model multi_exit
+
+# Batch benchmarking across datasets
+for dataset in mnist cifar10 fashion_mnist; do
+    uv run phaze --dataset $dataset --model conv --output results_$dataset/
+done
+```
+
+**Dynamic RISC Zero Workflow**
+```bash
+# Build all guest programs for your dataset
+uv run phaze-risc-build build --dataset cifar10
+
+# Run any model architecture (guest programs automatically selected)
+uv run phaze --model simple     # Uses simple_dense guest program
+uv run phaze --model conv       # Uses conv_2d guest program  
+uv run phaze --model transformer # Uses transformer guest program
+
+# Verify guest programs are built
+uv run phaze-risc-build scan --verbose
 ```
 
 **Generate Publication-Ready Plots**
@@ -501,15 +653,46 @@ uv run phaze --plot all --data-file previous_benchmark.json --style neurips
 
 ## 🏗️ Architecture
 
-### Project Structure
+PHAZE is built on a modular architecture with dynamic components:
+
+```
+PHAZE Framework
+├── Core Components
+│   ├── Model Factory (architecture-agnostic)
+│   ├── Dataset Configuration (multi-dataset)
+│   ├── Dynamic RISC Zero Integration
+│   └── Benchmarking Suite
+├── RISC Zero Integration
+│   ├── Architecture Registry
+│   ├── Template Engine (dynamic guest programs)
+│   ├── Build Manager
+│   └── Runtime Backend
+├── Cryptographic Primitives
+│   ├── Hash Functions
+│   ├── Commitment Schemes
+│   └── Zero-Knowledge Proofs
+└── Tools & Utilities
+    ├── CLI Build Tools
+    ├── Dataset Managers
+    └── Performance Analyzers
+```
+
+### Key Components
+
+- **Model Factory**: Creates any architecture (simple, conv, transformer, multi-exit) with automatic parameter detection
+- **Dynamic RISC Zero**: Generates Rust guest programs on-demand for any model architecture
+- **Dataset Configuration**: Supports multiple datasets with automatic dimension handling
+- **Build System**: One-time build process that works with all subsequent model architectures
+- **Benchmarking**: Comprehensive performance evaluation with statistical analysis
 
 ```
 PHAZE/
 ├── README.md                       # Project documentation
 ├── pyproject.toml                  # Python project configuration
 ├── phaze_config.py                 # Python configuration system
+├── phaze_risc_build.py             # CLI utility for RISC Zero build management
+├── setup_phaze_complete.py         # Complete setup with multi-dataset support
 ├── dev_setup.py                    # Editable install setup script
-├── install_dev.sh                  # Automated installation script
 ├── uv.lock                         # Dependency lock file
 │
 ├── phaze/                          # Main Python package
@@ -518,6 +701,8 @@ PHAZE/
 │   ├── phaze_legacy.py             # Legacy benchmark CLI
 │   └── src/                        # Core implementation modules
 │       ├── model_architectures.py      # Model factory and definitions
+│       ├── risc_zero_codegen.py        # Dynamic RISC Zero integration (NEW)
+│       ├── dataset_config.py           # Multi-dataset configuration (NEW)
 │       ├── zkml_integration.py         # zkML framework integration
 │       ├── zkml_backends.py            # Concrete zkML implementations
 │       ├── zkml_framework_interface.py # Abstract zkML interfaces
@@ -526,7 +711,7 @@ PHAZE/
 │       ├── early_exit_models.py        # Early-exit model implementations
 │       ├── training_config.py          # Configuration loading system
 │       ├── training_orchestrator.py    # Training pipeline coordinator
-│       ├── mnist_trainer.py            # Fast MNIST training
+│       ├── mnist_trainer.py            # Fast dataset training
 │       ├── multi_exit_generator.py     # Multi-exit model generation
 │       ├── enhanced_zkml_benchmark.py  # Enhanced zkML benchmarking
 │       ├── enhanced_crypto_benchmark.py # Enhanced crypto benchmarking
@@ -535,6 +720,14 @@ PHAZE/
 │           ├── __init__.py
 │           ├── plotters/               # Individual plot implementations
 │           └── ...
+│
+├── examples/                       # Example scripts and tutorials
+│   └── multi_dataset_example.py    # Multi-dataset benchmarking example (NEW)
+│
+├── docs/                           # Documentation
+│   ├── RISC_ZERO_DYNAMIC_INTEGRATION.md # Dynamic RISC Zero documentation (NEW)
+│   ├── API_REFERENCE.md            # API documentation
+│   └── ...
 │
 ├── legacy/                         # Legacy benchmark system
 │   ├── examples/                   # Legacy benchmark scripts
@@ -672,21 +865,6 @@ uv sync --no-dev
 ```
 
 ## 🚨 Known Limitations
-
-### Current Constraints
-
-1. **EZKL Integration**: Requires proper EZKL installation and Structured Reference String (SRS) setup
-2. **Large Models**: Memory requirements scale significantly with model complexity
-3. **Platform Support**: Rust bindings require compilation on target platform
-4. **Mock Backends**: Some zkML frameworks use simulated implementations for testing
-
-### Performance Considerations
-
-- **Model Complexity**: Choose appropriate complexity based on latency requirements
-- **Input Size**: Larger inputs significantly increase proof generation time
-- **Memory Usage**: Monitor system resources for complex models
-- **Framework Selection**: Different backends have varying performance characteristics
-
 ### Troubleshooting
 
 **Common Issues:**
@@ -743,15 +921,40 @@ We welcome contributions! Please see our contributing guidelines:
 git clone https://github.com/YOUR_USERNAME/PHAZE.git
 cd PHAZE
 
-# Set up development environment
+# Set up development environment with dynamic RISC Zero
 uv sync --group dev --group test
+python setup_phaze_complete.py --development
 
 # Install pre-commit hooks (optional)
 uv tool install pre-commit
 pre-commit install
 
-# Run tests to verify setup
+# Verify RISC Zero integration
+uv run phaze-risc-build scan
+uv run phaze-risc-build build --dataset mnist
+
+# Run comprehensive tests (includes dynamic integration tests)
 uv run pytest
+```
+
+### Development Tools
+
+PHAZE includes several CLI tools for development and debugging:
+
+```bash
+# RISC Zero build management
+uv run phaze-risc-build build --dataset cifar10    # Build guest programs
+uv run phaze-risc-build scan --verbose             # Scan model factory
+uv run phaze-risc-build datasets                   # List supported datasets
+uv run phaze-risc-build clean                      # Clean build artifacts
+
+# Main benchmarking CLI
+uv run phaze --help                                 # Show all options
+uv run phaze --model conv --dataset cifar10        # Run specific config
+uv run phaze --plot all --style neurips            # Generate plots
+
+# Legacy tools (for comparison and migration)
+uv run python legacy/examples/run_basic_benchmark.py
 ```
 
 ### Code Quality
@@ -792,9 +995,55 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📚 Additional Examples
 
-For more examples and legacy usage patterns, see the [examples directory](legacy/examples/) and API documentation.
+### Multi-Dataset Example
+
+The `examples/multi_dataset_example.py` demonstrates the new multi-dataset capabilities:
+
+```python
+"""
+Multi-dataset benchmarking with dynamic RISC Zero integration.
+"""
+import asyncio
+from phaze.src.dataset_config import DATASET_CONFIGS
+from phaze.src.enhanced_zkml_benchmark import ZkMLBenchmarkRunner
+
+async def run_multi_dataset_benchmark():
+    # Benchmark across multiple datasets
+    datasets = ["mnist", "cifar10", "fashion_mnist"]
+    
+    for dataset_name in datasets:
+        print(f"\n=== Benchmarking {dataset_name.upper()} ===")
+        
+        # Get dataset configuration
+        dataset_config = DATASET_CONFIGS[dataset_name]
+        
+        # Create benchmark runner
+        runner = ZkMLBenchmarkRunner(dataset_config=dataset_config)
+        
+        # Run benchmarks for all architectures
+        architectures = ["simple", "conv", "multi_exit"]
+        for arch in architectures:
+            results = await runner.run_architecture_benchmark(arch)
+            print(f"{arch} architecture: {results.summary}")
+
+if __name__ == "__main__":
+    asyncio.run(run_multi_dataset_benchmark())
+```
+
+### Dynamic RISC Zero Integration
+
+See `docs/RISC_ZERO_DYNAMIC_INTEGRATION.md` for comprehensive documentation on the dynamic RISC Zero system, including:
+
+- Template-based guest program generation
+- Architecture registry and build management
+- Multi-dataset configuration patterns
+- Performance optimization techniques
+
+## 📚 Legacy Examples
+
+For legacy usage patterns and migration guides, see the [examples directory](legacy/examples/) and API documentation.
 
 ---
 
-**PHAZE** - Advancing privacy-preserving machine learning for high-energy physics through comprehensive zero-knowledge benchmarking.
+**PHAZE** - Advancing privacy-preserving machine learning through dynamic zero-knowledge benchmarking with multi-dataset support and architecture-agnostic integration.
 
