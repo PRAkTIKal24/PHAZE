@@ -182,36 +182,47 @@ def build_guest_program():
 
 def build_dynamic_guest_programs(dataset_name="mnist"):
     """Build dynamic guest programs for all model architectures.
-    
+
     Args:
         dataset_name: Dataset to build guest programs for
     """
-    print(f"🏗️  Building dynamic RISC Zero guest programs for dataset: {dataset_name}...")
-    
+    print(
+        f"🏗️  Building dynamic RISC Zero guest programs for dataset: {dataset_name}..."
+    )
+
     project_root = Path(__file__).parent
-    
+
     try:
         # Import and run the dynamic build system
-        result = run_command([
-            "uv", "run", "python", "-c",
-            f"from phaze.src.risc_zero_codegen import RiscZeroArchitectureRegistry, RiscZeroBuildManager; "
-            f"from phaze.src.dataset_config import get_dataset_config; "
-            f"dataset_config = get_dataset_config('{dataset_name}').to_dict(); "
-            f"registry = RiscZeroArchitectureRegistry(); "
-            f"registry.register_all_factory_models(dataset_config); "
-            f"build_manager = RiscZeroBuildManager(registry); "
-            f"results = build_manager.build_all_guest_programs(); "
-            f"success_count = sum(1 for success in results.values() if success); "
-            f"print(f'Successfully built {{success_count}}/{{len(results)}} guest programs for {dataset_name}'); "
-            f"exit(0 if success_count > 0 else 1)"
-        ], cwd=project_root, check=True)
-        
+        run_command(
+            [
+                "uv",
+                "run",
+                "python",
+                "-c",
+                f"from phaze.src.risc_zero_codegen import RiscZeroArchitectureRegistry, RiscZeroBuildManager; "
+                f"from phaze.src.dataset_config import get_dataset_config; "
+                f"dataset_config = get_dataset_config('{dataset_name}').to_dict(); "
+                f"registry = RiscZeroArchitectureRegistry(); "
+                f"registry.register_all_factory_models(dataset_config); "
+                f"build_manager = RiscZeroBuildManager(registry); "
+                f"results = build_manager.build_all_guest_programs(); "
+                f"success_count = sum(1 for success in results.values() if success); "
+                f"print(f'Successfully built {{success_count}}/{{len(results)}} guest programs for {dataset_name}'); "
+                f"exit(0 if success_count > 0 else 1)",
+            ],
+            cwd=project_root,
+            check=True,
+        )
+
         print(f"✅ Dynamic guest programs built successfully for {dataset_name}")
         return True
-        
+
     except Exception as e:
         print(f"❌ Error building dynamic guest programs: {e}")
-        print("💡 This may be due to missing RISC Zero toolchain or model factory issues")
+        print(
+            "💡 This may be due to missing RISC Zero toolchain or model factory issues"
+        )
         return False
 
 
@@ -397,8 +408,8 @@ def main():
     )
     parser.add_argument(
         "--dataset",
-        default="mnist", 
-        help="Dataset to build RISC Zero guest programs for (default: mnist)"
+        default="mnist",
+        help="Dataset to build RISC Zero guest programs for (default: mnist)",
     )
 
     args = parser.parse_args()
