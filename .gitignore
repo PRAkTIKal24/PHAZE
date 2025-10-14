@@ -26,6 +26,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+uv.lock
 
 # PyInstaller
 # Usually these files are written by a python script from a template
@@ -65,8 +66,23 @@ docs/_build/
 .DS_Store
 
 # Project-specific
+phaze_config.py
 phaze/workspaces/
-/rust_bindings/target/
-/rust_bindings/Cargo.lock
-*.rs.bk
 plots/
+data/
+benchmark_results/
+
+# Rust build artifacts
+/rust_bindings/target/
+rust_bindings/target/
+rust_bindings/Cargo.lock
+*.rs.bk
+rust_bindings/risc0_guest/target/
+rust_bindings/risc0_guest/Cargo.lock
+rust_bindings/**/target/
+rust_bindings/**/Cargo.lock
+
+# Dynamic RISC Zero artifacts (generated at build time)
+rust_bindings/guest_programs/
+rust_bindings/guest_templates/
+*.whl

@@ -10,9 +10,22 @@ import torch
 
 try:
     import rust_zkml_bindings
+
+    _using_real_bindings = True
+    # Try to get binding info, fall back to basic info if function doesn't exist
+    try:
+        _binding_info = rust_zkml_bindings.get_binding_info()
+    except AttributeError:
+        _binding_info = {"implementation": "real_rust_bindings", "version": "unknown"}
 except ImportError:
-    print("rust_zkml_bindings not found. Using mock implementation for testing.")
+    print("❌ rust_zkml_bindings not found. Using mock implementation for testing.")
     from . import mock_rust_zkml_bindings as rust_zkml_bindings
+
+    _using_real_bindings = False
+    try:
+        _binding_info = rust_zkml_bindings.get_binding_info()
+    except AttributeError:
+        _binding_info = {"implementation": "mock", "version": "0.1.0"}
 
 
 class RustZKMLBackend:
@@ -21,6 +34,16 @@ class RustZKMLBackend:
     def __init__(self):
         self.field_cache = {}
         self.proof_cache = {}
+
+    @staticmethod
+    def is_using_real_bindings() -> bool:
+        """Check if we're using real Rust bindings or mock implementation."""
+        return _using_real_bindings
+
+    @staticmethod
+    def get_binding_info() -> Dict[str, Any]:
+        """Get information about the current binding implementation."""
+        return _binding_info
 
     def sha256_hash(self, data: bytes) -> str:
         """Compute SHA256 hash using Rust implementation."""

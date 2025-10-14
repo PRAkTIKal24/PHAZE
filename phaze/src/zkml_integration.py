@@ -172,10 +172,17 @@ class ZKMLProverVerifier:
         # Run the async setup function in a new event loop
         asyncio.run(self._async_setup(input_data))
 
+    async def async_setup(self, input_data: torch.Tensor):
+        """Async version of setup that doesn't create a new event loop."""
+        self._export_to_onnx(input_data)
+        await self._async_setup(input_data)
+
     async def generate_proof(self, input_data: torch.Tensor):
         """Generates a zero-knowledge proof for the model inference."""
         if not EZKL_AVAILABLE:
-            # Mock proof for testing
+            # Mock proof for testing - ensure model and input are on CPU
+            input_data = input_data.cpu()
+            self.model = self.model.cpu()
             with torch.no_grad():
                 output = self.model(input_data)
             mock_proof = {
@@ -185,9 +192,10 @@ class ZKMLProverVerifier:
                 ],  # First 3 outputs as public
                 "transcript_type": "EVM",
             }
-            return mock_proof, output.numpy().tolist()
+            return mock_proof, output.cpu().numpy().tolist()
 
-        # Prepare input data for ezkl
+        # Prepare input data for ezkl - ensure on CPU
+        input_data = input_data.cpu()
         input_array = (input_data.detach().numpy() * 2**15).astype(np.int64)
         data = dict(input_data=[input_array.flatten().tolist()])
         with open(self.input_json_path, "w") as f:
@@ -210,7 +218,7 @@ class ZKMLProverVerifier:
         # Get the model output from the witness
         with open(self.witness_path, "r") as f:
             witness = json.load(f)
-        output = witness["output_data"]
+        output = witness["outputs"]
 
         return proof, output
 
@@ -220,7 +228,8 @@ class ZKMLProverVerifier:
             # Mock verification
             return isinstance(proof, dict) and "proof" in proof
 
-        # Prepare input data for ezkl (same as generate_proof)
+        # Prepare input data for ezkl (same as generate_proof) - ensure on CPU
+        input_data = input_data.cpu()
         input_array = (input_data.detach().numpy() * 2**15).astype(np.int64)
         data = dict(input_data=[input_array.flatten().tolist()])
         with open(self.input_json_path, "w") as f:
@@ -228,7 +237,7 @@ class ZKMLProverVerifier:
 
         # Verify proof
         verified = ezkl.verify(
-            proof, self.settings_path, self.vk_path, srs_path=self.srs_path
+            self.proof_path, self.settings_path, self.vk_path, srs_path=self.srs_path
         )
 
         return verified
@@ -299,7 +308,8 @@ class PHAZEZKMLIntegration:
         if name not in self.provers:
             raise ValueError(f"Model {name} not registered")
 
-        await self.provers[name]._async_setup(input_data)
+        # Use the async setup method
+        await self.provers[name].async_setup(input_data)
 
     async def prove_inference(self, name: str, input_data: torch.Tensor):
         """Generate proof for model inference."""

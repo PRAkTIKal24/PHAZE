@@ -3,13 +3,13 @@ name = "risc0_guest"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
+[[bin]]
 name = "risc0_guest"
-crate-type = ["staticlib"]
+path = "src/main.rs"
 
 [dependencies]
 # RISC Zero zkVM guest environment
-risc0-zkvm = { version = "0.20.1", default-features = false, features = ["std"] }
+risc0-zkvm = { version = "3.0.3", default-features = false, features = ["std"] }
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }

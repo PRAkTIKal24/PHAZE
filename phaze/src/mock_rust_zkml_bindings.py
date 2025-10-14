@@ -280,3 +280,18 @@ def MockHalo() -> MockHalo:
 def RiscZeroBackend() -> MockRiscZeroBackend:
     """Create a mock RISC Zero backend."""
     return MockRiscZeroBackend()
+
+
+def is_real_rust_bindings() -> bool:
+    """Mock function to detect real rust bindings - always returns False for mock."""
+    return False
+
+
+def get_binding_info() -> dict:
+    """Mock function to get binding information."""
+    return {
+        "implementation": "mock",
+        "version": "0.1.0",
+        "risc_zero_enabled": "false",
+        "timestamp": "mock_timestamp",
+    }

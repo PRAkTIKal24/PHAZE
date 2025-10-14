@@ -69,13 +69,31 @@ class PHAZEModelInterface(ABC, nn.Module):
 class SimpleEarlyExitModel(PHAZEModelInterface):
     """Simple early-exit model for basic testing."""
 
-    def __init__(self, input_size: int = 10, output_size: int = 5):
-        super().__init__(input_size, output_size, ModelComplexity.MINIMAL)
+    def __init__(
+        self,
+        input_size: int = 10,
+        output_size: int = 5,
+        complexity: ModelComplexity = ModelComplexity.MINIMAL,
+    ):
+        super().__init__(input_size, output_size, complexity)
 
-        self.fc1 = nn.Linear(input_size, 20)
+        # Define hidden layer size based on complexity
+        if complexity == ModelComplexity.MINIMAL:
+            hidden_size = 32
+        elif complexity == ModelComplexity.LIGHT:
+            hidden_size = 64
+        elif complexity == ModelComplexity.MEDIUM:
+            hidden_size = 128
+        elif complexity == ModelComplexity.HEAVY:
+            hidden_size = 256
+        elif complexity == ModelComplexity.EXTREME:
+            hidden_size = 512
+
+        self.hidden_size = hidden_size
+        self.fc1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(20, output_size)
-        self.confidence_head = nn.Linear(20, 1)  # For confidence estimation
+        self.fc2 = nn.Linear(hidden_size, output_size)
+        self.confidence_head = nn.Linear(hidden_size, 1)  # For confidence estimation
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.relu(self.fc1(x))
@@ -92,8 +110,13 @@ class SimpleEarlyExitModel(PHAZEModelInterface):
             "complexity": self.complexity.value,
             "input_size": self.input_size,
             "output_size": self.output_size,
+            "hidden_size": self.hidden_size,
             "parameters": self.count_parameters(),
-            "layers": ["Linear(10->20)", "ReLU", "Linear(20->5)"],
+            "layers": [
+                f"Linear({self.input_size}->{self.hidden_size})",
+                "ReLU",
+                f"Linear({self.hidden_size}->{self.output_size})",
+            ],
         }
 
 
@@ -296,8 +319,10 @@ class MultiExitModel(PHAZEModelInterface):
             self.layer_sizes = [input_size, 64, 128, 256]
         elif complexity == ModelComplexity.MEDIUM:
             self.layer_sizes = [input_size, 128, 256, 512, 256]
-        else:  # HEAVY and above
+        elif complexity == ModelComplexity.HEAVY:
             self.layer_sizes = [input_size, 256, 512, 1024, 512, 256]
+        elif complexity == ModelComplexity.EXTREME:
+            self.layer_sizes = [input_size, 512, 1024, 2048, 1024, 512, 256]
 
         # Build the main backbone
         self.backbone_layers = nn.ModuleList()
@@ -422,7 +447,7 @@ class PHAZEModelFactory:
         """Create an early-exit model."""
 
         if architecture == "simple":
-            return SimpleEarlyExitModel(input_size, output_size)
+            return SimpleEarlyExitModel(input_size, output_size, complexity)
         elif architecture == "conv":
             input_channels = kwargs.get("input_channels", 3)
             spatial_size = kwargs.get("spatial_size", 32)
@@ -444,16 +469,10 @@ class PHAZEModelFactory:
         output_size: int = 5,
         **kwargs,
     ) -> PHAZEModelInterface:
-        """Create a full model (typically more complex than early-exit)."""
+        """Create a full model (M_full) with the specified complexity."""
 
-        # Full models are typically more complex versions of early-exit models
-        if complexity == ModelComplexity.MINIMAL:
-            complexity = ModelComplexity.LIGHT
-        elif complexity == ModelComplexity.LIGHT:
-            complexity = ModelComplexity.MEDIUM
-        elif complexity == ModelComplexity.MEDIUM:
-            complexity = ModelComplexity.HEAVY
-
+        # M_full models use the exact complexity specified
+        # The early exit models (M_early) will be generated later using early_exit_ratios
         return PHAZEModelFactory.create_early_exit_model(
             architecture, complexity, input_size, output_size, **kwargs
         )
@@ -471,10 +490,12 @@ class PHAZEModelFactory:
 
 # Convenience functions for backward compatibility
 def create_simple_early_exit_model(
-    input_size: int = 10, output_size: int = 5
+    input_size: int = 10,
+    output_size: int = 5,
+    complexity: ModelComplexity = ModelComplexity.MINIMAL,
 ) -> SimpleEarlyExitModel:
     """Create a simple early-exit model."""
-    return SimpleEarlyExitModel(input_size, output_size)
+    return SimpleEarlyExitModel(input_size, output_size, complexity)
 
 
 def create_simple_full_model(
@@ -484,3 +505,117 @@ def create_simple_full_model(
     return PHAZEModelFactory.create_full_model(
         "simple", ModelComplexity.MEDIUM, input_size, output_size
     )
+
+
+def load_pretrained_model(model_path: str) -> Dict[str, Any]:
+    """Load a pre-trained model and extract metadata.
+
+    Args:
+        model_path: Path to the pre-trained model file (.pth or .pt)
+
+    Returns:
+        Dictionary containing model information and loaded state
+    """
+    from pathlib import Path
+
+    import torch
+
+    model_path = Path(model_path)
+    if not model_path.exists():
+        raise FileNotFoundError(f"Model file not found: {model_path}")
+
+    if model_path.suffix not in [".pth", ".pt"]:
+        raise ValueError(
+            f"Unsupported model format: {model_path.suffix}. Use .pth or .pt files."
+        )
+
+    # Load the model state
+    try:
+        state_dict = torch.load(model_path, map_location="cpu")
+
+        # Try to extract metadata if available
+        metadata = {}
+        if isinstance(state_dict, dict) and "metadata" in state_dict:
+            metadata = state_dict["metadata"]
+            actual_state_dict = state_dict.get("model_state_dict", state_dict)
+        else:
+            actual_state_dict = state_dict
+
+        # Infer model architecture from state dict structure
+        architecture = infer_architecture_from_state_dict(actual_state_dict)
+        complexity = infer_complexity_from_state_dict(actual_state_dict)
+
+        # Extract input/output sizes from the state dict
+        input_size, output_size = infer_io_sizes_from_state_dict(actual_state_dict)
+
+        model_info = {
+            "model_path": str(model_path),
+            "architecture": architecture,
+            "complexity": complexity,
+            "input_size": input_size,
+            "output_size": output_size,
+            "state_dict": actual_state_dict,
+            "metadata": metadata,
+            "model_id": model_path.stem,
+        }
+
+        return model_info
+
+    except Exception as e:
+        raise RuntimeError(f"Failed to load model from {model_path}: {e}") from e
+
+
+def infer_architecture_from_state_dict(state_dict: dict) -> str:
+    """Infer model architecture from state dict keys."""
+    keys = list(state_dict.keys())
+
+    # Check for convolutional layers
+    if any("conv" in key.lower() for key in keys):
+        return "conv"
+
+    # Check for transformer/attention layers
+    if any(key in ["attention", "self_attn", "cross_attn"] for key in keys):
+        return "transformer"
+
+    # Check for multi-exit patterns
+    if any("exit" in key.lower() for key in keys):
+        return "multi_exit"
+
+    # Default to simple
+    return "simple"
+
+
+def infer_complexity_from_state_dict(state_dict: dict) -> ModelComplexity:
+    """Infer model complexity from parameter count."""
+    total_params = sum(
+        param.numel() for param in state_dict.values() if hasattr(param, "numel")
+    )
+
+    if total_params < 1000:
+        return ModelComplexity.MINIMAL
+    elif total_params < 10000:
+        return ModelComplexity.LIGHT
+    elif total_params < 100000:
+        return ModelComplexity.MEDIUM
+    elif total_params < 1000000:
+        return ModelComplexity.HEAVY
+    else:
+        return ModelComplexity.EXTREME
+
+
+def infer_io_sizes_from_state_dict(state_dict: dict) -> Tuple[int, int]:
+    """Infer input and output sizes from state dict."""
+    # Find first and last linear layers
+    first_linear = None
+    last_linear = None
+
+    for key, param in state_dict.items():
+        if "weight" in key and len(param.shape) == 2:
+            if first_linear is None:
+                first_linear = param
+            last_linear = param
+
+    input_size = first_linear.shape[1] if first_linear is not None else 10
+    output_size = last_linear.shape[0] if last_linear is not None else 5
+
+    return input_size, output_size

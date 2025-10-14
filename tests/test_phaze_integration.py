@@ -3,14 +3,19 @@ Integration tests for PHAZE framework's latest workflows.
 These tests verify that the major components work together correctly.
 """
 
+import sys
 import tempfile
 from pathlib import Path
 
 import pytest
 import torch
 
+# Add project root to path for legacy imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from legacy.src.comprehensive_benchmark import run_phaze_benchmarks
+from legacy.src.phaze_benchmark_suite import PHAZEBenchmarkSuite
 from phaze import (
-    ComprehensiveBenchmarkSuite,
     ConvolutionalEarlyExitModel,
     ModelComplexity,
     PHAZEModelFactory,
@@ -19,7 +24,6 @@ from phaze import (
     SimpleEarlyExitModel,
     create_simple_early_exit_model,
     create_simple_full_model,
-    run_phaze_benchmarks,
 )
 
 
@@ -168,7 +172,7 @@ class TestPHAZEIntegration:
     def test_comprehensive_benchmark_suite_setup(self):
         """Test comprehensive benchmark suite initialization."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            suite = ComprehensiveBenchmarkSuite(temp_dir)
+            suite = PHAZEBenchmarkSuite(temp_dir)
 
             assert suite.output_dir == Path(temp_dir)
             assert suite.output_dir.exists()

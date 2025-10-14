@@ -16,9 +16,11 @@ import sys
 import torch
 
 # Make sure we can import phaze modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
-from phaze.src.comprehensive_benchmark import (
+from legacy.src.comprehensive_benchmark import (
     ComprehensiveBenchmarkSuite,
 )
 from phaze.src.model_architectures import PHAZEModelFactory

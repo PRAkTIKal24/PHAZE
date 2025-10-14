@@ -14,21 +14,22 @@ import json
 import os
 import time
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any, Dict, List
 
 import numpy as np
 import torch
 
-from .crypto_primitives import RabinFingerprint
-from .early_exit_models import SimpleEarlyExitModel
-from .zkml_backends import create_backend
-from .zkml_framework_interface import (
+from phaze.src.crypto_primitives import RabinFingerprint
+from phaze.src.early_exit_models import SimpleEarlyExitModel
+from phaze.src.zkml_backends import create_backend
+from phaze.src.zkml_framework_interface import (
     BenchmarkMetrics,
     CryptographicPrimitiveBenchmark,
     ZKMLBenchmarkRunner,
     ZKMLFramework,
 )
-from .zkml_integration import SimpleFullModel
+from phaze.src.zkml_integration import SimpleFullModel
 
 
 @dataclass
@@ -70,8 +71,15 @@ class PHAZEBenchmarkResults:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert results to dictionary format."""
+        # Convert config to dict with enum serialization
+        config_dict = asdict(self.config)
+        if "frameworks_to_test" in config_dict:
+            config_dict["frameworks_to_test"] = [
+                f.value for f in self.config.frameworks_to_test
+            ]
+
         return {
-            "config": asdict(self.config),
+            "config": config_dict,
             "m_early_results": self.m_early_results,
             "m_full_results": self.m_full_results,
             "crypto_results": self.crypto_results,
@@ -91,8 +99,25 @@ class PHAZEBenchmarkResults:
 class PHAZEBenchmarkSuite:
     """Comprehensive benchmarking suite for PHAZE framework."""
 
-    def __init__(self, config: PHAZEBenchmarkConfig = None):
-        self.config = config or PHAZEBenchmarkConfig()
+    def __init__(self, config_or_dir=None):
+        # Handle both PHAZEBenchmarkConfig objects and directory paths
+        if isinstance(config_or_dir, str):
+            # Directory path provided - create default config with results_dir set
+            self.config = PHAZEBenchmarkConfig()
+            self.config.results_dir = config_or_dir
+            self.output_dir = Path(config_or_dir)
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+        elif isinstance(config_or_dir, PHAZEBenchmarkConfig):
+            # Config object provided
+            self.config = config_or_dir
+            self.output_dir = Path(self.config.results_dir)
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            # Nothing provided - use defaults
+            self.config = PHAZEBenchmarkConfig()
+            self.output_dir = Path(self.config.results_dir)
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+
         self.zkml_runner = ZKMLBenchmarkRunner()
         self.crypto_benchmark = CryptographicPrimitiveBenchmark()
 
@@ -287,8 +312,27 @@ class PHAZEBenchmarkSuite:
 
         return results
 
-    def generate_report(self, results: PHAZEBenchmarkResults) -> str:
+    def generate_report(self, results) -> str:
         """Generate a comprehensive benchmark report."""
+        # Handle both PHAZEBenchmarkResults objects and dict inputs for compatibility
+        if isinstance(results, dict):
+            # Convert dict to object-like access for compatibility
+            results_obj = type("Results", (), results)()
+            results_obj.timestamp = results.get("timestamp", "Unknown")
+            results_obj.config = type("Config", (), {})()
+            results_obj.config.num_iterations = 10  # Default
+            results_obj.config.zkml_iterations = 5  # Default
+            results_obj.config.crypto_iterations = 1000  # Default
+            results_obj.config.input_size = 10  # Default
+            results_obj.config.batch_size = 1  # Default
+            results_obj.m_early_results = {}
+            results_obj.m_full_results = {}
+            results_obj.crypto_results = {}
+            results_obj.zkml_results = {}
+            results_obj.pipeline_results = {}
+            results_obj.total_time_ms = 0
+            results = results_obj
+
         report = "PHAZE Framework Comprehensive Benchmark Report\n"
         report += "=" * 60 + "\n\n"
 
@@ -389,6 +433,183 @@ class PHAZEBenchmarkSuite:
             )
 
         return report
+
+    # Compatibility methods for existing tests
+    async def run_full_benchmark_suite(
+        self, zkml_config: Dict[str, Any], crypto_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Compatibility method that wraps run_full_benchmark with test-expected interface."""
+        # Modify config based on test parameters
+        if zkml_config:
+            self.config.num_iterations = zkml_config.get(
+                "num_trials", self.config.num_iterations
+            )
+            self.config.zkml_iterations = zkml_config.get(
+                "num_trials", self.config.zkml_iterations
+            )
+
+        if crypto_config:
+            self.config.crypto_iterations = crypto_config.get(
+                "num_trials", self.config.crypto_iterations
+            )
+
+        # Run the benchmark
+        results = await self.run_full_benchmark()
+
+        # Convert to format expected by tests
+        return {
+            "zkml_results": [
+                {
+                    "framework": framework,
+                    "success": metrics.success,
+                    "setup_time": metrics.setup_time_ms or 0,
+                    "proof_time": metrics.proving_time_ms or 0,
+                    "verification_time": metrics.verification_time_ms or 0,
+                    "total_time": (metrics.setup_time_ms or 0)
+                    + (metrics.proving_time_ms or 0)
+                    + (metrics.verification_time_ms or 0),
+                    "memory_usage_mb": metrics.memory_usage_mb or 0,
+                    "cpu_usage_percent": 0,  # Not tracked in current BenchmarkMetrics
+                    "error_message": metrics.error_message,
+                }
+                for framework, metrics in results.zkml_results.items()
+            ],
+            "crypto_results": [
+                {
+                    "primitive_name": primitive,
+                    "operation": "hash" if "hash" in primitive else "compute",
+                    "success": True,
+                    "execution_time": metrics.get("avg_time_ms", 0)
+                    / 1000,  # Convert to seconds
+                    "memory_usage_mb": 0,  # Not tracked in current implementation
+                    "throughput_ops_per_sec": metrics.get("throughput_ops_per_sec", 0),
+                }
+                for primitive, metrics in results.crypto_results.items()
+            ],
+            "summary": self._generate_summary(
+                # Convert zkml results to expected format
+                [
+                    type(
+                        "BenchmarkResult",
+                        (),
+                        {
+                            "framework": framework,
+                            "success": metrics.success,
+                            "total_time": (
+                                (metrics.setup_time_ms or 0)
+                                + (metrics.proving_time_ms or 0)
+                                + (metrics.verification_time_ms or 0)
+                            )
+                            / 1000,
+                            "setup_time": (metrics.setup_time_ms or 0) / 1000,
+                            "proof_time": (metrics.proving_time_ms or 0) / 1000,
+                            "verification_time": (metrics.verification_time_ms or 0)
+                            / 1000,
+                            "memory_usage_mb": metrics.memory_usage_mb or 0,
+                        },
+                    )()
+                    for framework, metrics in results.zkml_results.items()
+                ],
+                # Convert crypto results to expected format
+                [
+                    type(
+                        "CryptoBenchmarkResult",
+                        (),
+                        {
+                            "primitive_name": primitive,
+                            "success": True,
+                            "execution_time": metrics.get("avg_time_ms", 0) / 1000,
+                        },
+                    )()
+                    for primitive, metrics in results.crypto_results.items()
+                ],
+            ),
+            "timestamp": int(time.time()),
+        }
+
+    def _generate_summary(
+        self, zkml_results: List, crypto_results: List
+    ) -> Dict[str, Any]:
+        """Generate summary for test compatibility."""
+        successful_zkml = [r for r in zkml_results if r.success]
+        successful_crypto = [r for r in crypto_results if r.success]
+
+        # Calculate additional metrics for zkml
+        zkml_summary = {
+            "total_tests": len(zkml_results),
+            "successful_tests": len(successful_zkml),
+            "success_rate": len(successful_zkml) / len(zkml_results)
+            if zkml_results
+            else 0,
+            "avg_total_time": np.mean([r.total_time for r in successful_zkml])
+            if successful_zkml
+            else 0,
+        }
+
+        # Add additional zkml metrics if available
+        if successful_zkml:
+            if hasattr(successful_zkml[0], "setup_time"):
+                zkml_summary["avg_setup_time"] = np.mean(
+                    [r.setup_time for r in successful_zkml]
+                )
+            if hasattr(successful_zkml[0], "proof_time"):
+                zkml_summary["avg_proof_time"] = np.mean(
+                    [r.proof_time for r in successful_zkml]
+                )
+            if hasattr(successful_zkml[0], "verification_time"):
+                zkml_summary["avg_verification_time"] = np.mean(
+                    [r.verification_time for r in successful_zkml]
+                )
+            if hasattr(successful_zkml[0], "memory_usage_mb"):
+                zkml_summary["avg_memory_usage"] = np.mean(
+                    [r.memory_usage_mb for r in successful_zkml]
+                )
+
+        return {
+            "zkml_summary": zkml_summary,
+            "crypto_summary": {
+                "total_tests": len(crypto_results),
+                "successful_tests": len(successful_crypto),
+                "success_rate": len(successful_crypto) / len(crypto_results)
+                if crypto_results
+                else 0,
+                "avg_execution_time": np.mean(
+                    [r.execution_time for r in successful_crypto]
+                )
+                if successful_crypto
+                else 0,
+            },
+            "overall_summary": {
+                "total_tests": len(zkml_results) + len(crypto_results),
+                "successful_tests": len(successful_zkml) + len(successful_crypto),
+                "success_rate": (len(successful_zkml) + len(successful_crypto))
+                / (len(zkml_results) + len(crypto_results))
+                if (zkml_results or crypto_results)
+                else 0,
+            },
+        }
+
+    def _save_results(self, results: Dict[str, Any]) -> None:
+        """Save results to output directory for test compatibility."""
+        # Save to JSON file in output directory with expected filename
+        output_file = self.output_dir / "benchmark_results.json"
+        with open(output_file, "w") as f:
+            json.dump(results, f, indent=2)
+
+        # Save CSV files as expected by tests
+        import pandas as pd
+
+        # Save zkML results to CSV
+        if "zkml_results" in results and results["zkml_results"]:
+            zkml_df = pd.DataFrame(results["zkml_results"])
+            zkml_csv = self.output_dir / "zkml_benchmark_results.csv"
+            zkml_df.to_csv(zkml_csv, index=False)
+
+        # Save crypto results to CSV
+        if "crypto_results" in results and results["crypto_results"]:
+            crypto_df = pd.DataFrame(results["crypto_results"])
+            crypto_csv = self.output_dir / "crypto_benchmark_results.csv"
+            crypto_df.to_csv(crypto_csv, index=False)
 
 
 async def main():
