@@ -18,7 +18,7 @@ from phaze.src.training_config import (
 
 # Project metadata
 PROJECT_NAME = "phaze_benchmark"
-VERSION = "0.11.3"
+VERSION = "0.14.2"
 
 # Dataset configuration
 DATASET_CONFIG = DatasetConfig(
@@ -63,6 +63,8 @@ EXPERIMENT_CONFIG = ExperimentConfig(
     deterministic=True,  # Enable deterministic training
     zkml_frameworks=["ezkl", "risc_zero"],  # zkML frameworks to benchmark
     hashing_algorithms=["rabin", "shamir"],  # Crypto algorithms to benchmark
+    polynomial_degree=200,  # Degree for rabin fingerprints
+    field_size=2**31 - 1,  # Field size for rabin fingerprints
     benchmark_iterations=5,  # Iterations per benchmark
     warmup_iterations=2,  # Warmup iterations
     profile_memory=True,  # Enable memory profiling
