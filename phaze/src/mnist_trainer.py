@@ -18,6 +18,7 @@ from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
+from .dataset_config import get_dataset_config
 from .model_architectures import ModelComplexity, PHAZEModelFactory
 from .training_config import PHAZEConfig
 
@@ -40,6 +41,14 @@ class MNISTTrainer:
         self.train_loader = None
         self.val_loader = None
         self.test_loader = None
+
+        # Dataset Parameters
+        self.source = config.dataset.source if config.dataset.source else "mnist"
+        dataset_cfg = get_dataset_config(self.source)
+        self.input_size = dataset_cfg.input_size
+        self.output_size = dataset_cfg.output_size
+        self.input_channels = dataset_cfg.input_channels
+        self.spatial_size = dataset_cfg.spatial_size
 
         # Training state
         self.current_model = None
@@ -399,6 +408,10 @@ class MNISTTrainer:
             "complexity": complexity,
             "seed": seed,
             "parameters": sum(p.numel() for p in model.parameters() if p.requires_grad),
+            "input_size": self.input_size,
+            "output_size": self.output_size,
+            "input_channels": self.input_channels,
+            "spatial_size": self.spatial_size,
             "training_time": total_training_time,
             "epochs_completed": len(history["train_loss"]),
             "final_train_loss": history["train_loss"][-1],
