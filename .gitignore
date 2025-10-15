@@ -67,6 +67,7 @@ docs/_build/
 
 # Project-specific
 phaze_config.py
+configs/
 phaze/workspaces/
 plots/
 data/
