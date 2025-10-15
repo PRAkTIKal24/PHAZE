@@ -59,7 +59,7 @@ class TestSimpleEarlyExitModel:
 
         # Should have parameters from fc1, fc2, and confidence_head
         expected_params = (
-            (10 * 20 + 20) + (20 * 5 + 5) + (20 * 1 + 1)
+            (10 * 32 + 32) + (32 * 5 + 5) + (32 * 1 + 1)
         )  # weights + biases
         assert param_count == expected_params
 
