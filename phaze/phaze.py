@@ -457,7 +457,7 @@ Default behavior (if no options specified):
                 architectures=architectures,
                 complexities=complexities,
                 epochs=args.epochs,
-                quick=args.quick,
+                quick=False,
                 verbose=args.verbose,
                 model_path=args.model_path,
             )
