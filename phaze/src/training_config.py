@@ -41,7 +41,7 @@ class ModelConfig:
         default_factory=lambda: ["simple", "conv", "transformer", "multi_exit"]
     )
     complexities: List[str] = field(
-        default_factory=lambda: ["minimal", "light", "medium", "heavy"]
+        default_factory=lambda: ["minimal", "light", "medium", "heavy", "extreme"]
     )
 
     # Multi-exit configuration
@@ -311,7 +311,7 @@ class PHAZEConfig:
             if arch not in valid_architectures:
                 warnings.append(f"Unknown architecture: {arch}")
 
-        valid_complexities = ["minimal", "light", "medium", "heavy"]
+        valid_complexities = ["minimal", "light", "medium", "heavy", "extreme"]
         for comp in self.model.complexities:
             if comp not in valid_complexities:
                 warnings.append(f"Unknown complexity: {comp}")
