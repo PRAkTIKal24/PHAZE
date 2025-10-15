@@ -91,6 +91,8 @@ class ExperimentConfig:
     # Benchmarking
     zkml_frameworks: List[str] = field(default_factory=lambda: ["ezkl", "risc_zero"])
     hashing_algorithms: List[str] = field(default_factory=lambda: ["rabin", "shamir"])
+    polynomial_degree: int = 100
+    field_size: int = 2**31 - 1
 
     # Performance settings
     benchmark_iterations: int = 10  # Reduced for faster results

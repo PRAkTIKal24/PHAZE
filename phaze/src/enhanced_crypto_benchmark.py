@@ -75,6 +75,8 @@ class EnhancedCryptoBenchmark:
         self.config = config
         self.crypto_results = []
         self.failed_benchmarks = []
+        self.degree = config.experiment.polynomial_degree
+        self.field_size = config.experiment.field_size
 
         # Initialize crypto systems
         self.crypto_systems = self._initialize_crypto_systems()
@@ -86,7 +88,9 @@ class EnhancedCryptoBenchmark:
         for algorithm in self.config.experiment.hashing_algorithms:
             if algorithm == "rabin":
                 systems["rabin"] = {
-                    "instance": RabinFingerprint(field_size=2**31 - 1, degree=100),
+                    "instance": RabinFingerprint(
+                        field_size=self.field_size, degree=self.degree
+                    ),
                     "operations": ["hash"],
                 }
             elif algorithm == "shamir":
@@ -151,7 +155,7 @@ class EnhancedCryptoBenchmark:
         """
         if target_sizes is None:
             # Default sizes for testing different input complexities
-            target_sizes = [64, 128, 256, 512, 1024, 2048]
+            target_sizes = [32, 64, 128, 256, 512, 1024, 2048]
 
         fingerprint_data = []
 
