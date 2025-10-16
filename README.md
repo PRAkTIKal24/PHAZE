@@ -1,10 +1,11 @@
 # PHAZE: Probabilistic Hashing And Zero-knowledge-ml for Early-exit models
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17370252.svg)](https://doi.org/10.5281/zenodo.17370252)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/PRAkTIKal24/PHAZE/actions/workflows/pytest.yml/badge.svg)](https://github.com/PRAkTIKal24/PHAZE/actions/workflows/pytest.yml)
 [![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 
 PHAZE is a comprehensive framework for benchmarking and evaluating zero-knowledge machine learning (zkML) systems and cryptographic primitives with support for early-exit models, multi-dataset compatibility, and verifiable inference. Built for research applications including high-energy physics at the Large Hadron Collider (LHC).
 
