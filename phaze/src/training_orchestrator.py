@@ -577,6 +577,45 @@ class TrainingOrchestrator:
 
             raise
 
+    async def run_plotting_pipeline(self) -> Dict[str, Any]:
+        """Run the complete PHAZE training and benchmarking pipeline.
+
+        Returns:
+            Dictionary containing all results
+        """
+        pipeline_start_time = time.time()
+
+        logger.info("🚀 Starting PHAZE plotting pipeline")
+        logger.info(f"Configuration: {self.config.project_name} v{self.config.version}")
+
+        try:
+            # Generate plots
+            self.generate_plots()
+
+            # Save complete results
+            results_file = self.save_final_results()
+
+            total_time = time.time() - pipeline_start_time
+
+            logger.info("=" * 60)
+            logger.info("🎉 PLOTTING COMPLETED SUCCESSFULLY")
+            logger.info("=" * 60)
+            logger.info(
+                f"Total runtime: {total_time:.2f}s ({total_time / 3600:.2f} hours)"
+            )
+            logger.info(f"Results saved to: {results_file}")
+
+            return self.results
+
+        except Exception as e:
+            logger.error(f"Plotting failed: {e}")
+
+            # Save partial results
+            partial_results_file = self.save_final_results()
+            logger.info(f"Partial results saved to: {partial_results_file}")
+
+            raise
+
     def get_progress_summary(self) -> Dict[str, Any]:
         """Get current progress summary.
 
@@ -729,6 +768,19 @@ async def run_pipeline_with_pretrained_model(
     except Exception as e:
         logger.error(f"❌ Pipeline failed: {e}")
         raise
+
+
+async def run_plotting_only(config: PHAZEConfig) -> Dict[str, Any]:
+    """Run the PHAZE plotting pipeline with given configuration.
+
+    Args:
+        config: PHAZE configuration
+
+    Returns:
+        Complete results dictionary
+    """
+    orchestrator = TrainingOrchestrator(config)
+    return await orchestrator.run_plotting_pipeline()
 
 
 if __name__ == "__main__":

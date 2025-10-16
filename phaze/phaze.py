@@ -1,6 +1,5 @@
 import argparse
 import asyncio
-import json
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -124,9 +123,10 @@ async def run_training_command(
 
 
 async def run_plotting_command(
+    config_file: Optional[str] = None,
+    output_dir: str = "benchmark_results",
     plot_types: Optional[List[str]] = None,
     components: Optional[List[str]] = None,
-    output_dir: str = "plots",
     data_file: Optional[str] = None,
     style: str = "neurips",
     formats: Optional[List[str]] = None,
@@ -138,8 +138,9 @@ async def run_plotting_command(
 ) -> int:
     """Run plotting command with specified parameters."""
     try:
-        from .src.comprehensive_benchmark import ComprehensiveBenchmarkSuite
-        from .src.plotting import PHAZEPlotSuite, PlotConfig, PlotStyle
+        from .src.plotting import PlotStyle
+        from .src.training_config import PHAZEConfig, load_config
+        from .src.training_orchestrator import run_plotting_only
 
         # Create plot configuration
         style_enum = PlotStyle.NEURIPS
@@ -150,88 +151,45 @@ async def run_plotting_command(
         elif style.lower() == "web":
             style_enum = PlotStyle.WEB
 
-        config = PlotConfig(
-            style=style_enum,
-            export_formats=formats or ["png", "pdf"],
-            num_trials=trials,
-        )
+        # Load configuration
+        if config_file:
+            config = PHAZEConfig.from_file(config_file)
+        else:
+            config = load_config()
 
-        # Initialize plot suite
-        plot_suite = PHAZEPlotSuite(config)
+        # Override configuration with command line arguments
+        if output_dir != "benchmark_results":
+            config.output.output_dir = output_dir
+
+        # Validate configuration
+        warnings = config.validate()
+        if warnings:
+            print("Configuration warnings:")
+            for warning in warnings:
+                print(f"  - {warning}")
+            print()
 
         if verbose:
-            print(f"Plot suite initialized with style: {style}")
-            print(f"Output directory: {output_dir}")
+            print(f"Configuration loaded: {config.project_name} v{config.version}")
+            print(f"Output directory: {config.output.output_dir}")
+            print(f"Plot style: {style_enum}")
             print(f"Export formats: {config.export_formats}")
 
-        # Get data for plotting
-        if data_file:
-            # Load data from file
-            if verbose:
-                print(f"Loading data from: {data_file}")
-
-            data_path = Path(data_file)
-            if not data_path.exists():
-                print(f"Error: Data file not found: {data_file}", file=sys.stderr)
-                return 1
-
-            with open(data_path, "r") as f:
-                data = json.load(f)
-        else:
-            # Run benchmarks to generate data
-            if verbose:
-                print("Running benchmarks to generate plotting data...")
-
-            benchmark_suite = ComprehensiveBenchmarkSuite(output_dir)
-
-            # Configure benchmark parameters based on requested plot types
-            zkml_config = {
-                "architectures": ["simple", "multi_exit"],
-                "complexities": complexities_plot or ["light", "medium", "heavy"],
-                "input_sizes": [10, 50, 100],
-                "num_trials": max(3, trials // 3),  # Fewer trials for benchmarking
-                "frameworks": frameworks or ["ezkl", "risc_zero"],
-            }
-
-            crypto_config = {
-                "rabin_input_sizes": [64, 256, 1024],
-                "shamir_secret_sizes": [32, 64, 128],
-                "num_trials": trials,
-                "algorithms": algorithms or ["rabin", "shamir"],
-            }
-
-            # Run comprehensive benchmarks
-            data = await benchmark_suite.run_full_benchmark_suite(
-                zkml_config, crypto_config
-            )
-
-        # Generate plots
+        # Load data from file
         if verbose:
-            print(f"Generating plots for types: {plot_types or 'all available'}")
+            print(f"Loading data from: {output_dir}")
 
-        if components:
-            # Generate comparative plots
-            results = plot_suite.generate_comparative_plots(
-                data, components, output_dir
+        data_path = Path(output_dir)
+        if not data_path.exists():
+            print(
+                f"Error: Resuts directory not found: {output_dir}. Run full pipeline instead with `uv run phaze [OPTIONS]` instead!",
+                file=sys.stderr,
             )
-        else:
-            # Generate standard plots
-            results = plot_suite.generate_plots(
-                data, plot_types, output_dir, save_plots=True
-            )
-
-        # Generate summary report
-        report = plot_suite.generate_summary_report(
-            results, Path(output_dir) / "plotting_report.md"
-        )
-
-        if verbose:
-            print("\nPlotting Summary:")
-            print("=" * 50)
-            print(report)
-
-        print(f"\nPlots generated successfully in: {output_dir}")
-        print(f"Report saved to: {Path(output_dir) / 'plotting_report.md'}")
+            return 1
+        # Run the orchestrator to generate plots
+        print("Running plotting pipeline...")
+        await run_plotting_only(config)
+        print("Plotting pipeline completed successfully!")
 
         return 0
 
@@ -388,8 +346,8 @@ Default behavior (if no options specified):
     parser.add_argument(
         "--output",
         type=str,
-        default="plots",
-        help="Output directory for plots (default: plots)",
+        default="benchmark_results",
+        help="Output directory for plots (default: benchmark_results)",
     )
 
     parser.add_argument(
@@ -468,7 +426,8 @@ Default behavior (if no options specified):
         if args.verbose:
             print(f"Running plotting command: {args.plot}")
 
-        # Parse plot-specific arguments
+        # Parse plot-specific arguments - Currently disabled for simplicity
+        # Code searches for all possible plots that can be made and generates all
         plot_types = None if args.plot in ["all", "comparative"] else [args.plot]
         components = args.components.split(",") if args.components else None
         formats = args.format.split(",") if args.format else None
@@ -481,9 +440,10 @@ Default behavior (if no options specified):
         # Run plotting asynchronously
         return asyncio.run(
             run_plotting_command(
+                config_file=args.config,
+                output_dir=args.output,
                 plot_types=plot_types,
                 components=components,
-                output_dir=args.output,
                 data_file=args.data_file,
                 style=args.style,
                 formats=formats,
