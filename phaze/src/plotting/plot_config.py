@@ -238,7 +238,8 @@ class PlotConfig:
         """
         return {
             "rabin": self.primary_colors[0],  # Blue
-            "shamir": self.primary_colors[1],  # Orange
+            "shamir_share": self.primary_colors[1],  # Orange
+            "shamir_reconstruct": self.primary_colors[3],  # Red
             "sha256": self.primary_colors[2],  # Green
             "keccak256": self.primary_colors[3],  # Red
         }
