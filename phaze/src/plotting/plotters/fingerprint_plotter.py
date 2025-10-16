@@ -160,8 +160,8 @@ class FingerprintPlotter(BasePlotter):
                 capsize=5,
             )
 
-        ax.set_xlabel("Input Size (bytes)")
-        ax.set_ylabel("Execution Time (seconds)")
+        ax.set_xlabel("M_early Output Size (bytes)")
+        ax.set_ylabel("Execution Time per event (seconds)")
         ax.set_title("Fingerprinting Algorithm Time Complexity")
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -216,8 +216,8 @@ class FingerprintPlotter(BasePlotter):
                 capsize=5,
             )
 
-        ax.set_xlabel("Input Size (bytes)")
-        ax.set_ylabel("Memory Usage (MB)")
+        ax.set_xlabel("M_early Output Size (bytes)")
+        ax.set_ylabel("Memory Usage per event (MiB)")
         ax.set_title("Fingerprinting Algorithm Memory Consumption")
         ax.set_xscale("log")
         ax.legend()
@@ -271,7 +271,7 @@ class FingerprintPlotter(BasePlotter):
                 capsize=5,
             )
 
-        ax.set_xlabel("Input Size (bytes)")
+        ax.set_xlabel("M_early Output Size (bytes)")
         ax.set_ylabel("Throughput (operations/sec)")
         ax.set_title("Fingerprinting Algorithm Throughput")
         ax.set_xscale("log")
@@ -289,7 +289,7 @@ class FingerprintPlotter(BasePlotter):
         algorithms = list(data.keys())
         metrics = [
             "Mean Execution Time (s)",
-            "Mean Memory (MB)",
+            "Mean Memory (MiB)",
             "Mean Throughput (ops/s)",
         ]
 
@@ -451,7 +451,7 @@ class FingerprintPlotter(BasePlotter):
             )
 
         # Configure first subplot (execution time scaling)
-        ax1.set_xlabel("Input Size (bytes)")
+        ax1.set_xlabel("M_early Output Size (bytes)")
         ax1.set_ylabel("Execution Time (seconds)")
         ax1.set_title("Execution Time Scaling")
         ax1.set_xscale("log")
@@ -460,7 +460,7 @@ class FingerprintPlotter(BasePlotter):
         ax1.grid(True, alpha=0.3)
 
         # Configure second subplot (throughput scaling)
-        ax2.set_xlabel("Input Size (bytes)")
+        ax2.set_xlabel("M_early Output Size (bytes)")
         ax2.set_ylabel("Throughput (operations/sec)")
         ax2.set_title("Throughput Scaling")
         ax2.set_xscale("log")
