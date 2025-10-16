@@ -214,7 +214,7 @@ class ZKMLPlotter(BasePlotter):
             )
 
         ax.set_xlabel("Model Parameters")
-        ax.set_ylabel("Proof Generation Time (seconds)")
+        ax.set_ylabel("Proof Generation Time per Event (seconds)")
         ax.set_title("zkML Framework Proof Generation Performance")
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -286,7 +286,7 @@ class ZKMLPlotter(BasePlotter):
             )
 
         ax.set_xlabel("Model Parameters")
-        ax.set_ylabel("Verification Time (seconds)")
+        ax.set_ylabel("Verification Time per Event (seconds)")
         ax.set_title("zkML Framework Verification Performance")
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -358,7 +358,7 @@ class ZKMLPlotter(BasePlotter):
             )
 
         ax.set_xlabel("Model Parameters")
-        ax.set_ylabel("Memory Usage (MB)")
+        ax.set_ylabel("Memory Usage per Proof Generated (MiB)")
         ax.set_title("zkML Framework Memory Consumption")
         ax.set_xscale("log")
         ax.legend()
@@ -502,7 +502,7 @@ class ZKMLPlotter(BasePlotter):
                 ax.plot(x_trend, y_trend, "--", color=color, alpha=0.8, linewidth=2)
 
         ax.set_xlabel("Model Parameters")
-        ax.set_ylabel("Proof Size (bytes)")
+        ax.set_ylabel("Proof Size per Event (bytes)")
         ax.set_title("zkML Framework Proof Size Analysis")
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -559,7 +559,7 @@ class ZKMLPlotter(BasePlotter):
 
         # Add colorbar
         cbar = plt.colorbar(im, ax=ax)
-        cbar.set_label("Mean Proof Generation Time (seconds)")
+        cbar.set_label("Mean Proof Generation Time per Event (seconds)")
 
         # Add text annotations
         for i in range(len(frameworks)):
@@ -635,7 +635,7 @@ class ZKMLPlotter(BasePlotter):
 
         # Configure first subplot (proof time scaling)
         ax1.set_xlabel("Model Parameters")
-        ax1.set_ylabel("Proof Generation Time (seconds)")
+        ax1.set_ylabel("Proof Generation Time per Event (seconds)")
         ax1.set_title("Proof Generation Scaling")
         ax1.set_xscale("log")
         ax1.set_yscale("log")
@@ -644,7 +644,7 @@ class ZKMLPlotter(BasePlotter):
 
         # Configure second subplot (verification time scaling)
         ax2.set_xlabel("Model Parameters")
-        ax2.set_ylabel("Verification Time (seconds)")
+        ax2.set_ylabel("Verification Time per Event (seconds)")
         ax2.set_title("Verification Time Scaling")
         ax2.set_xscale("log")
         ax2.set_yscale("log")
