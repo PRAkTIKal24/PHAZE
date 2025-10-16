@@ -589,11 +589,19 @@ class TrainingOrchestrator:
         logger.info(f"Configuration: {self.config.project_name} v{self.config.version}")
 
         try:
+            output_dir = Path(self.config.output.output_dir)
+            results_file = output_dir / "complete_benchmark_results.json"
+
+            # Load results from file
+            if not results_file.exists():
+                raise FileNotFoundError(
+                    f"Results file not found: {results_file}. Cannot run plotting phase."
+                )
+            with open(results_file, "r") as f:
+                self.results = json.load(f)
+
             # Generate plots
             self.generate_plots()
-
-            # Save complete results
-            results_file = self.save_final_results()
 
             total_time = time.time() - pipeline_start_time
 
@@ -603,7 +611,6 @@ class TrainingOrchestrator:
             logger.info(
                 f"Total runtime: {total_time:.2f}s ({total_time / 3600:.2f} hours)"
             )
-            logger.info(f"Results saved to: {results_file}")
 
             return self.results
 
