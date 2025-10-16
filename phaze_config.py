@@ -18,7 +18,7 @@ from phaze.src.training_config import (
 
 # Project metadata
 PROJECT_NAME = "phaze_benchmark"
-VERSION = "0.14.2"
+VERSION = "0.14.4"
 
 # Dataset configuration
 DATASET_CONFIG = DatasetConfig(
