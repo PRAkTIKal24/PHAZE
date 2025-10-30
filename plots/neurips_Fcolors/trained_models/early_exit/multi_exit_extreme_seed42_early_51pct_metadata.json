@@ -1,0 +1,16 @@
+{
+  "model_id": "multi_exit_extreme_seed42_early_51pct",
+  "parent_model_id": "multi_exit_extreme_seed42",
+  "architecture": "multi_exit",
+  "complexity": "extreme_early_51pct",
+  "truncation_layer": 2,
+  "target_ratio": 0.6,
+  "actual_ratio": 0.518230159292787,
+  "parameters": 409132,
+  "parent_parameters": 5839938,
+  "parameter_reduction": 0.9299424069228133,
+  "input_size": 784,
+  "output_size": 10,
+  "input_channels": 1,
+  "spatial_size": 28
+}

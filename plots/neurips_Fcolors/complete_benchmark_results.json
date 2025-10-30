@@ -1,0 +1,3798 @@
+{
+  "training_results": {
+    "multi_exit_minimal_seed42": {
+      "model_id": "multi_exit_minimal_seed42",
+      "architecture": "multi_exit",
+      "complexity": "minimal",
+      "seed": 42,
+      "parameters": 28310,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 16.055837392807007,
+      "epochs_completed": 2,
+      "final_train_loss": 2.073016583919525,
+      "final_val_loss": 2.038614332675934,
+      "final_test_loss": 2.038614332675934,
+      "final_train_acc": 38.8,
+      "final_val_acc": 40.833333333333336,
+      "final_test_acc": 40.833333333333336,
+      "best_val_loss": 2.038614332675934,
+      "history": {
+        "train_loss": [
+          2.2592957615852356,
+          2.073016583919525
+        ],
+        "train_acc": [
+          21.6,
+          38.8
+        ],
+        "val_loss": [
+          2.183113694190979,
+          2.038614332675934
+        ],
+        "val_acc": [
+          32.5,
+          40.833333333333336
+        ],
+        "epoch_times": [
+          8.48219919204712,
+          7.573531150817871
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed42.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed42_metadata.json"
+      },
+      "onnx_export_time": 0.38877272605895996,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed42.onnx",
+      "model_training_time": 20.461836099624634
+    },
+    "multi_exit_minimal_seed123": {
+      "model_id": "multi_exit_minimal_seed123",
+      "architecture": "multi_exit",
+      "complexity": "minimal",
+      "seed": 123,
+      "parameters": 28310,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 16.08175301551819,
+      "epochs_completed": 2,
+      "final_train_loss": 2.0730897784233093,
+      "final_val_loss": 2.0675803422927856,
+      "final_test_loss": 2.0675803422927856,
+      "final_train_acc": 45.6,
+      "final_val_acc": 40.0,
+      "final_test_acc": 40.0,
+      "best_val_loss": 2.0675803422927856,
+      "history": {
+        "train_loss": [
+          2.252030074596405,
+          2.0730897784233093
+        ],
+        "train_acc": [
+          20.8,
+          45.6
+        ],
+        "val_loss": [
+          2.2026209831237793,
+          2.0675803422927856
+        ],
+        "val_acc": [
+          35.833333333333336,
+          40.0
+        ],
+        "epoch_times": [
+          7.876806020736694,
+          8.204870223999023
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed123.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed123_metadata.json"
+      },
+      "onnx_export_time": 0.005008220672607422,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed123.onnx",
+      "model_training_time": 20.24507188796997
+    },
+    "multi_exit_minimal_seed55": {
+      "model_id": "multi_exit_minimal_seed55",
+      "architecture": "multi_exit",
+      "complexity": "minimal",
+      "seed": 55,
+      "parameters": 28310,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 15.218731880187988,
+      "epochs_completed": 2,
+      "final_train_loss": 2.0811102390289307,
+      "final_val_loss": 2.0496091842651367,
+      "final_test_loss": 2.0496091842651367,
+      "final_train_acc": 59.6,
+      "final_val_acc": 50.0,
+      "final_test_acc": 50.0,
+      "best_val_loss": 2.0496091842651367,
+      "history": {
+        "train_loss": [
+          2.2617595195770264,
+          2.0811102390289307
+        ],
+        "train_acc": [
+          21.6,
+          59.6
+        ],
+        "val_loss": [
+          2.1888036727905273,
+          2.0496091842651367
+        ],
+        "val_acc": [
+          39.166666666666664,
+          50.0
+        ],
+        "epoch_times": [
+          7.794072866439819,
+          7.424590826034546
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed55.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed55_metadata.json"
+      },
+      "onnx_export_time": 0.004820823669433594,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed55.onnx",
+      "model_training_time": 19.179860830307007
+    },
+    "multi_exit_minimal_seed61": {
+      "model_id": "multi_exit_minimal_seed61",
+      "architecture": "multi_exit",
+      "complexity": "minimal",
+      "seed": 61,
+      "parameters": 28310,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 15.976073980331421,
+      "epochs_completed": 2,
+      "final_train_loss": 2.1333847045898438,
+      "final_val_loss": 2.095873236656189,
+      "final_test_loss": 2.095873236656189,
+      "final_train_acc": 30.8,
+      "final_val_acc": 30.833333333333332,
+      "final_test_acc": 30.833333333333332,
+      "best_val_loss": 2.095873236656189,
+      "history": {
+        "train_loss": [
+          2.2717968225479126,
+          2.1333847045898438
+        ],
+        "train_acc": [
+          16.4,
+          30.8
+        ],
+        "val_loss": [
+          2.21469509601593,
+          2.095873236656189
+        ],
+        "val_acc": [
+          22.5,
+          30.833333333333332
+        ],
+        "epoch_times": [
+          7.648766994476318,
+          8.327270746231079
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed61.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed61_metadata.json"
+      },
+      "onnx_export_time": 0.005429983139038086,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed61.onnx",
+      "model_training_time": 20.07460904121399
+    },
+    "multi_exit_minimal_seed48": {
+      "model_id": "multi_exit_minimal_seed48",
+      "architecture": "multi_exit",
+      "complexity": "minimal",
+      "seed": 48,
+      "parameters": 28310,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 16.593666076660156,
+      "epochs_completed": 2,
+      "final_train_loss": 2.107901930809021,
+      "final_val_loss": 2.0945000648498535,
+      "final_test_loss": 2.0945000648498535,
+      "final_train_acc": 33.2,
+      "final_val_acc": 25.0,
+      "final_test_acc": 25.0,
+      "best_val_loss": 2.0945000648498535,
+      "history": {
+        "train_loss": [
+          2.261029839515686,
+          2.107901930809021
+        ],
+        "train_acc": [
+          17.2,
+          33.2
+        ],
+        "val_loss": [
+          2.201265811920166,
+          2.0945000648498535
+        ],
+        "val_acc": [
+          15.0,
+          25.0
+        ],
+        "epoch_times": [
+          8.048947811126709,
+          8.544680833816528
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed48.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed48_metadata.json"
+      },
+      "onnx_export_time": 0.005861043930053711,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_minimal_seed48.onnx",
+      "model_training_time": 20.508888006210327
+    },
+    "multi_exit_light_seed42": {
+      "model_id": "multi_exit_light_seed42",
+      "architecture": "multi_exit",
+      "complexity": "light",
+      "seed": 42,
+      "parameters": 96545,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 15.064625024795532,
+      "epochs_completed": 2,
+      "final_train_loss": 2.1152294874191284,
+      "final_val_loss": 2.0243143439292908,
+      "final_test_loss": 2.0243143439292908,
+      "final_train_acc": 62.4,
+      "final_val_acc": 51.666666666666664,
+      "final_test_acc": 51.666666666666664,
+      "best_val_loss": 2.0243143439292908,
+      "history": {
+        "train_loss": [
+          2.2726526856422424,
+          2.1152294874191284
+        ],
+        "train_acc": [
+          15.6,
+          62.4
+        ],
+        "val_loss": [
+          2.212741732597351,
+          2.0243143439292908
+        ],
+        "val_acc": [
+          48.333333333333336,
+          51.666666666666664
+        ],
+        "epoch_times": [
+          7.853744745254517,
+          7.210841178894043
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed42.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed42_metadata.json"
+      },
+      "onnx_export_time": 0.00712275505065918,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed42.onnx",
+      "model_training_time": 18.372689962387085
+    },
+    "multi_exit_light_seed123": {
+      "model_id": "multi_exit_light_seed123",
+      "architecture": "multi_exit",
+      "complexity": "light",
+      "seed": 123,
+      "parameters": 96545,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.915046215057373,
+      "epochs_completed": 2,
+      "final_train_loss": 2.1053757071495056,
+      "final_val_loss": 2.0229157209396362,
+      "final_test_loss": 2.0229157209396362,
+      "final_train_acc": 46.4,
+      "final_val_acc": 42.5,
+      "final_test_acc": 42.5,
+      "best_val_loss": 2.0229157209396362,
+      "history": {
+        "train_loss": [
+          2.273997485637665,
+          2.1053757071495056
+        ],
+        "train_acc": [
+          17.2,
+          46.4
+        ],
+        "val_loss": [
+          2.218178391456604,
+          2.0229157209396362
+        ],
+        "val_acc": [
+          27.5,
+          42.5
+        ],
+        "epoch_times": [
+          7.151663780212402,
+          7.763345241546631
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed123.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed123_metadata.json"
+      },
+      "onnx_export_time": 0.006456613540649414,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed123.onnx",
+      "model_training_time": 18.77905583381653
+    },
+    "multi_exit_light_seed55": {
+      "model_id": "multi_exit_light_seed55",
+      "architecture": "multi_exit",
+      "complexity": "light",
+      "seed": 55,
+      "parameters": 96545,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 15.541939973831177,
+      "epochs_completed": 2,
+      "final_train_loss": 2.114663600921631,
+      "final_val_loss": 2.0342312455177307,
+      "final_test_loss": 2.0342312455177307,
+      "final_train_acc": 56.0,
+      "final_val_acc": 46.666666666666664,
+      "final_test_acc": 46.666666666666664,
+      "best_val_loss": 2.0342312455177307,
+      "history": {
+        "train_loss": [
+          2.2777913212776184,
+          2.114663600921631
+        ],
+        "train_acc": [
+          17.2,
+          56.0
+        ],
+        "val_loss": [
+          2.2239174842834473,
+          2.0342312455177307
+        ],
+        "val_acc": [
+          34.166666666666664,
+          46.666666666666664
+        ],
+        "epoch_times": [
+          7.784382104873657,
+          7.757518768310547
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed55.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed55_metadata.json"
+      },
+      "onnx_export_time": 0.005739688873291016,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed55.onnx",
+      "model_training_time": 19.68325400352478
+    },
+    "multi_exit_light_seed61": {
+      "model_id": "multi_exit_light_seed61",
+      "architecture": "multi_exit",
+      "complexity": "light",
+      "seed": 61,
+      "parameters": 96545,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 20.44892382621765,
+      "epochs_completed": 2,
+      "final_train_loss": 2.0975615680217743,
+      "final_val_loss": 2.043209731578827,
+      "final_test_loss": 2.043209731578827,
+      "final_train_acc": 49.2,
+      "final_val_acc": 40.833333333333336,
+      "final_test_acc": 40.833333333333336,
+      "best_val_loss": 2.043209731578827,
+      "history": {
+        "train_loss": [
+          2.2642743587493896,
+          2.0975615680217743
+        ],
+        "train_acc": [
+          17.2,
+          49.2
+        ],
+        "val_loss": [
+          2.2127885818481445,
+          2.043209731578827
+        ],
+        "val_acc": [
+          32.5,
+          40.833333333333336
+        ],
+        "epoch_times": [
+          7.7801830768585205,
+          12.668698787689209
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed61.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed61_metadata.json"
+      },
+      "onnx_export_time": 0.006331205368041992,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed61.onnx",
+      "model_training_time": 27.92595911026001
+    },
+    "multi_exit_light_seed48": {
+      "model_id": "multi_exit_light_seed48",
+      "architecture": "multi_exit",
+      "complexity": "light",
+      "seed": 48,
+      "parameters": 96545,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.102589845657349,
+      "epochs_completed": 2,
+      "final_train_loss": 2.0903249382972717,
+      "final_val_loss": 2.0068089962005615,
+      "final_test_loss": 2.0068089962005615,
+      "final_train_acc": 56.0,
+      "final_val_acc": 53.333333333333336,
+      "final_test_acc": 53.333333333333336,
+      "best_val_loss": 2.0068089962005615,
+      "history": {
+        "train_loss": [
+          2.2767417430877686,
+          2.0903249382972717
+        ],
+        "train_acc": [
+          19.6,
+          56.0
+        ],
+        "val_loss": [
+          2.2113795280456543,
+          2.0068089962005615
+        ],
+        "val_acc": [
+          40.0,
+          53.333333333333336
+        ],
+        "epoch_times": [
+          7.120256185531616,
+          6.982270956039429
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed48.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed48_metadata.json"
+      },
+      "onnx_export_time": 0.005842924118041992,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_light_seed48.onnx",
+      "model_training_time": 17.646573066711426
+    },
+    "multi_exit_medium_seed42": {
+      "model_id": "multi_exit_medium_seed42",
+      "architecture": "multi_exit",
+      "complexity": "medium",
+      "seed": 42,
+      "parameters": 409132,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.398825883865356,
+      "epochs_completed": 2,
+      "final_train_loss": 2.042216032743454,
+      "final_val_loss": 1.8082159757614136,
+      "final_test_loss": 1.8082159757614136,
+      "final_train_acc": 53.2,
+      "final_val_acc": 51.666666666666664,
+      "final_test_acc": 51.666666666666664,
+      "best_val_loss": 1.8082159757614136,
+      "history": {
+        "train_loss": [
+          2.283672034740448,
+          2.042216032743454
+        ],
+        "train_acc": [
+          13.2,
+          53.2
+        ],
+        "val_loss": [
+          2.2045425176620483,
+          1.8082159757614136
+        ],
+        "val_acc": [
+          33.333333333333336,
+          51.666666666666664
+        ],
+        "epoch_times": [
+          7.24906325340271,
+          7.149724960327148
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed42.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed42_metadata.json"
+      },
+      "onnx_export_time": 0.008689165115356445,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed42.onnx",
+      "model_training_time": 17.843244075775146
+    },
+    "multi_exit_medium_seed123": {
+      "model_id": "multi_exit_medium_seed123",
+      "architecture": "multi_exit",
+      "complexity": "medium",
+      "seed": 123,
+      "parameters": 409132,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.618022918701172,
+      "epochs_completed": 2,
+      "final_train_loss": 2.06021910905838,
+      "final_val_loss": 1.8471828699111938,
+      "final_test_loss": 1.8471828699111938,
+      "final_train_acc": 66.0,
+      "final_val_acc": 50.833333333333336,
+      "final_test_acc": 50.833333333333336,
+      "best_val_loss": 1.8471828699111938,
+      "history": {
+        "train_loss": [
+          2.283402442932129,
+          2.06021910905838
+        ],
+        "train_acc": [
+          21.2,
+          66.0
+        ],
+        "val_loss": [
+          2.2210915088653564,
+          1.8471828699111938
+        ],
+        "val_acc": [
+          45.833333333333336,
+          50.833333333333336
+        ],
+        "epoch_times": [
+          7.606400966644287,
+          7.011588096618652
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed123.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed123_metadata.json"
+      },
+      "onnx_export_time": 0.008077859878540039,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed123.onnx",
+      "model_training_time": 18.517849683761597
+    },
+    "multi_exit_medium_seed55": {
+      "model_id": "multi_exit_medium_seed55",
+      "architecture": "multi_exit",
+      "complexity": "medium",
+      "seed": 55,
+      "parameters": 409132,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.551297903060913,
+      "epochs_completed": 2,
+      "final_train_loss": 1.968561738729477,
+      "final_val_loss": 1.717690348625183,
+      "final_test_loss": 1.717690348625183,
+      "final_train_acc": 50.4,
+      "final_val_acc": 49.166666666666664,
+      "final_test_acc": 49.166666666666664,
+      "best_val_loss": 1.717690348625183,
+      "history": {
+        "train_loss": [
+          2.269632935523987,
+          1.968561738729477
+        ],
+        "train_acc": [
+          23.2,
+          50.4
+        ],
+        "val_loss": [
+          2.1675736904144287,
+          1.717690348625183
+        ],
+        "val_acc": [
+          44.166666666666664,
+          49.166666666666664
+        ],
+        "epoch_times": [
+          7.2016282081604,
+          7.349609136581421
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed55.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed55_metadata.json"
+      },
+      "onnx_export_time": 0.007370948791503906,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed55.onnx",
+      "model_training_time": 18.14516305923462
+    },
+    "multi_exit_medium_seed61": {
+      "model_id": "multi_exit_medium_seed61",
+      "architecture": "multi_exit",
+      "complexity": "medium",
+      "seed": 61,
+      "parameters": 409132,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.161818265914917,
+      "epochs_completed": 2,
+      "final_train_loss": 2.0483543276786804,
+      "final_val_loss": 1.8199627995491028,
+      "final_test_loss": 1.8199627995491028,
+      "final_train_acc": 58.0,
+      "final_val_acc": 64.16666666666667,
+      "final_test_acc": 64.16666666666667,
+      "best_val_loss": 1.8199627995491028,
+      "history": {
+        "train_loss": [
+          2.280140221118927,
+          2.0483543276786804
+        ],
+        "train_acc": [
+          22.0,
+          58.0
+        ],
+        "val_loss": [
+          2.2144155502319336,
+          1.8199627995491028
+        ],
+        "val_acc": [
+          51.666666666666664,
+          64.16666666666667
+        ],
+        "epoch_times": [
+          7.088185787200928,
+          7.073585033416748
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed61.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed61_metadata.json"
+      },
+      "onnx_export_time": 0.008546113967895508,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed61.onnx",
+      "model_training_time": 17.685834884643555
+    },
+    "multi_exit_medium_seed48": {
+      "model_id": "multi_exit_medium_seed48",
+      "architecture": "multi_exit",
+      "complexity": "medium",
+      "seed": 48,
+      "parameters": 409132,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 15.478548288345337,
+      "epochs_completed": 2,
+      "final_train_loss": 1.9964410662651062,
+      "final_val_loss": 1.775583267211914,
+      "final_test_loss": 1.775583267211914,
+      "final_train_acc": 58.8,
+      "final_val_acc": 54.166666666666664,
+      "final_test_acc": 54.166666666666664,
+      "best_val_loss": 1.775583267211914,
+      "history": {
+        "train_loss": [
+          2.273466467857361,
+          1.9964410662651062
+        ],
+        "train_acc": [
+          17.2,
+          58.8
+        ],
+        "val_loss": [
+          2.190958857536316,
+          1.775583267211914
+        ],
+        "val_acc": [
+          38.333333333333336,
+          54.166666666666664
+        ],
+        "epoch_times": [
+          7.52770471572876,
+          7.950787782669067
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed48.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed48_metadata.json"
+      },
+      "onnx_export_time": 0.009667158126831055,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_medium_seed48.onnx",
+      "model_training_time": 19.572850942611694
+    },
+    "multi_exit_heavy_seed42": {
+      "model_id": "multi_exit_heavy_seed42",
+      "architecture": "multi_exit",
+      "complexity": "heavy",
+      "seed": 42,
+      "parameters": 1542199,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 13.848963260650635,
+      "epochs_completed": 2,
+      "final_train_loss": 1.8502312898635864,
+      "final_val_loss": 1.3803212642669678,
+      "final_test_loss": 1.3803212642669678,
+      "final_train_acc": 64.4,
+      "final_val_acc": 58.333333333333336,
+      "final_test_acc": 58.333333333333336,
+      "best_val_loss": 1.3803212642669678,
+      "history": {
+        "train_loss": [
+          2.2816662788391113,
+          1.8502312898635864
+        ],
+        "train_acc": [
+          17.6,
+          64.4
+        ],
+        "val_loss": [
+          2.171853542327881,
+          1.3803212642669678
+        ],
+        "val_acc": [
+          49.166666666666664,
+          58.333333333333336
+        ],
+        "epoch_times": [
+          7.095595836639404,
+          6.753328084945679
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed42.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed42_metadata.json"
+      },
+      "onnx_export_time": 0.017663002014160156,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed42.onnx",
+      "model_training_time": 17.169246912002563
+    },
+    "multi_exit_heavy_seed123": {
+      "model_id": "multi_exit_heavy_seed123",
+      "architecture": "multi_exit",
+      "complexity": "heavy",
+      "seed": 123,
+      "parameters": 1542199,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.439948081970215,
+      "epochs_completed": 2,
+      "final_train_loss": 1.94131338596344,
+      "final_val_loss": 1.5822131633758545,
+      "final_test_loss": 1.5822131633758545,
+      "final_train_acc": 42.8,
+      "final_val_acc": 50.833333333333336,
+      "final_test_acc": 50.833333333333336,
+      "best_val_loss": 1.5822131633758545,
+      "history": {
+        "train_loss": [
+          2.2835598587989807,
+          1.94131338596344
+        ],
+        "train_acc": [
+          11.2,
+          42.8
+        ],
+        "val_loss": [
+          2.1988266706466675,
+          1.5822131633758545
+        ],
+        "val_acc": [
+          40.833333333333336,
+          50.833333333333336
+        ],
+        "epoch_times": [
+          7.268472194671631,
+          7.17143988609314
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed123.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed123_metadata.json"
+      },
+      "onnx_export_time": 0.01701211929321289,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed123.onnx",
+      "model_training_time": 18.19958806037903
+    },
+    "multi_exit_heavy_seed55": {
+      "model_id": "multi_exit_heavy_seed55",
+      "architecture": "multi_exit",
+      "complexity": "heavy",
+      "seed": 55,
+      "parameters": 1542199,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.354364156723022,
+      "epochs_completed": 2,
+      "final_train_loss": 1.820050209760666,
+      "final_val_loss": 1.6133301258087158,
+      "final_test_loss": 1.6133301258087158,
+      "final_train_acc": 48.8,
+      "final_val_acc": 45.0,
+      "final_test_acc": 45.0,
+      "best_val_loss": 1.6133301258087158,
+      "history": {
+        "train_loss": [
+          2.276173233985901,
+          1.820050209760666
+        ],
+        "train_acc": [
+          22.0,
+          48.8
+        ],
+        "val_loss": [
+          2.1470673084259033,
+          1.6133301258087158
+        ],
+        "val_acc": [
+          50.833333333333336,
+          45.0
+        ],
+        "epoch_times": [
+          7.290080785751343,
+          7.064241170883179
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed55.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed55_metadata.json"
+      },
+      "onnx_export_time": 0.01648998260498047,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed55.onnx",
+      "model_training_time": 17.73569083213806
+    },
+    "multi_exit_heavy_seed61": {
+      "model_id": "multi_exit_heavy_seed61",
+      "architecture": "multi_exit",
+      "complexity": "heavy",
+      "seed": 61,
+      "parameters": 1542199,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 13.245826005935669,
+      "epochs_completed": 2,
+      "final_train_loss": 1.8461959958076477,
+      "final_val_loss": 1.6172903180122375,
+      "final_test_loss": 1.6172903180122375,
+      "final_train_acc": 61.6,
+      "final_val_acc": 40.0,
+      "final_test_acc": 40.0,
+      "best_val_loss": 1.6172903180122375,
+      "history": {
+        "train_loss": [
+          2.278009831905365,
+          1.8461959958076477
+        ],
+        "train_acc": [
+          20.0,
+          61.6
+        ],
+        "val_loss": [
+          2.1681848764419556,
+          1.6172903180122375
+        ],
+        "val_acc": [
+          58.333333333333336,
+          40.0
+        ],
+        "epoch_times": [
+          6.7466208934783936,
+          6.4991631507873535
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed61.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed61_metadata.json"
+      },
+      "onnx_export_time": 0.017171859741210938,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed61.onnx",
+      "model_training_time": 16.6481831073761
+    },
+    "multi_exit_heavy_seed48": {
+      "model_id": "multi_exit_heavy_seed48",
+      "architecture": "multi_exit",
+      "complexity": "heavy",
+      "seed": 48,
+      "parameters": 1542199,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.622110843658447,
+      "epochs_completed": 2,
+      "final_train_loss": 1.8566584289073944,
+      "final_val_loss": 1.50911283493042,
+      "final_test_loss": 1.50911283493042,
+      "final_train_acc": 50.0,
+      "final_val_acc": 53.333333333333336,
+      "final_test_acc": 53.333333333333336,
+      "best_val_loss": 1.50911283493042,
+      "history": {
+        "train_loss": [
+          2.2802228927612305,
+          1.8566584289073944
+        ],
+        "train_acc": [
+          16.0,
+          50.0
+        ],
+        "val_loss": [
+          2.1683214902877808,
+          1.50911283493042
+        ],
+        "val_acc": [
+          40.0,
+          53.333333333333336
+        ],
+        "epoch_times": [
+          7.291078329086304,
+          7.330985069274902
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed48.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed48_metadata.json"
+      },
+      "onnx_export_time": 0.015624761581420898,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_heavy_seed48.onnx",
+      "model_training_time": 18.421385765075684
+    },
+    "multi_exit_extreme_seed42": {
+      "model_id": "multi_exit_extreme_seed42",
+      "architecture": "multi_exit",
+      "complexity": "extreme",
+      "seed": 42,
+      "parameters": 5839938,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.679600715637207,
+      "epochs_completed": 2,
+      "final_train_loss": 1.8170427978038788,
+      "final_val_loss": 1.9120152592658997,
+      "final_test_loss": 1.9120152592658997,
+      "final_train_acc": 39.2,
+      "final_val_acc": 26.666666666666668,
+      "final_test_acc": 26.666666666666668,
+      "best_val_loss": 1.9120152592658997,
+      "history": {
+        "train_loss": [
+          2.2881008982658386,
+          1.8170427978038788
+        ],
+        "train_acc": [
+          15.2,
+          39.2
+        ],
+        "val_loss": [
+          2.1599788665771484,
+          1.9120152592658997
+        ],
+        "val_acc": [
+          35.0,
+          26.666666666666668
+        ],
+        "epoch_times": [
+          7.399395704269409,
+          7.280166864395142
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed42.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed42_metadata.json"
+      },
+      "onnx_export_time": 0.03358793258666992,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed42.onnx",
+      "model_training_time": 18.439069986343384
+    },
+    "multi_exit_extreme_seed123": {
+      "model_id": "multi_exit_extreme_seed123",
+      "architecture": "multi_exit",
+      "complexity": "extreme",
+      "seed": 123,
+      "parameters": 5839938,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.90000605583191,
+      "epochs_completed": 2,
+      "final_train_loss": 2.079939514398575,
+      "final_val_loss": 1.9145223498344421,
+      "final_test_loss": 1.9145223498344421,
+      "final_train_acc": 31.2,
+      "final_val_acc": 40.0,
+      "final_test_acc": 40.0,
+      "best_val_loss": 1.9145223498344421,
+      "history": {
+        "train_loss": [
+          2.296446740627289,
+          2.079939514398575
+        ],
+        "train_acc": [
+          12.4,
+          31.2
+        ],
+        "val_loss": [
+          2.2282086610794067,
+          1.9145223498344421
+        ],
+        "val_acc": [
+          33.333333333333336,
+          40.0
+        ],
+        "epoch_times": [
+          7.359005928039551,
+          7.540954828262329
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed123.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed123_metadata.json"
+      },
+      "onnx_export_time": 0.048937082290649414,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed123.onnx",
+      "model_training_time": 18.670648097991943
+    },
+    "multi_exit_extreme_seed55": {
+      "model_id": "multi_exit_extreme_seed55",
+      "architecture": "multi_exit",
+      "complexity": "extreme",
+      "seed": 55,
+      "parameters": 5839938,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.420494794845581,
+      "epochs_completed": 2,
+      "final_train_loss": 1.8897894620895386,
+      "final_val_loss": 1.7716251611709595,
+      "final_test_loss": 1.7716251611709595,
+      "final_train_acc": 40.0,
+      "final_val_acc": 40.833333333333336,
+      "final_test_acc": 40.833333333333336,
+      "best_val_loss": 1.7716251611709595,
+      "history": {
+        "train_loss": [
+          2.2895092368125916,
+          1.8897894620895386
+        ],
+        "train_acc": [
+          13.2,
+          40.0
+        ],
+        "val_loss": [
+          2.1611759662628174,
+          1.7716251611709595
+        ],
+        "val_acc": [
+          30.833333333333332,
+          40.833333333333336
+        ],
+        "epoch_times": [
+          6.994777679443359,
+          7.425674915313721
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed55.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed55_metadata.json"
+      },
+      "onnx_export_time": 0.04547691345214844,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed55.onnx",
+      "model_training_time": 18.229660987854004
+    },
+    "multi_exit_extreme_seed61": {
+      "model_id": "multi_exit_extreme_seed61",
+      "architecture": "multi_exit",
+      "complexity": "extreme",
+      "seed": 61,
+      "parameters": 5839938,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.878980159759521,
+      "epochs_completed": 2,
+      "final_train_loss": 1.9435966610908508,
+      "final_val_loss": 1.5263106226921082,
+      "final_test_loss": 1.5263106226921082,
+      "final_train_acc": 43.2,
+      "final_val_acc": 48.333333333333336,
+      "final_test_acc": 48.333333333333336,
+      "best_val_loss": 1.5263106226921082,
+      "history": {
+        "train_loss": [
+          2.2928808331489563,
+          1.9435966610908508
+        ],
+        "train_acc": [
+          15.6,
+          43.2
+        ],
+        "val_loss": [
+          2.2012468576431274,
+          1.5263106226921082
+        ],
+        "val_acc": [
+          50.0,
+          48.333333333333336
+        ],
+        "epoch_times": [
+          7.734852075576782,
+          7.144085168838501
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed61.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed61_metadata.json"
+      },
+      "onnx_export_time": 0.04586601257324219,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed61.onnx",
+      "model_training_time": 18.68043804168701
+    },
+    "multi_exit_extreme_seed48": {
+      "model_id": "multi_exit_extreme_seed48",
+      "architecture": "multi_exit",
+      "complexity": "extreme",
+      "seed": 48,
+      "parameters": 5839938,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "training_time": 14.890076160430908,
+      "epochs_completed": 2,
+      "final_train_loss": 1.9685432314872742,
+      "final_val_loss": 1.671689510345459,
+      "final_test_loss": 1.671689510345459,
+      "final_train_acc": 31.2,
+      "final_val_acc": 44.166666666666664,
+      "final_test_acc": 44.166666666666664,
+      "best_val_loss": 1.671689510345459,
+      "history": {
+        "train_loss": [
+          2.2877288460731506,
+          1.9685432314872742
+        ],
+        "train_acc": [
+          10.8,
+          31.2
+        ],
+        "val_loss": [
+          2.143990635871887,
+          1.671689510345459
+        ],
+        "val_acc": [
+          20.0,
+          44.166666666666664
+        ],
+        "epoch_times": [
+          7.467381000518799,
+          7.422659873962402
+        ]
+      },
+      "device": "cpu",
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed48.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed48_metadata.json"
+      },
+      "onnx_export_time": 0.043797969818115234,
+      "onnx_path": "plots/neurips_Fcolors/trained_models/multi_exit_extreme_seed48.onnx",
+      "model_training_time": 18.644397020339966
+    }
+  },
+  "early_exit_models": [
+    {
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "parent_model_id": "multi_exit_extreme_seed42",
+      "architecture": "multi_exit",
+      "complexity": "extreme_early_6pct",
+      "truncation_layer": 0,
+      "target_ratio": 0.1,
+      "actual_ratio": 0.06882264845962406,
+      "parameters": 28310,
+      "parent_parameters": 5839938,
+      "parameter_reduction": 0.995152345795452,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_6pct.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_6pct_metadata.json"
+      }
+    },
+    {
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "parent_model_id": "multi_exit_extreme_seed42",
+      "architecture": "multi_exit",
+      "complexity": "extreme_early_15pct",
+      "truncation_layer": 1,
+      "target_ratio": 0.3,
+      "actual_ratio": 0.15877428835717092,
+      "parameters": 96545,
+      "parent_parameters": 5839938,
+      "parameter_reduction": 0.9834681464084036,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_15pct.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_15pct_metadata.json"
+      }
+    },
+    {
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "parent_model_id": "multi_exit_extreme_seed42",
+      "architecture": "multi_exit",
+      "complexity": "extreme_early_51pct",
+      "truncation_layer": 2,
+      "target_ratio": 0.6,
+      "actual_ratio": 0.518230159292787,
+      "parameters": 409132,
+      "parent_parameters": 5839938,
+      "parameter_reduction": 0.9299424069228133,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_51pct.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_51pct_metadata.json"
+      }
+    },
+    {
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "parent_model_id": "multi_exit_extreme_seed42",
+      "architecture": "multi_exit",
+      "complexity": "extreme_early_87pct",
+      "truncation_layer": 3,
+      "target_ratio": 0.85,
+      "actual_ratio": 0.8775106859011175,
+      "parameters": 28310,
+      "parent_parameters": 5839938,
+      "parameter_reduction": 0.995152345795452,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_87pct.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_87pct_metadata.json"
+      }
+    },
+    {
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "parent_model_id": "multi_exit_extreme_seed42",
+      "architecture": "multi_exit",
+      "complexity": "extreme_early_96pct",
+      "truncation_layer": 4,
+      "target_ratio": 0.97,
+      "actual_ratio": 0.9673746536350215,
+      "parameters": 28310,
+      "parent_parameters": 5839938,
+      "parameter_reduction": 0.995152345795452,
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28,
+      "saved_files": {
+        "model": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_96pct.pth",
+        "metadata": "plots/neurips_Fcolors/trained_models/early_exit/multi_exit_extreme_seed42_early_96pct_metadata.json"
+      }
+    }
+  ],
+  "zkml_results": [
+    {
+      "model_id": "multi_exit_minimal_seed42",
+      "framework": "ezkl",
+      "architecture": "multi_exit",
+      "complexity": "minimal",
+      "model_parameters": 28310,
+      "success": true,
+      "error_message": null,
+      "setup_time": 3.4931888580322266,
+      "proof_time": 4.134587526321411,
+      "verification_time": 0.05226597785949707,
+      "total_time": 7.680042362213134,
+      "memory_usage_mb": 1532.046875,
+      "cpu_memory_mb": 1532.046875,
+      "gpu_memory_mb": 0.003173828125,
+      "device_type": "mps",
+      "proof_size_bytes": 60194,
+      "setup_memory": {
+        "start_mb": 719.456298828125,
+        "peak_mb": 1228.503173828125,
+        "end_mb": 1228.518798828125,
+        "peak_increase_mb": 509.046875,
+        "net_increase_mb": 509.0625
+      },
+      "proof_memory": {
+        "peak_mb": 1490.40625,
+        "peak_increase_mb": 60.503125
+      },
+      "verification_memory": {
+        "peak_mb": 1532.046875,
+        "peak_increase_mb": 0.034375
+      },
+      "proof_time_std": 0.028164842455458222,
+      "proof_time_min": 4.101180076599121,
+      "proof_time_max": 4.167530059814453,
+      "verification_time_std": 0.003931678096284964,
+      "verification_time_min": 0.04878997802734375,
+      "verification_time_max": 0.059310197830200195
+    },
+    {
+      "model_id": "multi_exit_light_seed42",
+      "framework": "ezkl",
+      "architecture": "multi_exit",
+      "complexity": "light",
+      "model_parameters": 96545,
+      "success": true,
+      "error_message": null,
+      "setup_time": 3.9916839599609375,
+      "proof_time": 4.500673246383667,
+      "verification_time": 0.05167436599731445,
+      "total_time": 8.544031572341918,
+      "memory_usage_mb": 1593.971923828125,
+      "cpu_memory_mb": 1579.015625,
+      "gpu_memory_mb": 0.003173828125,
+      "device_type": "mps",
+      "proof_size_bytes": 60194,
+      "setup_memory": {
+        "start_mb": 1532.253173828125,
+        "peak_mb": 1593.971923828125,
+        "end_mb": 1593.971923828125,
+        "peak_increase_mb": 61.71875,
+        "net_increase_mb": 61.71875
+      },
+      "proof_memory": {
+        "peak_mb": 1586.715625,
+        "peak_increase_mb": 2.2875
+      },
+      "verification_memory": {
+        "peak_mb": 1579.015625,
+        "peak_increase_mb": 0.003125
+      },
+      "proof_time_std": 0.062061978636477055,
+      "proof_time_min": 4.410104036331177,
+      "proof_time_max": 4.593925952911377,
+      "verification_time_std": 0.002645542510268493,
+      "verification_time_min": 0.04799389839172363,
+      "verification_time_max": 0.05602693557739258
+    },
+    {
+      "model_id": "multi_exit_medium_seed42",
+      "framework": "ezkl",
+      "architecture": "multi_exit",
+      "complexity": "medium",
+      "model_parameters": 409132,
+      "success": true,
+      "error_message": null,
+      "setup_time": 7.803560018539429,
+      "proof_time": 8.25307264328003,
+      "verification_time": 0.06708588600158691,
+      "total_time": 16.123718547821042,
+      "memory_usage_mb": 1771.096875,
+      "cpu_memory_mb": 1771.1875,
+      "gpu_memory_mb": 0.003173828125,
+      "device_type": "mps",
+      "proof_size_bytes": 64738,
+      "setup_memory": {
+        "start_mb": 1579.143798828125,
+        "peak_mb": 1699.784423828125,
+        "end_mb": 1699.784423828125,
+        "peak_increase_mb": 120.640625,
+        "net_increase_mb": 120.640625
+      },
+      "proof_memory": {
+        "peak_mb": 1747.209375,
+        "peak_increase_mb": 22.790625
+      },
+      "verification_memory": {
+        "peak_mb": 1771.096875,
+        "peak_increase_mb": 0.053125
+      },
+      "proof_time_std": 0.13679688792304287,
+      "proof_time_min": 8.101337194442749,
+      "proof_time_max": 8.478210210800171,
+      "verification_time_std": 0.007382979627479927,
+      "verification_time_min": 0.06109786033630371,
+      "verification_time_max": 0.0812842845916748
+    },
+    {
+      "model_id": "multi_exit_heavy_seed42",
+      "framework": "ezkl",
+      "architecture": "multi_exit",
+      "complexity": "heavy",
+      "model_parameters": 1542199,
+      "success": true,
+      "error_message": null,
+      "setup_time": 22.635313034057617,
+      "proof_time": 25.83372211456299,
+      "verification_time": 0.2539551258087158,
+      "total_time": 48.72299027442932,
+      "memory_usage_mb": 3232.678125,
+      "cpu_memory_mb": 3248.8125,
+      "gpu_memory_mb": 0.003173828125,
+      "device_type": "mps",
+      "proof_size_bytes": 87586,
+      "setup_memory": {
+        "start_mb": 1773.143798828125,
+        "peak_mb": 2116.440673828125,
+        "end_mb": 2116.440673828125,
+        "peak_increase_mb": 343.296875,
+        "net_increase_mb": 343.296875
+      },
+      "proof_memory": {
+        "peak_mb": 3001.25625,
+        "peak_increase_mb": 239.0625
+      },
+      "verification_memory": {
+        "peak_mb": 3232.678125,
+        "peak_increase_mb": 14.65
+      },
+      "proof_time_std": 0.11216257186302381,
+      "proof_time_min": 25.701427936553955,
+      "proof_time_max": 25.995428800582886,
+      "verification_time_std": 0.009014028301377689,
+      "verification_time_min": 0.2472081184387207,
+      "verification_time_max": 0.27176904678344727
+    },
+    {
+      "model_id": "multi_exit_extreme_seed42",
+      "framework": "ezkl",
+      "architecture": "multi_exit",
+      "complexity": "extreme",
+      "model_parameters": 5839938,
+      "success": true,
+      "error_message": null,
+      "setup_time": 82.64821004867554,
+      "proof_time": 103.8796124458313,
+      "verification_time": 2.489608955383301,
+      "total_time": 189.01743144989013,
+      "memory_usage_mb": 6556.571875,
+      "cpu_memory_mb": 6580.84375,
+      "gpu_memory_mb": 0.003173828125,
+      "device_type": "mps",
+      "proof_size_bytes": 165154,
+      "setup_memory": {
+        "start_mb": 3256.175048828125,
+        "peak_mb": 3256.175048828125,
+        "end_mb": 640.596923828125,
+        "peak_increase_mb": 0.0,
+        "net_increase_mb": -2615.578125
+      },
+      "proof_memory": {
+        "peak_mb": 5138.14375,
+        "peak_increase_mb": 1198.628125
+      },
+      "verification_memory": {
+        "peak_mb": 6556.571875,
+        "peak_increase_mb": 22.4
+      },
+      "proof_time_std": 2.658914527495542,
+      "proof_time_min": 100.4657051563263,
+      "proof_time_max": 107.35839486122131,
+      "verification_time_std": 0.02235713561190941,
+      "verification_time_min": 2.46492600440979,
+      "verification_time_max": 2.529914140701294
+    }
+  ],
+  "crypto_results": [
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.0011936249677091837,
+      "memory_usage_mb": 6588.35625,
+      "throughput_ops_per_sec": 837.7840838225841,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.002317610454277495,
+      "execution_time_min": 2.8416980057954788e-05,
+      "execution_time_max": 0.005828832974657416,
+      "memory_usage_std": 0.00625,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 9.139999747276306e-05,
+      "memory_usage_mb": 6588.375,
+      "throughput_ops_per_sec": 10940.919339718768,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 7.44227645458535e-06,
+      "execution_time_min": 7.712515071034431e-05,
+      "execution_time_max": 9.887502528727055e-05,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0004455581773072481,
+      "memory_usage_mb": 6588.4375,
+      "throughput_ops_per_sec": 2244.3758210062424,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.000183314605809486,
+      "execution_time_min": 0.00027395784854888916,
+      "execution_time_max": 0.0008020000532269478,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0020224334206432105,
+      "memory_usage_mb": 6588.459375,
+      "throughput_ops_per_sec": 494.4538543483731,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 0.0001812413724765854,
+      "execution_time_min": 0.0018161670304834843,
+      "execution_time_max": 0.0022776660043746233,
+      "memory_usage_std": 0.0125,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.011236375011503697,
+      "memory_usage_mb": 6588.490625,
+      "throughput_ops_per_sec": 88.99667365820464,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.0011438331385881255,
+      "execution_time_min": 0.009113583015277982,
+      "execution_time_max": 0.012212791945785284,
+      "memory_usage_std": 0.01875,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.06754993321374059,
+      "memory_usage_mb": 6588.540625,
+      "throughput_ops_per_sec": 14.803863637226902,
+      "output_size": 8,
+      "error_message": null,
+      "execution_time_std": 0.003630571698907938,
+      "execution_time_min": 0.06271170801483095,
+      "execution_time_max": 0.07178420783020556,
+      "memory_usage_std": 0.023385358667337132,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.4169091165997088,
+      "memory_usage_mb": 6588.640625,
+      "throughput_ops_per_sec": 2.3986043005150695,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.004502582550863885,
+      "execution_time_min": 0.4088341249153018,
+      "execution_time_max": 0.420572750037536,
+      "memory_usage_std": 0.009882117688026186,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.0007565250620245933,
+      "memory_usage_mb": 6589.028125,
+      "throughput_ops_per_sec": 1321.833274530027,
+      "output_size": 160,
+      "error_message": null,
+      "execution_time_std": 0.0012182286497502606,
+      "execution_time_min": 0.0001427079550921917,
+      "execution_time_max": 0.003192958189174533,
+      "memory_usage_std": 0.00625,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.00028859982267022134,
+      "memory_usage_mb": 6589.05625,
+      "throughput_ops_per_sec": 3465.005594070253,
+      "output_size": 320,
+      "error_message": null,
+      "execution_time_std": 2.457260469306492e-05,
+      "execution_time_min": 0.00026950007304549217,
+      "execution_time_max": 0.00033658300526440144,
+      "memory_usage_std": 0.0125,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0006525584030896425,
+      "memory_usage_mb": 6589.134375,
+      "throughput_ops_per_sec": 1532.4298871416559,
+      "output_size": 640,
+      "error_message": null,
+      "execution_time_std": 0.00016934749476143107,
+      "execution_time_min": 0.0005200421437621117,
+      "execution_time_max": 0.0009480419103056192,
+      "memory_usage_std": 0.0125,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0010601668152958154,
+      "memory_usage_mb": 6589.140625,
+      "throughput_ops_per_sec": 943.2477847563761,
+      "output_size": 1280,
+      "error_message": null,
+      "execution_time_std": 1.7076281560363353e-05,
+      "execution_time_min": 0.0010347920469939709,
+      "execution_time_max": 0.0010848341044038534,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.002115424955263734,
+      "memory_usage_mb": 6589.140625,
+      "throughput_ops_per_sec": 472.7182581030525,
+      "output_size": 2560,
+      "error_message": null,
+      "execution_time_std": 5.542494528734345e-05,
+      "execution_time_min": 0.0020624578464776278,
+      "execution_time_max": 0.0021947911009192467,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.004110099840909242,
+      "memory_usage_mb": 6589.140625,
+      "throughput_ops_per_sec": 243.30309206765608,
+      "output_size": 5120,
+      "error_message": null,
+      "execution_time_std": 6.45683637042524e-05,
+      "execution_time_min": 0.004059625091031194,
+      "execution_time_max": 0.004234458087012172,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.008262591622769832,
+      "memory_usage_mb": 6589.140625,
+      "throughput_ops_per_sec": 121.02740225527138,
+      "output_size": 10240,
+      "error_message": null,
+      "execution_time_std": 7.619568363205251e-05,
+      "execution_time_min": 0.008140458026900887,
+      "execution_time_max": 0.008376375073567033,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.0005286500323563814,
+      "memory_usage_mb": 6589.25,
+      "throughput_ops_per_sec": 1891.610590739291,
+      "output_size": 32,
+      "error_message": null,
+      "execution_time_std": 0.00045090981424493394,
+      "execution_time_min": 0.00027708313427865505,
+      "execution_time_max": 0.001429583877325058,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.0012905248440802097,
+      "memory_usage_mb": 6589.425,
+      "throughput_ops_per_sec": 774.8785345645366,
+      "output_size": 64,
+      "error_message": null,
+      "execution_time_std": 0.0014011913621906139,
+      "execution_time_min": 0.0005771249998360872,
+      "execution_time_max": 0.004092833027243614,
+      "memory_usage_std": 0.2143303524935281,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0012238412629812956,
+      "memory_usage_mb": 6589.703125,
+      "throughput_ops_per_sec": 817.09943131349,
+      "output_size": 128,
+      "error_message": null,
+      "execution_time_std": 9.589866882113412e-05,
+      "execution_time_min": 0.0011619161814451218,
+      "execution_time_max": 0.0014114161022007465,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0023603250272572042,
+      "memory_usage_mb": 6589.703125,
+      "throughput_ops_per_sec": 423.6704642165497,
+      "output_size": 256,
+      "error_message": null,
+      "execution_time_std": 7.687738282767524e-05,
+      "execution_time_min": 0.0023014580365270376,
+      "execution_time_max": 0.002506792079657316,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.004639550484716893,
+      "memory_usage_mb": 6589.703125,
+      "throughput_ops_per_sec": 215.5381223448462,
+      "output_size": 512,
+      "error_message": null,
+      "execution_time_std": 0.00014261894632717267,
+      "execution_time_min": 0.004537542117759585,
+      "execution_time_max": 0.004912417149171233,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.00926615009084344,
+      "memory_usage_mb": 6589.703125,
+      "throughput_ops_per_sec": 107.9196851115301,
+      "output_size": 1024,
+      "error_message": null,
+      "execution_time_std": 0.00012163749271611392,
+      "execution_time_min": 0.009086625184863806,
+      "execution_time_max": 0.009409333113580942,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.01852156678214669,
+      "memory_usage_mb": 6589.703125,
+      "throughput_ops_per_sec": 53.99111272616094,
+      "output_size": 2048,
+      "error_message": null,
+      "execution_time_std": 0.0003267088304344666,
+      "execution_time_min": 0.018186833010986447,
+      "execution_time_max": 0.019118624972179532,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_6pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_6pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 4.550861194729805e-05,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 21973.86290660909,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 3.057699784642758e-05,
+      "execution_time_min": 2.8042122721672058e-05,
+      "execution_time_max": 0.00010654190555214882,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 7.952502928674222e-05,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 12574.657425077014,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 6.515879130935729e-06,
+      "execution_time_min": 7.13749323040247e-05,
+      "execution_time_max": 8.899997919797897e-05,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0003577166236937046,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 2795.5088854250494,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 3.628591921808487e-05,
+      "execution_time_min": 0.00028604106046259403,
+      "execution_time_max": 0.000382457859814167,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0020019662100821734,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 499.50893025260086,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 0.00014403684467684607,
+      "execution_time_min": 0.0017437911592423916,
+      "execution_time_max": 0.0021806659642606974,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.011124933464452624,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 89.88817804576439,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.0007571136391234076,
+      "execution_time_min": 0.010316875064745545,
+      "execution_time_max": 0.012115166988223791,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.06116238320246339,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 16.349918816762585,
+      "output_size": 8,
+      "error_message": null,
+      "execution_time_std": 0.006766277756137137,
+      "execution_time_min": 0.05344462487846613,
+      "execution_time_max": 0.06869154190644622,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.40109854997135697,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 2.493152867472125,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 0.009992057239824532,
+      "execution_time_min": 0.38630962488241494,
+      "execution_time_max": 0.41427516704425216,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.0001491336151957512,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 6705.396356732925,
+      "output_size": 160,
+      "error_message": null,
+      "execution_time_std": 2.8768292542317054e-05,
+      "execution_time_min": 0.00013237493112683296,
+      "execution_time_max": 0.00020654220134019852,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.0002612915821373463,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 3827.142044990781,
+      "output_size": 320,
+      "error_message": null,
+      "execution_time_std": 1.0014267173361364e-05,
+      "execution_time_min": 0.00025558285415172577,
+      "execution_time_max": 0.00028129201382398605,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0005066582001745701,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 1973.717191699351,
+      "output_size": 640,
+      "error_message": null,
+      "execution_time_std": 6.955291892658893e-06,
+      "execution_time_min": 0.0004996659699827433,
+      "execution_time_max": 0.0005190419033169746,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0010901750531047583,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 917.2838776231902,
+      "output_size": 1280,
+      "error_message": null,
+      "execution_time_std": 7.20526766505216e-05,
+      "execution_time_min": 0.0010114579927176237,
+      "execution_time_max": 0.0012031670194119215,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.0020448165480047463,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 489.0414257336492,
+      "output_size": 2560,
+      "error_message": null,
+      "execution_time_std": 5.011434654106958e-05,
+      "execution_time_min": 0.002005457878112793,
+      "execution_time_max": 0.002143166959285736,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.0041375166270881895,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 241.69087163373118,
+      "output_size": 5120,
+      "error_message": null,
+      "execution_time_std": 0.00010045943922440992,
+      "execution_time_min": 0.004069917136803269,
+      "execution_time_max": 0.004335416946560144,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.008399316342547536,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 119.05730885910378,
+      "output_size": 10240,
+      "error_message": null,
+      "execution_time_std": 0.00017590296136770988,
+      "execution_time_min": 0.00816916604526341,
+      "execution_time_max": 0.008614624850451946,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.0003435085993260145,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 2911.135272776469,
+      "output_size": 32,
+      "error_message": null,
+      "execution_time_std": 4.370549379486892e-05,
+      "execution_time_min": 0.0002794999163597822,
+      "execution_time_max": 0.0003884590696543455,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.0006385165732353925,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 1566.1300613278595,
+      "output_size": 64,
+      "error_message": null,
+      "execution_time_std": 6.211854072854362e-05,
+      "execution_time_min": 0.0005832919850945473,
+      "execution_time_max": 0.0007505409885197878,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0011483084410429001,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 870.8461631543825,
+      "output_size": 128,
+      "error_message": null,
+      "execution_time_std": 2.1732168508240762e-05,
+      "execution_time_min": 0.001131750177592039,
+      "execution_time_max": 0.0011897499207407236,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0023492917884141208,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 425.66019467298514,
+      "output_size": 256,
+      "error_message": null,
+      "execution_time_std": 0.00011053978135096247,
+      "execution_time_min": 0.002219167072325945,
+      "execution_time_max": 0.002482333919033408,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.0045826415531337265,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 218.21475417735317,
+      "output_size": 512,
+      "error_message": null,
+      "execution_time_std": 3.2731910106193915e-05,
+      "execution_time_min": 0.004546792013570666,
+      "execution_time_max": 0.004628082970157266,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.009178141644224525,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 108.95451811089275,
+      "output_size": 1024,
+      "error_message": null,
+      "execution_time_std": 9.664315142172847e-05,
+      "execution_time_min": 0.009029082953929901,
+      "execution_time_max": 0.009328375104814768,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.018115883180871605,
+      "memory_usage_mb": 6590.390625,
+      "throughput_ops_per_sec": 55.200179313139465,
+      "output_size": 2048,
+      "error_message": null,
+      "execution_time_std": 0.0001602154906679093,
+      "execution_time_min": 0.017947332933545113,
+      "execution_time_max": 0.018414708087220788,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_15pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_15pct",
+      "model_parameters": 96545
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 3.637503832578659e-05,
+      "memory_usage_mb": 6591.984375,
+      "throughput_ops_per_sec": 27491.379968968748,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 9.809697051132259e-06,
+      "execution_time_min": 2.8542010113596916e-05,
+      "execution_time_max": 5.570892244577408e-05,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 8.621681481599808e-05,
+      "memory_usage_mb": 6591.984375,
+      "throughput_ops_per_sec": 11598.665551890042,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 6.40109865219441e-06,
+      "execution_time_min": 7.579196244478226e-05,
+      "execution_time_max": 9.304191917181015e-05,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.00035655866377055646,
+      "memory_usage_mb": 6591.984375,
+      "throughput_ops_per_sec": 2804.587580133783,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 1.824225303242328e-05,
+      "execution_time_min": 0.00033237505704164505,
+      "execution_time_max": 0.00037516700103878975,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0019787418190389872,
+      "memory_usage_mb": 6591.984375,
+      "throughput_ops_per_sec": 505.37164089738025,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 0.00017632096859681776,
+      "execution_time_min": 0.0016942080110311508,
+      "execution_time_max": 0.0021422088611871004,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.01097351680509746,
+      "memory_usage_mb": 6591.984375,
+      "throughput_ops_per_sec": 91.1284885020157,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.0010319425983244472,
+      "execution_time_min": 0.009071582928299904,
+      "execution_time_max": 0.012122875079512596,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.061845599999651314,
+      "memory_usage_mb": 6591.984375,
+      "throughput_ops_per_sec": 16.169299028639678,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.005217830439759134,
+      "execution_time_min": 0.05208766693249345,
+      "execution_time_max": 0.06728254188783467,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.39198615001514553,
+      "memory_usage_mb": 6591.990625,
+      "throughput_ops_per_sec": 2.5511105429652607,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.01717320557120407,
+      "execution_time_min": 0.36460700002498925,
+      "execution_time_max": 0.4118032918777317,
+      "memory_usage_std": 0.007654655446197432,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.00016990001313388348,
+      "memory_usage_mb": 6592.0,
+      "throughput_ops_per_sec": 5885.814730408447,
+      "output_size": 160,
+      "error_message": null,
+      "execution_time_std": 4.146429490288723e-05,
+      "execution_time_min": 0.00013724993914365768,
+      "execution_time_max": 0.00024337507784366608,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.00026765866205096244,
+      "memory_usage_mb": 6592.0,
+      "throughput_ops_per_sec": 3736.1017660978937,
+      "output_size": 320,
+      "error_message": null,
+      "execution_time_std": 5.756202540316284e-06,
+      "execution_time_min": 0.00026175007224082947,
+      "execution_time_max": 0.00027862517163157463,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0005599915981292725,
+      "memory_usage_mb": 6592.0,
+      "throughput_ops_per_sec": 1785.7410777958723,
+      "output_size": 640,
+      "error_message": null,
+      "execution_time_std": 3.745650581841585e-05,
+      "execution_time_min": 0.0005314999725669622,
+      "execution_time_max": 0.0006333331111818552,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.001035458454862237,
+      "memory_usage_mb": 6592.0,
+      "throughput_ops_per_sec": 965.7557918468543,
+      "output_size": 1280,
+      "error_message": null,
+      "execution_time_std": 6.573368682209991e-05,
+      "execution_time_min": 0.000991250155493617,
+      "execution_time_max": 0.0011655411217361689,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.0020659501664340497,
+      "memory_usage_mb": 6592.003125,
+      "throughput_ops_per_sec": 484.03878091893097,
+      "output_size": 2560,
+      "error_message": null,
+      "execution_time_std": 7.350308644357931e-05,
+      "execution_time_min": 0.0019932498689740896,
+      "execution_time_max": 0.002177166985347867,
+      "memory_usage_std": 0.00625,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.004080849979072809,
+      "memory_usage_mb": 6592.015625,
+      "throughput_ops_per_sec": 245.04698901653947,
+      "output_size": 5120,
+      "error_message": null,
+      "execution_time_std": 8.550465894789304e-05,
+      "execution_time_min": 0.0039725829847157,
+      "execution_time_max": 0.00420200009830296,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.008302533579990268,
+      "memory_usage_mb": 6592.03125,
+      "throughput_ops_per_sec": 120.44516175280222,
+      "output_size": 10240,
+      "error_message": null,
+      "execution_time_std": 0.00015926982522179253,
+      "execution_time_min": 0.008108834037557244,
+      "execution_time_max": 0.008497332921251655,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.0003433751408010721,
+      "memory_usage_mb": 6592.03125,
+      "throughput_ops_per_sec": 2912.2667344731603,
+      "output_size": 32,
+      "error_message": null,
+      "execution_time_std": 7.34459371962101e-05,
+      "execution_time_min": 0.0002692500129342079,
+      "execution_time_max": 0.00046133389696478844,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.0005735331680625678,
+      "memory_usage_mb": 6592.03125,
+      "throughput_ops_per_sec": 1743.5783241238948,
+      "output_size": 64,
+      "error_message": null,
+      "execution_time_std": 9.96228211817302e-06,
+      "execution_time_min": 0.000559207983314991,
+      "execution_time_max": 0.000588458962738514,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0011379169765859843,
+      "memory_usage_mb": 6592.03125,
+      "throughput_ops_per_sec": 878.7987353877369,
+      "output_size": 128,
+      "error_message": null,
+      "execution_time_std": 1.8591902779701125e-05,
+      "execution_time_min": 0.0011144999880343676,
+      "execution_time_max": 0.0011624579783529043,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.002375558391213417,
+      "memory_usage_mb": 6592.03125,
+      "throughput_ops_per_sec": 420.95366028414384,
+      "output_size": 256,
+      "error_message": null,
+      "execution_time_std": 0.00010677747767866978,
+      "execution_time_min": 0.0022842090111225843,
+      "execution_time_max": 0.0025814578402787447,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.0045864835381507875,
+      "memory_usage_mb": 6592.03125,
+      "throughput_ops_per_sec": 218.0319610180455,
+      "output_size": 512,
+      "error_message": null,
+      "execution_time_std": 3.6434087148879974e-05,
+      "execution_time_min": 0.004547791788354516,
+      "execution_time_max": 0.004650166956707835,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.0093064249958843,
+      "memory_usage_mb": 6592.03125,
+      "throughput_ops_per_sec": 107.45264700916226,
+      "output_size": 1024,
+      "error_message": null,
+      "execution_time_std": 9.11939763222327e-05,
+      "execution_time_min": 0.009221917018294334,
+      "execution_time_max": 0.009484000038355589,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.01837369194254279,
+      "memory_usage_mb": 6592.03125,
+      "throughput_ops_per_sec": 54.42564309487421,
+      "output_size": 2048,
+      "error_message": null,
+      "execution_time_std": 0.0001776226919288032,
+      "execution_time_min": 0.018155166879296303,
+      "execution_time_max": 0.018698791973292828,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_51pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_51pct",
+      "model_parameters": 409132
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 3.1958241015672685e-05,
+      "memory_usage_mb": 6592.1875,
+      "throughput_ops_per_sec": 31290.833544611814,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 5.1944904543049355e-06,
+      "execution_time_min": 2.695806324481964e-05,
+      "execution_time_max": 4.179193638265133e-05,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 8.380841463804246e-05,
+      "memory_usage_mb": 6592.1875,
+      "throughput_ops_per_sec": 11931.976094749778,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 4.8917469056818915e-06,
+      "execution_time_min": 7.754191756248474e-05,
+      "execution_time_max": 9.120791219174862e-05,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.00034038317389786246,
+      "memory_usage_mb": 6592.1875,
+      "throughput_ops_per_sec": 2937.865548841925,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 2.3831107106354164e-05,
+      "execution_time_min": 0.00031341705471277237,
+      "execution_time_max": 0.00037400005385279655,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0019907832611352205,
+      "memory_usage_mb": 6592.1875,
+      "throughput_ops_per_sec": 502.3148524112875,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 4.183693593122042e-05,
+      "execution_time_min": 0.0019331250805407763,
+      "execution_time_max": 0.002063250169157982,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.01196899195201695,
+      "memory_usage_mb": 6592.1875,
+      "throughput_ops_per_sec": 83.54922486446199,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.00020545112359955601,
+      "execution_time_min": 0.011680874973535538,
+      "execution_time_max": 0.012205000035464764,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.065663374774158,
+      "memory_usage_mb": 6592.1875,
+      "throughput_ops_per_sec": 15.229189840445922,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.004624563316428968,
+      "execution_time_min": 0.05961337499320507,
+      "execution_time_max": 0.07039149990305305,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.4036414498463273,
+      "memory_usage_mb": 6592.2,
+      "throughput_ops_per_sec": 2.4774462592499256,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 0.015270211472021749,
+      "execution_time_min": 0.3761591659858823,
+      "execution_time_max": 0.42107224999926984,
+      "memory_usage_std": 0.00625,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.00019475817680358887,
+      "memory_usage_mb": 6592.203125,
+      "throughput_ops_per_sec": 5134.572609028309,
+      "output_size": 160,
+      "error_message": null,
+      "execution_time_std": 7.594174552299578e-05,
+      "execution_time_min": 0.0001373749691992998,
+      "execution_time_max": 0.00033733295276761055,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.0002782831434160471,
+      "memory_usage_mb": 6592.203125,
+      "throughput_ops_per_sec": 3593.4623553714514,
+      "output_size": 320,
+      "error_message": null,
+      "execution_time_std": 2.035815360228171e-05,
+      "execution_time_min": 0.0002651249524205923,
+      "execution_time_max": 0.0003187078982591629,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0005220998078584671,
+      "memory_usage_mb": 6592.203125,
+      "throughput_ops_per_sec": 1915.3425934052134,
+      "output_size": 640,
+      "error_message": null,
+      "execution_time_std": 2.457662907982407e-06,
+      "execution_time_min": 0.0005182500462979078,
+      "execution_time_max": 0.0005250410176813602,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0010587831493467093,
+      "memory_usage_mb": 6592.203125,
+      "throughput_ops_per_sec": 944.4804638390972,
+      "output_size": 1280,
+      "error_message": null,
+      "execution_time_std": 5.4768542748029714e-05,
+      "execution_time_min": 0.0010236669331789017,
+      "execution_time_max": 0.001167665934190154,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.0022355417255312203,
+      "memory_usage_mb": 6592.209375,
+      "throughput_ops_per_sec": 447.31887066987093,
+      "output_size": 2560,
+      "error_message": null,
+      "execution_time_std": 0.00019823248230112036,
+      "execution_time_min": 0.002039666986092925,
+      "execution_time_max": 0.002578000072389841,
+      "memory_usage_std": 0.0125,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.004195558000355959,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 238.34731873928527,
+      "output_size": 5120,
+      "error_message": null,
+      "execution_time_std": 0.0001718151327067382,
+      "execution_time_min": 0.004031541058793664,
+      "execution_time_max": 0.004452124936506152,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.008476191572844982,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 117.97751282588769,
+      "output_size": 10240,
+      "error_message": null,
+      "execution_time_std": 0.0001731320820663022,
+      "execution_time_min": 0.008256415836513042,
+      "execution_time_max": 0.008786082966253161,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.0003090998157858849,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 3235.2008928167897,
+      "output_size": 32,
+      "error_message": null,
+      "execution_time_std": 3.1124342683045754e-05,
+      "execution_time_min": 0.0002733329311013222,
+      "execution_time_max": 0.0003527081571519375,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.0005862166173756123,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 1705.8540654763804,
+      "output_size": 64,
+      "error_message": null,
+      "execution_time_std": 1.803151667823542e-05,
+      "execution_time_min": 0.000570167088881135,
+      "execution_time_max": 0.0006208750419318676,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.001180400187149644,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 847.1703163778185,
+      "output_size": 128,
+      "error_message": null,
+      "execution_time_std": 6.19949628920033e-05,
+      "execution_time_min": 0.0011349169071763754,
+      "execution_time_max": 0.001301292097195983,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0022934665437787773,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 436.0211849231396,
+      "output_size": 256,
+      "error_message": null,
+      "execution_time_std": 7.804314115774765e-05,
+      "execution_time_min": 0.0022372917737811804,
+      "execution_time_max": 0.0024432919453829527,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.004657674999907613,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 214.69939401521907,
+      "output_size": 512,
+      "error_message": null,
+      "execution_time_std": 9.19248495412652e-05,
+      "execution_time_min": 0.004476374946534634,
+      "execution_time_max": 0.004724500002339482,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.009381291596218944,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 106.59513029133879,
+      "output_size": 1024,
+      "error_message": null,
+      "execution_time_std": 0.00019966024167456013,
+      "execution_time_min": 0.00907666701823473,
+      "execution_time_max": 0.0096028340049088,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.01853239149786532,
+      "memory_usage_mb": 6592.234375,
+      "throughput_ops_per_sec": 53.95957667499019,
+      "output_size": 2048,
+      "error_message": null,
+      "execution_time_std": 0.00011103215927169128,
+      "execution_time_min": 0.018349082907661796,
+      "execution_time_max": 0.018675207858905196,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_87pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_87pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 3.2625021412968634e-05,
+      "memory_usage_mb": 6592.375,
+      "throughput_ops_per_sec": 30651.32087859701,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 9.264324293414211e-06,
+      "execution_time_min": 2.533290535211563e-05,
+      "execution_time_max": 5.050003528594971e-05,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 8.588302880525589e-05,
+      "memory_usage_mb": 6592.375,
+      "throughput_ops_per_sec": 11643.743984245719,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 3.2812533289571226e-06,
+      "execution_time_min": 8.058291859924793e-05,
+      "execution_time_max": 8.991616778075695e-05,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.00035355859436094763,
+      "memory_usage_mb": 6592.375,
+      "throughput_ops_per_sec": 2828.3854952175225,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 2.962996138096611e-05,
+      "execution_time_min": 0.0003124580252915621,
+      "execution_time_max": 0.0003812920767813921,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.00196144157089293,
+      "memory_usage_mb": 6592.375,
+      "throughput_ops_per_sec": 509.82910469505254,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 0.0002382983325656068,
+      "execution_time_min": 0.0016098751220852137,
+      "execution_time_max": 0.0022330419160425663,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.01110085817053914,
+      "memory_usage_mb": 6592.375,
+      "throughput_ops_per_sec": 90.08312552392809,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 0.000929846323001358,
+      "execution_time_min": 0.009876083116978407,
+      "execution_time_max": 0.01238058297894895,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.06305696656927466,
+      "memory_usage_mb": 6592.375,
+      "throughput_ops_per_sec": 15.85867596249489,
+      "output_size": 10,
+      "error_message": null,
+      "execution_time_std": 0.004898323400448964,
+      "execution_time_min": 0.056977625004947186,
+      "execution_time_max": 0.07066449988633394,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "rabin",
+      "operation": "hash",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.39804435819387435,
+      "memory_usage_mb": 6592.384375,
+      "throughput_ops_per_sec": 2.512282813245987,
+      "output_size": 9,
+      "error_message": null,
+      "execution_time_std": 0.01127810850003926,
+      "execution_time_min": 0.37649399996735156,
+      "execution_time_max": 0.4070046250708401,
+      "memory_usage_std": 0.0125,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.00014035003259778024,
+      "memory_usage_mb": 6592.40625,
+      "throughput_ops_per_sec": 7125.042876661333,
+      "output_size": 160,
+      "error_message": null,
+      "execution_time_std": 1.0552883581378308e-05,
+      "execution_time_min": 0.00013291696086525917,
+      "execution_time_max": 0.00016116700135171413,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.00025864182971417903,
+      "memory_usage_mb": 6592.40625,
+      "throughput_ops_per_sec": 3866.350625129292,
+      "output_size": 320,
+      "error_message": null,
+      "execution_time_std": 6.8888153829712725e-06,
+      "execution_time_min": 0.0002533749211579561,
+      "execution_time_max": 0.0002721250057220459,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0005030166357755661,
+      "memory_usage_mb": 6592.40625,
+      "throughput_ops_per_sec": 1988.0058210364555,
+      "output_size": 640,
+      "error_message": null,
+      "execution_time_std": 2.359104938604775e-06,
+      "execution_time_min": 0.0004993330221623182,
+      "execution_time_max": 0.0005054578650742769,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.0010564332362264395,
+      "memory_usage_mb": 6592.40625,
+      "throughput_ops_per_sec": 946.5813510108618,
+      "output_size": 1280,
+      "error_message": null,
+      "execution_time_std": 6.0417842115367694e-05,
+      "execution_time_min": 0.00099829095415771,
+      "execution_time_max": 0.0011575829703360796,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.0021481582429260016,
+      "memory_usage_mb": 6592.40625,
+      "throughput_ops_per_sec": 465.51505378761215,
+      "output_size": 2560,
+      "error_message": null,
+      "execution_time_std": 7.366557494028799e-05,
+      "execution_time_min": 0.0020289160311222076,
+      "execution_time_max": 0.0022510001435875893,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.004080650024116039,
+      "memory_usage_mb": 6592.40625,
+      "throughput_ops_per_sec": 245.0589965054949,
+      "output_size": 5120,
+      "error_message": null,
+      "execution_time_std": 0.00011116031392054181,
+      "execution_time_min": 0.003943500109016895,
+      "execution_time_max": 0.004241249989718199,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "share",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.008249091589823366,
+      "memory_usage_mb": 6592.4375,
+      "throughput_ops_per_sec": 121.22546938788597,
+      "output_size": 10240,
+      "error_message": null,
+      "execution_time_std": 0.00021716476155706955,
+      "execution_time_min": 0.007936124922707677,
+      "execution_time_max": 0.0084887919947505,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 32,
+      "success": true,
+      "execution_time": 0.00030595818534493444,
+      "memory_usage_mb": 6592.4375,
+      "throughput_ops_per_sec": 3268.4204832520145,
+      "output_size": 32,
+      "error_message": null,
+      "execution_time_std": 2.0233909022388982e-05,
+      "execution_time_min": 0.00026825000531971455,
+      "execution_time_max": 0.0003281659446656704,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 64,
+      "success": true,
+      "execution_time": 0.00057160803116858,
+      "memory_usage_mb": 6592.4375,
+      "throughput_ops_per_sec": 1749.4505770949843,
+      "output_size": 64,
+      "error_message": null,
+      "execution_time_std": 8.789431597497164e-06,
+      "execution_time_min": 0.0005572079680860043,
+      "execution_time_max": 0.0005849581211805344,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 128,
+      "success": true,
+      "execution_time": 0.0012128497939556838,
+      "memory_usage_mb": 6592.4375,
+      "throughput_ops_per_sec": 824.504406880032,
+      "output_size": 128,
+      "error_message": null,
+      "execution_time_std": 3.4485676934188994e-05,
+      "execution_time_min": 0.001168833114206791,
+      "execution_time_max": 0.0012521659955382347,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 256,
+      "success": true,
+      "execution_time": 0.002286783419549465,
+      "memory_usage_mb": 6592.4375,
+      "throughput_ops_per_sec": 437.2954567761458,
+      "output_size": 256,
+      "error_message": null,
+      "execution_time_std": 2.7622112759017185e-05,
+      "execution_time_min": 0.0022456669248640537,
+      "execution_time_max": 0.002324166940525174,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 512,
+      "success": true,
+      "execution_time": 0.0045968750957399605,
+      "memory_usage_mb": 6592.4375,
+      "throughput_ops_per_sec": 217.53908452433808,
+      "output_size": 512,
+      "error_message": null,
+      "execution_time_std": 6.124643053415962e-05,
+      "execution_time_min": 0.004483500029891729,
+      "execution_time_max": 0.004653667099773884,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 1024,
+      "success": true,
+      "execution_time": 0.009074041899293662,
+      "memory_usage_mb": 6592.4375,
+      "throughput_ops_per_sec": 110.20447239480364,
+      "output_size": 1024,
+      "error_message": null,
+      "execution_time_std": 7.710858297415337e-05,
+      "execution_time_min": 0.008984917076304555,
+      "execution_time_max": 0.009202875196933746,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    },
+    {
+      "primitive_name": "shamir",
+      "operation": "reconstruct",
+      "input_size": 2048,
+      "success": true,
+      "execution_time": 0.018130475049838425,
+      "memory_usage_mb": 6592.4375,
+      "throughput_ops_per_sec": 55.15575280025064,
+      "output_size": 2048,
+      "error_message": null,
+      "execution_time_std": 0.00012299313830238425,
+      "execution_time_min": 0.017996042035520077,
+      "execution_time_max": 0.018334791995584965,
+      "memory_usage_std": 0.0,
+      "model_id": "multi_exit_extreme_seed42_early_96pct",
+      "model_architecture": "multi_exit",
+      "model_complexity": "extreme_early_96pct",
+      "model_parameters": 28310
+    }
+  ],
+  "timing_info": {
+    "training_phase": 475.506466627121,
+    "early_exit_phase": 0.04372119903564453,
+    "zkml_phase": 868.8491849899292,
+    "crypto_phase": 13.444003820419312,
+    "plotting_phase": 7.68135404586792
+  },
+  "config": {
+    "project_name": "phaze_benchmark",
+    "version": "0.14.2",
+    "dataset": {
+      "source": "mnist",
+      "dataset_size": 256,
+      "batch_size": 64,
+      "num_workers": 4,
+      "shuffle": true,
+      "normalize": true,
+      "augment": false
+    },
+    "model": {
+      "architectures": [
+        "multi_exit"
+      ],
+      "complexities": [
+        "minimal",
+        "light",
+        "medium",
+        "heavy",
+        "extreme"
+      ],
+      "early_exit_ratios": [
+        0.1,
+        0.3,
+        0.6,
+        0.85,
+        0.97
+      ],
+      "input_size": 784,
+      "output_size": 10,
+      "input_channels": 1,
+      "spatial_size": 28
+    },
+    "training": {
+      "epochs": 2,
+      "learning_rate": 0.001,
+      "weight_decay": 1e-05,
+      "optimizer": "adam",
+      "device": "auto",
+      "use_gpu_if_available": true,
+      "early_stopping": true,
+      "patience": 3,
+      "save_best_only": true,
+      "verbose": false,
+      "log_interval": 10
+    },
+    "experiment": {
+      "seeds": [
+        42,
+        123,
+        55,
+        61,
+        48
+      ],
+      "deterministic": true,
+      "zkml_frameworks": [
+        "ezkl"
+      ],
+      "hashing_algorithms": [
+        "rabin",
+        "shamir"
+      ],
+      "polynomial_degree": 2048,
+      "field_size": 2147483647,
+      "benchmark_iterations": 5,
+      "warmup_iterations": 2,
+      "profile_memory": true,
+      "memory_check_interval": 0.1
+    },
+    "output": {
+      "output_dir": "plots/neurips_Fcolors/",
+      "models_dir": "trained_models",
+      "plots_dir": "plots",
+      "logs_dir": "logs",
+      "save_models": true,
+      "export_onnx": true,
+      "save_checkpoints": false,
+      "generate_plots": true,
+      "save_plots": true,
+      "plot_formats": [
+        "png"
+      ],
+      "export_benchmark_data": true,
+      "export_format": "json"
+    },
+    "plotting": {
+      "style": "neurips",
+      "dpi": 300,
+      "figure_size": [
+        12,
+        8
+      ],
+      "font_size": 12,
+      "title_size": 14,
+      "legend_size": 10,
+      "primary_colors": [
+        "#1f77b4",
+        "#ff7f0e",
+        "#2ca02c",
+        "#d62728",
+        "#9467bd"
+      ],
+      "secondary_colors": [
+        "#aec7e8",
+        "#ffbb78",
+        "#98df8a",
+        "#ff9896",
+        "#c5b0d5",
+        "#c49c94",
+        "#f7b6d3",
+        "#c7c7c7",
+        "#dbdb8d",
+        "#9edae5"
+      ],
+      "export_formats": [
+        "png"
+      ],
+      "confidence_level": 0.95,
+      "num_trials": 10
+    }
+  },
+  "plot_results": {
+    "plots": {
+      "fingerprint": {
+        "figures": [
+          "Figure(7200x4800)",
+          "Figure(7200x4800)",
+          "Figure(7200x4800)",
+          "Figure(9000x3000)",
+          "Figure(7200x4800)",
+          "Figure(9000x3600)"
+        ],
+        "saved_files": [
+          "plots/neurips_Fcolors/plots/fingerprint/fingerprint_plot_1.png",
+          "plots/neurips_Fcolors/plots/fingerprint/fingerprint_plot_2.png",
+          "plots/neurips_Fcolors/plots/fingerprint/fingerprint_plot_3.png",
+          "plots/neurips_Fcolors/plots/fingerprint/fingerprint_fingerprinting_algorithm_performance_comparison.png",
+          "plots/neurips_Fcolors/plots/fingerprint/fingerprint_plot_5.png",
+          "plots/neurips_Fcolors/plots/fingerprint/fingerprint_algorithm_scaling_analysis.png"
+        ],
+        "num_plots": 6
+      },
+      "zkml-proof": {
+        "figures": [
+          "Figure(7200x4800)",
+          "Figure(7200x4800)",
+          "Figure(7200x4800)",
+          "Figure(9000x6000)",
+          "Figure(7200x4800)",
+          "Figure(6000x3600)",
+          "Figure(9000x3600)"
+        ],
+        "saved_files": [
+          "plots/neurips_Fcolors/plots/zkml-proof/zkml-proof_plot_1.png",
+          "plots/neurips_Fcolors/plots/zkml-proof/zkml-proof_plot_2.png",
+          "plots/neurips_Fcolors/plots/zkml-proof/zkml-proof_plot_3.png",
+          "plots/neurips_Fcolors/plots/zkml-proof/zkml-proof_zkml_framework_performance_comparison.png",
+          "plots/neurips_Fcolors/plots/zkml-proof/zkml-proof_plot_5.png",
+          "plots/neurips_Fcolors/plots/zkml-proof/zkml-proof_plot_6.png",
+          "plots/neurips_Fcolors/plots/zkml-proof/zkml-proof_zkml_framework_scaling_analysis.png"
+        ],
+        "num_plots": 7
+      },
+      "zkml-verify": {
+        "figures": [
+          "Figure(7200x4800)",
+          "Figure(7200x4800)",
+          "Figure(7200x4800)",
+          "Figure(9000x6000)",
+          "Figure(7200x4800)",
+          "Figure(6000x3600)",
+          "Figure(9000x3600)"
+        ],
+        "saved_files": [
+          "plots/neurips_Fcolors/plots/zkml-verify/zkml-verify_plot_1.png",
+          "plots/neurips_Fcolors/plots/zkml-verify/zkml-verify_plot_2.png",
+          "plots/neurips_Fcolors/plots/zkml-verify/zkml-verify_plot_3.png",
+          "plots/neurips_Fcolors/plots/zkml-verify/zkml-verify_zkml_framework_performance_comparison.png",
+          "plots/neurips_Fcolors/plots/zkml-verify/zkml-verify_plot_5.png",
+          "plots/neurips_Fcolors/plots/zkml-verify/zkml-verify_plot_6.png",
+          "plots/neurips_Fcolors/plots/zkml-verify/zkml-verify_zkml_framework_scaling_analysis.png"
+        ],
+        "num_plots": 7
+      }
+    },
+    "metadata": {
+      "plot_types": [
+        "fingerprint",
+        "zkml-proof",
+        "zkml-verify"
+      ],
+      "config": {
+        "style": "PlotStyle.NEURIPS",
+        "dpi": 300,
+        "figure_size": [
+          12,
+          8
+        ],
+        "font_size": 12,
+        "title_size": 14,
+        "legend_size": 10,
+        "primary_colors": [
+          "#1f77b4",
+          "#ff7f0e",
+          "#2ca02c",
+          "#d62728",
+          "#9467bd"
+        ],
+        "secondary_colors": [
+          "#aec7e8",
+          "#ffbb78",
+          "#98df8a",
+          "#ff9896",
+          "#c5b0d5",
+          "#c49c94",
+          "#f7b6d3",
+          "#c7c7c7",
+          "#dbdb8d",
+          "#9edae5"
+        ],
+        "export_formats": [
+          "png"
+        ],
+        "confidence_level": 0.95,
+        "num_trials": 10
+      },
+      "data_summary": {
+        "num_fields": 4,
+        "field_names": [
+          "zkml_results",
+          "crypto_results",
+          "training_results",
+          "early_exit_models"
+        ]
+      }
+    }
+  },
+  "completion_timestamp": 1760621821.233598,
+  "total_runtime": 1365.524730682373
+}

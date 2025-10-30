@@ -1,0 +1,43 @@
+{
+  "model_id": "multi_exit_light_seed123",
+  "architecture": "multi_exit",
+  "complexity": "light",
+  "seed": 123,
+  "parameters": 96545,
+  "input_size": 784,
+  "output_size": 10,
+  "input_channels": 1,
+  "spatial_size": 28,
+  "training_time": 14.915046215057373,
+  "epochs_completed": 2,
+  "final_train_loss": 2.1053757071495056,
+  "final_val_loss": 2.0229157209396362,
+  "final_test_loss": 2.0229157209396362,
+  "final_train_acc": 46.4,
+  "final_val_acc": 42.5,
+  "final_test_acc": 42.5,
+  "best_val_loss": 2.0229157209396362,
+  "history": {
+    "train_loss": [
+      2.273997485637665,
+      2.1053757071495056
+    ],
+    "train_acc": [
+      17.2,
+      46.4
+    ],
+    "val_loss": [
+      2.218178391456604,
+      2.0229157209396362
+    ],
+    "val_acc": [
+      27.5,
+      42.5
+    ],
+    "epoch_times": [
+      7.151663780212402,
+      7.763345241546631
+    ]
+  },
+  "device": "cpu"
+}

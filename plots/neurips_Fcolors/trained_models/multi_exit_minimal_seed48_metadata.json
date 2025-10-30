@@ -1,0 +1,43 @@
+{
+  "model_id": "multi_exit_minimal_seed48",
+  "architecture": "multi_exit",
+  "complexity": "minimal",
+  "seed": 48,
+  "parameters": 28310,
+  "input_size": 784,
+  "output_size": 10,
+  "input_channels": 1,
+  "spatial_size": 28,
+  "training_time": 16.593666076660156,
+  "epochs_completed": 2,
+  "final_train_loss": 2.107901930809021,
+  "final_val_loss": 2.0945000648498535,
+  "final_test_loss": 2.0945000648498535,
+  "final_train_acc": 33.2,
+  "final_val_acc": 25.0,
+  "final_test_acc": 25.0,
+  "best_val_loss": 2.0945000648498535,
+  "history": {
+    "train_loss": [
+      2.261029839515686,
+      2.107901930809021
+    ],
+    "train_acc": [
+      17.2,
+      33.2
+    ],
+    "val_loss": [
+      2.201265811920166,
+      2.0945000648498535
+    ],
+    "val_acc": [
+      15.0,
+      25.0
+    ],
+    "epoch_times": [
+      8.048947811126709,
+      8.544680833816528
+    ]
+  },
+  "device": "cpu"
+}
