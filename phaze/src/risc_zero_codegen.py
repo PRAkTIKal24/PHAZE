@@ -132,7 +132,8 @@ class RiscZeroArchitectureRegistry:
         Returns:
             List of (architecture, complexity, model_info) tuples
         """
-        architectures = PHAZEModelFactory.get_available_architectures()
+        # TEMP: Only focus on multi-exit models for faster development
+        architectures = ["multi_exit"]  # PHAZEModelFactory.get_available_architectures()
         complexities = PHAZEModelFactory.get_complexity_levels()
 
         # Set dataset-specific defaults
@@ -157,25 +158,13 @@ class RiscZeroArchitectureRegistry:
         for architecture in architectures:
             for complexity in complexities:
                 try:
-                    # Create a sample model to extract architecture info
-                    if architecture == "conv":
-                        # Convolutional models need spatial dimensions
-                        model = PHAZEModelFactory.create_full_model(
-                            architecture=architecture,
-                            complexity=complexity,
-                            input_size=dataset_config["input_size"],
-                            output_size=dataset_config["output_size"],
-                            input_channels=dataset_config["input_channels"],
-                            spatial_size=dataset_config["spatial_size"],
-                        )
-                    else:
-                        # Other architectures use flattened input
-                        model = PHAZEModelFactory.create_full_model(
-                            architecture=architecture,
-                            complexity=complexity,
-                            input_size=dataset_config["input_size"],
-                            output_size=dataset_config["output_size"],
-                        )
+                    # TEMP: Only multi-exit models, so we always use flattened input
+                    model = PHAZEModelFactory.create_full_model(
+                        architecture=architecture,
+                        complexity=complexity,
+                        input_size=dataset_config["input_size"],
+                        output_size=dataset_config["output_size"],
+                    )
 
                     # Extract model information and add dataset info
                     model_info = model.get_model_info()
@@ -228,10 +217,11 @@ class RiscZeroTemplateEngine:
 
     def create_templates(self):
         """Create initial template files for all supported architectures."""
+        # TEMP: Only create multi-exit template for faster development
         templates = {
-            "simple_model.rs.template": self._generate_simple_template(),
-            "conv_model.rs.template": self._generate_conv_template(),
-            "transformer_model.rs.template": self._generate_transformer_template(),
+            # "simple_model.rs.template": self._generate_simple_template(),
+            # "conv_model.rs.template": self._generate_conv_template(),
+            # "transformer_model.rs.template": self._generate_transformer_template(),
             "multi_exit_model.rs.template": self._generate_multi_exit_template(),
             "generic_model.rs.template": self._generate_generic_template(),
         }
