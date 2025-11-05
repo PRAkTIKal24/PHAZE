@@ -204,7 +204,7 @@ def build_dynamic_guest_programs(dataset_name="mnist"):
                 f"from phaze.src.dataset_config import get_dataset_config; "
                 f"dataset_config = get_dataset_config('{dataset_name}').to_dict(); "
                 f"registry = RiscZeroArchitectureRegistry(); "
-                f"registry.register_all_factory_models(dataset_config); "
+                f"registry.register_multi_exit_only(dataset_config); "
                 f"build_manager = RiscZeroBuildManager(registry); "
                 f"results = build_manager.build_all_guest_programs(); "
                 f"success_count = sum(1 for success in results.values() if success); "
