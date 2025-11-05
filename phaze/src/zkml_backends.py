@@ -52,7 +52,7 @@ class EZKLBackend(ZKMLBackendInterface):
             self.model,
             input_data,
             self.onnx_path,
-            opset_version=11,
+            opset_version=14,  # Updated to support newer PyTorch operations
             do_constant_folding=True,
             input_names=["input"],
             output_names=["output"],
