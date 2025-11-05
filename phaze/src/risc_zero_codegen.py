@@ -135,6 +135,9 @@ class RiscZeroArchitectureRegistry:
         # TEMP: Only focus on multi-exit models for faster development
         architectures = ["multi_exit"]  # PHAZEModelFactory.get_available_architectures()
         complexities = PHAZEModelFactory.get_complexity_levels()
+        
+        logger.info(f"TEMP: Only using architectures: {architectures}")
+        logger.info(f"TEMP: Using complexities: {[complexity.value for complexity in complexities]}")
 
         # Set dataset-specific defaults
         if dataset_config is None:
@@ -572,10 +575,26 @@ fn main() {
         customized_content = self._customize_template(template_content, arch_info)
 
         # Write main.rs with the actual implementation
+        # Extract and modify the template content to work as main.rs
+        lines = customized_content.split('\n')
+        
+        # Build the main.rs content with proper attribute ordering
+        main_rs_content = []
+        main_rs_content.append("#![no_main]")
+        
+        # Add all the template content except the first #![no_std] line
+        for line in lines:
+            if line.strip() == "#![no_std]":
+                main_rs_content.append("#![no_std]")  # Keep no_std but after no_main
+            else:
+                main_rs_content.append(line)
+        
+        main_rs_content.append("")
+        main_rs_content.append("use risc0_zkvm::guest::entry;")
+        main_rs_content.append("entry!(main);")
+        
         with open(src_dir / "main.rs", "w") as f:
-            f.write("#![no_main]\n\nuse risc0_zkvm::guest::entry;\n\n")
-            f.write(customized_content)
-            f.write("\nentry!(main);\n")
+            f.write('\n'.join(main_rs_content))
 
         # Write lib.rs (empty for now, could be used for shared utilities)
         with open(src_dir / "lib.rs", "w") as f:
