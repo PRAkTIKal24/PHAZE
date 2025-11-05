@@ -299,7 +299,7 @@ fn forward(input: &[f32], weights: &ModelWeights) -> Vec<f32> {
     output
 }
 
-pub fn main() {
+fn main() {
     let input: ModelInput = env::read();
     let output_tensor = forward(&input.input_tensor, &input.weights);
     let output = ModelOutput { output_tensor };
@@ -382,7 +382,7 @@ fn forward(input: &[f32], weights: &ConvWeights, input_shape: (usize, usize, usi
     output
 }
 
-pub fn main() {
+fn main() {
     let input: ModelInput = env::read();
     let output_tensor = forward(&input.input_tensor, &input.weights, input.input_shape);
     let output = ModelOutput { output_tensor };
@@ -453,7 +453,7 @@ fn forward(input: &[f32], weights: &TransformerWeights) -> Vec<f32> {
     output
 }
 
-pub fn main() {
+fn main() {
     let input: ModelInput = env::read();
     let output_tensor = forward(&input.input_tensor, &input.weights);
     let output = ModelOutput { output_tensor };
@@ -527,7 +527,7 @@ fn forward(input: &[f32], weights: &MultiExitWeights) -> Vec<f32> {
     }
 }
 
-pub fn main() {
+fn main() {
     let input: ModelInput = env::read();
     let output_tensor = forward(&input.input_tensor, &input.weights);
     let output = ModelOutput { output_tensor };
@@ -581,13 +581,15 @@ pub fn main() {
         # Apply any architecture-specific customizations
         customized_content = self._customize_template(template_content, arch_info)
 
-        # Write main.rs
+        # Write main.rs with the actual implementation
         with open(src_dir / "main.rs", "w") as f:
-            f.write("#![no_main]\n\nuse risc0_zkvm::guest::entry;\n\nentry!(main);\n")
-
-        # Write lib.rs
-        with open(src_dir / "lib.rs", "w") as f:
+            f.write("#![no_main]\n\nuse risc0_zkvm::guest::entry;\n\n")
             f.write(customized_content)
+            f.write("\nentry!(main);\n")
+
+        # Write lib.rs (empty for now, could be used for shared utilities)
+        with open(src_dir / "lib.rs", "w") as f:
+            f.write("// Shared utilities for the guest program\n")
 
         logger.info(f"Generated guest program: {guest_dir}")
         return guest_dir
