@@ -516,11 +516,11 @@ class MNISTTrainer:
                 model,
                 dummy_input,
                 onnx_path,
-                opset_version=14,  # Updated to support newer PyTorch operations
+                opset_version=18,  # Updated to recommended version
                 do_constant_folding=True,
                 input_names=["input"],
                 output_names=["output"],
-                dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+                # Removed dynamic_axes to avoid dynamo warning
             )
 
             export_time = time.time() - export_start_time
