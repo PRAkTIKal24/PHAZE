@@ -678,6 +678,13 @@ class RiscZeroBuildManager:
         for arch_key in self.registry.list_architectures():
             logger.info(f"Building guest program for {arch_key}...")
 
+            # Get architecture info
+            arch_info = self.registry.get_architecture_info(arch_key)
+            if not arch_info:
+                logger.error(f"Architecture info not found for {arch_key}")
+                results[arch_key] = False
+                continue
+
             # Generate guest program
             guest_dir = template_engine.generate_guest_program(arch_key)
             if not guest_dir:
@@ -685,7 +692,7 @@ class RiscZeroBuildManager:
                 continue
 
             # Build the guest program
-            success = self._build_guest_program(guest_dir)
+            success = self._build_guest_program(guest_dir, arch_info)
             results[arch_key] = success
 
             if success:
@@ -695,7 +702,7 @@ class RiscZeroBuildManager:
 
         return results
 
-    def _build_guest_program(self, guest_dir: Path) -> bool:
+    def _build_guest_program(self, guest_dir: Path, arch_info: Dict[str, Any]) -> bool:
         """Build a single guest program using cargo risczero build.
 
         Args:
@@ -724,19 +731,51 @@ class RiscZeroBuildManager:
             )
 
             if result.returncode == 0:
-                # Verify the ELF was created
-                elf_path = (
-                    guest_dir
-                    / "target"
-                    / "riscv32im-risc0-zkvm-elf"
-                    / "release"
-                    / guest_dir.name
-                )
-                if elf_path.exists():
-                    logger.debug(f"ELF file created: {elf_path}")
+                # Check what files were actually created in target directory
+                target_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release"
+                if target_dir.exists():
+                    all_files = list(target_dir.glob("*"))
+                    logger.debug(f"Files in target/release: {[f.name for f in all_files]}")
+                    
+                    # Look for any ELF files (binaries without extension)
+                    elf_files = [f for f in all_files if f.is_file() and '.' not in f.name]
+                    logger.debug(f"Potential ELF files: {[f.name for f in elf_files]}")
+                
+                # Try multiple possible ELF paths
+                possible_names = [
+                    guest_dir.name,  # guest_multi_exit_minimal
+                    guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
+                    arch_info["guest_program_name"],  # from arch info
+                ]
+                
+                # Check both release/ and docker/ subdirectories
+                subdirs = ["release", "docker"]
+                
+                elf_path = None
+                for subdir in subdirs:
+                    for name in possible_names:
+                        # Try both with and without .bin extension
+                        for extension in ["", ".bin"]:
+                            candidate_path = (
+                                guest_dir
+                                / "target"
+                                / "riscv32im-risc0-zkvm-elf"
+                                / subdir
+                                / (name + extension)
+                            )
+                            if candidate_path.exists():
+                                elf_path = candidate_path
+                                break
+                        if elf_path:
+                            break
+                    if elf_path:
+                        break
+                
+                if elf_path:
+                    logger.debug(f"ELF file found: {elf_path}")
                     return True
                 else:
-                    logger.warning(f"Build succeeded but ELF not found: {elf_path}")
+                    logger.warning(f"Build succeeded but ELF not found. Tried: {possible_names}")
                     return False
             else:
                 logger.error(f"Build failed: {result.stderr}")
@@ -761,12 +800,29 @@ class RiscZeroBuildManager:
 
         guest_program_name = arch_info["guest_program_name"]
         guest_dir = self.registry.guest_programs_dir / guest_program_name
-        elf_path = (
-            guest_dir
-            / "target"
-            / "riscv32im-risc0-zkvm-elf"
-            / "release"
-            / guest_program_name
-        )
+        
+        # Try multiple possible ELF paths (same logic as build method)
+        possible_names = [
+            guest_dir.name,  # guest_multi_exit_minimal
+            guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
+            guest_program_name,  # from arch info
+        ]
+        
+        # Check both release/ and docker/ subdirectories
+        subdirs = ["release", "docker"]
+        
+        for subdir in subdirs:
+            for name in possible_names:
+                # Try both with and without .bin extension
+                for extension in ["", ".bin"]:
+                    elf_path = (
+                        guest_dir
+                        / "target"
+                        / "riscv32im-risc0-zkvm-elf"
+                        / subdir
+                        / (name + extension)
+                    )
+                    if elf_path.exists():
+                        return elf_path
 
-        return elf_path if elf_path.exists() else None
+        return None
