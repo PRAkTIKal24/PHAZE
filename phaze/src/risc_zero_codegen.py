@@ -182,6 +182,12 @@ class RiscZeroArchitectureRegistry:
 
         return model_configs
 
+    def clear_registry(self):
+        """Clear the current architecture registry."""
+        self.architectures = {}
+        self._save_registry()
+        logger.info("Cleared architecture registry")
+
     def register_all_factory_models(
         self, dataset_config: Optional[Dict[str, Any]] = None
     ) -> int:
@@ -209,6 +215,23 @@ class RiscZeroArchitectureRegistry:
             f"Registered {newly_registered} new architectures from model factory for dataset: {dataset_name}"
         )
         return newly_registered
+
+    def register_multi_exit_only(
+        self, dataset_config: Optional[Dict[str, Any]] = None
+    ) -> int:
+        """Clear registry and register only multi-exit models.
+
+        Args:
+            dataset_config: Optional dataset configuration for model creation
+
+        Returns:
+            Number of registered architectures
+        """
+        # Clear existing registry
+        self.clear_registry()
+        
+        # Register only multi-exit models
+        return self.register_all_factory_models(dataset_config)
 
 
 class RiscZeroTemplateEngine:
