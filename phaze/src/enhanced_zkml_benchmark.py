@@ -763,7 +763,7 @@ class RiscZeroBackendWrapper:
     def _convert_weights_for_guest_program(self) -> Dict[str, Any]:
         """Convert PyTorch model weights to guest program format."""
         state_dict = self.model.state_dict()
-        architecture = self.model_info.get("architecture", "simple")
+        architecture = self.model_info.get("architecture", "simple").lower()
 
         if architecture == "simple":
             return self._convert_simple_weights(state_dict)
@@ -771,7 +771,7 @@ class RiscZeroBackendWrapper:
             return self._convert_conv_weights(state_dict)
         elif architecture == "transformer":
             return self._convert_transformer_weights(state_dict)
-        elif architecture == "multi_exit":
+        elif architecture in ["multi_exit", "multiexit"]:
             return self._convert_multi_exit_weights(state_dict)
         else:
             logger.warning(
@@ -1035,79 +1035,66 @@ class RiscZeroBackendWrapper:
         exit_weights = []
         exit_bias = []
 
-        # Group layers by type
+        # Parse the actual PyTorch model structure
+        # backbone_layers.0, backbone_layers.2, etc. are Linear layers
+        # backbone_layers.1, backbone_layers.3, etc. are ReLU (no parameters)
+        # exit_heads.0, exit_heads.1, etc. are exit classifiers
+        
         backbone_layers = {}
         exit_layers = {}
 
         for name, tensor in state_dict.items():
-            name_lower = name.lower()
+            if name.startswith("backbone_layers.") and not "confidence" in name:
+                # Extract layer number from backbone_layers.X
+                parts = name.split(".")
+                if len(parts) >= 2:
+                    try:
+                        layer_num = int(parts[1])
+                        # Only even numbers are Linear layers (odd are ReLU activations)
+                        if layer_num % 2 == 0:
+                            linear_layer_idx = layer_num // 2
+                            
+                            if linear_layer_idx not in backbone_layers:
+                                backbone_layers[linear_layer_idx] = {"weight": None, "bias": None}
+                            
+                            if "weight" in name:
+                                backbone_layers[linear_layer_idx]["weight"] = tensor.tolist()
+                            elif "bias" in name:
+                                backbone_layers[linear_layer_idx]["bias"] = tensor.tolist()
+                    except ValueError:
+                        continue
+                        
+            elif name.startswith("exit_heads.") and not "confidence" in name:
+                # Extract exit number from exit_heads.X
+                parts = name.split(".")
+                if len(parts) >= 2:
+                    try:
+                        exit_num = int(parts[1])
+                        
+                        if exit_num not in exit_layers:
+                            exit_layers[exit_num] = {"weight": None, "bias": None}
+                        
+                        if "weight" in name:
+                            exit_layers[exit_num]["weight"] = tensor.tolist()
+                        elif "bias" in name:
+                            exit_layers[exit_num]["bias"] = tensor.tolist()
+                    except ValueError:
+                        continue
 
-            # Identify exit layers (early classifiers)
-            if any(x in name_lower for x in ["exit", "early", "classifier"]) and any(
-                y in name_lower for y in ["0", "1", "2", "3"]
-            ):
-                # Extract exit number
-                exit_num = None
-                for i in range(10):  # Support up to 10 exits
-                    if str(i) in name_lower:
-                        exit_num = i
-                        break
+        # Convert to ordered lists for the guest program
+        for layer_idx in sorted(backbone_layers.keys()):
+            layer_data = backbone_layers[layer_idx]
+            if layer_data["weight"] is not None:
+                backbone_weights.append(layer_data["weight"])
+            if layer_data["bias"] is not None:
+                backbone_bias.append(layer_data["bias"])
 
-                if exit_num is not None:
-                    if exit_num not in exit_layers:
-                        exit_layers[exit_num] = {"weights": [], "bias": []}
-
-                    if "weight" in name_lower:
-                        exit_layers[exit_num]["weights"].append(tensor.tolist())
-                    elif "bias" in name_lower:
-                        exit_layers[exit_num]["bias"].extend(
-                            tensor.tolist()
-                            if isinstance(tensor.tolist(), list)
-                            else [tensor.tolist()]
-                        )
-
-            # Backbone layers (everything else that's not an exit)
-            elif not any(x in name_lower for x in ["exit", "early"]) and any(
-                x in name_lower for x in ["linear", "fc", "conv"]
-            ):
-                # Try to extract layer number for ordering
-                layer_num = 0
-                for i in range(20):  # Support up to 20 backbone layers
-                    if (
-                        f"layer{i}" in name_lower
-                        or f".{i}." in name
-                        or f"_{i}_" in name
-                    ):
-                        layer_num = i
-                        break
-
-                if layer_num not in backbone_layers:
-                    backbone_layers[layer_num] = {"weights": [], "bias": []}
-
-                if "weight" in name_lower:
-                    backbone_layers[layer_num]["weights"].append(tensor.tolist())
-                elif "bias" in name_lower:
-                    backbone_layers[layer_num]["bias"].extend(
-                        tensor.tolist()
-                        if isinstance(tensor.tolist(), list)
-                        else [tensor.tolist()]
-                    )
-
-        # Convert to lists ordered by layer number
-        for layer_num in sorted(backbone_layers.keys()):
-            if backbone_layers[layer_num]["weights"]:
-                backbone_weights.append(
-                    backbone_layers[layer_num]["weights"][0]
-                )  # Take first weight matrix
-            if backbone_layers[layer_num]["bias"]:
-                backbone_bias.append(backbone_layers[layer_num]["bias"])
-
-        # Convert exit layers
-        for exit_num in sorted(exit_layers.keys()):
-            if exit_layers[exit_num]["weights"]:
-                exit_weights.append(exit_layers[exit_num]["weights"])
-            if exit_layers[exit_num]["bias"]:
-                exit_bias.append(exit_layers[exit_num]["bias"])
+        for exit_idx in sorted(exit_layers.keys()):
+            exit_data = exit_layers[exit_idx]
+            if exit_data["weight"] is not None:
+                exit_weights.append(exit_data["weight"])
+            if exit_data["bias"] is not None:
+                exit_bias.append(exit_data["bias"])
 
         # Provide defaults if nothing found
         if not backbone_weights:
