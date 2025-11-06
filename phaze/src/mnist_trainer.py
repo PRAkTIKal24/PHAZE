@@ -516,11 +516,11 @@ class MNISTTrainer:
                 model,
                 dummy_input,
                 onnx_path,
-                opset_version=18,  # Updated to recommended version
+                opset_version=11,  # Reverted to 11 for EZKL compatibility
                 do_constant_folding=True,
                 input_names=["input"],
                 output_names=["output"],
-                # Removed dynamic_axes to avoid dynamo warning
+                dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}}
             )
 
             export_time = time.time() - export_start_time
