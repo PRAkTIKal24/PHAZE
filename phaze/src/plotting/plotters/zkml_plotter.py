@@ -474,7 +474,7 @@ class ZKMLPlotter(BasePlotter):
             params, sizes = zip(*valid_data, strict=False)
 
             # Sort by parameter count for proper line connections
-            sorted_data = sorted(zip(params, sizes))
+            sorted_data = sorted(zip(params, sizes, strict=False))
             sorted_params, sorted_sizes = zip(*sorted_data, strict=False)
 
             # Get color for this framework
@@ -501,9 +501,9 @@ class ZKMLPlotter(BasePlotter):
                 color=color,
                 alpha=0.8,
                 s=60,
-                edgecolors='white',
+                edgecolors="white",
                 linewidth=1,
-                zorder=5
+                zorder=5,
             )
 
             # Add trend line if enough points (now more subtle)
@@ -514,7 +514,9 @@ class ZKMLPlotter(BasePlotter):
                 coeffs = np.polyfit(log_params, log_sizes, 1)
 
                 # Generate trend line
-                x_trend = np.logspace(np.log10(min(sorted_params)), np.log10(max(sorted_params)), 50)
+                x_trend = np.logspace(
+                    np.log10(min(sorted_params)), np.log10(max(sorted_params)), 50
+                )
                 y_trend = 10 ** (coeffs[0] * np.log10(x_trend) + coeffs[1])
 
                 ax.plot(x_trend, y_trend, ":", color=color, alpha=0.5, linewidth=1.5)
