@@ -512,9 +512,10 @@ class MNISTTrainer:
             export_start_time = time.time()
 
             model.eval()
+            
             # Export to ONNX using legacy behavior for EZKL compatibility
-            model.eval()
             try:
+                # Try with dynamo disabled first
                 import torch._dynamo
                 with torch._dynamo.config.patch(suppress_errors=True), \
                      torch.no_grad():
@@ -531,8 +532,9 @@ class MNISTTrainer:
                         keep_initializers_as_inputs=False,
                         training=torch.onnx.TrainingMode.EVAL
                     )
-            except (ImportError, Exception):
-                # Fallback if dynamo not available or other errors
+            except Exception as e:
+                # Fallback if dynamo approach fails
+                logger.warning(f"Dynamo-disabled export failed: {e}, trying fallback...")
                 with torch.no_grad():
                     torch.onnx.export(
                         model,
