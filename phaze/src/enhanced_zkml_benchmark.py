@@ -1142,13 +1142,13 @@ class RiscZeroBackendWrapper:
         architecture = self.model_info.get("architecture", "simple")
 
         try:
-            # Use the real RISC Zero Rust backend
-            backend = RustZKMLBackend()
+            # Use the real RISC Zero Rust backend directly
+            from .rust_zkml_backend import RustZKMLBackend, RustRiscZeroBackend
             
             # Check if we can use the real RISC Zero implementation
-            if backend.is_using_real_bindings():
-                # Setup the RISC Zero backend if not already done
-                risc_zero_backend = backend.get_backend("risc_zero")
+            if RustZKMLBackend.is_using_real_bindings():
+                # Use the RISC Zero backend directly
+                risc_zero_backend = RustRiscZeroBackend()
                 
                 if not risc_zero_backend.is_setup:
                     # Setup with architecture-specific parameters
@@ -1260,13 +1260,20 @@ class RiscZeroBackendWrapper:
 
         try:
             # Use the real RISC Zero Rust backend for verification
-            from .rust_zkml_backend import RustZKMLBackend
+            from .rust_zkml_backend import RustZKMLBackend, RustRiscZeroBackend
             
-            backend = RustZKMLBackend()
-            
-            if backend.is_using_real_bindings():
-                # Use real RISC Zero verification
-                risc_zero_backend = backend.get_backend("risc_zero")
+            if RustZKMLBackend.is_using_real_bindings():
+                # Use real RISC Zero verification directly
+                risc_zero_backend = RustRiscZeroBackend()
+                
+                # Setup if needed (verification might require setup)
+                if not risc_zero_backend.is_setup:
+                    setup_params = {
+                        "model_type": self.model_info.get("architecture", "simple"),
+                        "input_size": str(sample_input.numel()),
+                        "output_size": str(self.model_info.get("output_size", 10)),
+                    }
+                    risc_zero_backend.setup(setup_params)
                 
                 # Prepare proof data for verification
                 proof_dict = {
