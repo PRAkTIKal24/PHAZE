@@ -3,6 +3,7 @@ Enhanced Rust-based zkML backend with expanded functionality.
 """
 
 import json  # noqa: F401
+import logging
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import numpy as np  # noqa: F401
@@ -18,7 +19,7 @@ try:
     except AttributeError:
         _binding_info = {"implementation": "real_rust_bindings", "version": "unknown"}
 except ImportError:
-    print("❌ rust_zkml_bindings not found. Using mock implementation for testing.")
+    logging.warning("rust_zkml_bindings not found. Using mock implementation for testing.")
     from . import mock_rust_zkml_bindings as rust_zkml_bindings
 
     _using_real_bindings = False
@@ -325,13 +326,13 @@ class RustRiscZeroBackend:
                                 with open(elf_path, 'rb') as f:
                                     magic = f.read(4)
                                     if magic == b'\x7fELF':
-                                        logger.debug(f"Valid ELF file found at {elf_path} ({file_size} bytes)")
+                                        logging.debug(f"Valid ELF file found at {elf_path} ({file_size} bytes)")
                                     else:
-                                        logger.warning(f"File at {elf_path} is not a valid ELF file")
+                                        logging.warning(f"File at {elf_path} is not a valid ELF file")
                             except Exception as e:
-                                logger.error(f"Error checking ELF file: {e}")
+                                logging.error(f"Error checking ELF file: {e}")
                         else:
-                            logger.error(f"ELF file not found at {self._guest_program_path}")
+                            logging.error(f"ELF file not found at {self._guest_program_path}")
                         
                         # Try to pass the ELF path directly to the prove method
                         if hasattr(self.risc_zero, 'prove_with_elf'):
@@ -383,16 +384,16 @@ class RustRiscZeroBackend:
                                             with open(elf_path, 'rb') as f:
                                                 magic = f.read(4)
                                                 if magic == b'\x7fELF':
-                                                    print(f"Valid ELF file found at {elf_path} ({file_size} bytes)")
+                                                    logging.debug(f"Valid ELF file found at {elf_path} ({file_size} bytes)")
                                                 else:
-                                                    print(f"File at {elf_path} is not a valid ELF file")
+                                                    logging.warning(f"File at {elf_path} is not a valid ELF file")
                                         except Exception as e:
-                                            print(f"Error checking ELF file: {e}")
+                                            logging.error(f"Error checking ELF file: {e}")
                                     else:
-                                        print(f"ELF file not found at {self._guest_program_path}")
+                                        logging.error(f"ELF file not found at {self._guest_program_path}")
                                     
                                 else:
-                                    print(f"Could not find rust_bindings directory for path: {self._guest_program_path}")
+                                    logging.error(f"Could not find rust_bindings directory for path: {self._guest_program_path}")
                                     
                                 proof = self.risc_zero.prove(input_data, serialized_weights)
                             finally:
