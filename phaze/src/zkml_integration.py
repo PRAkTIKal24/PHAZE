@@ -168,8 +168,12 @@ class ZKMLProverVerifier:
         try:
             # For EZKL, use legacy exporter to avoid dynamo/tract conflicts
             if self.zkml_system_name == "ezkl":
-                # Force legacy exporter for EZKL compatibility
-                with torch.no_grad():
+                # Disable dynamo and force legacy export behavior for EZKL
+                import torch._dynamo
+                with torch._dynamo.config.patch(suppress_errors=True), \
+                     torch.no_grad():
+                    model_to_export.eval()
+                    # Use the older export API pattern that works with EZKL
                     torch.onnx.export(
                         model_to_export,
                         input_data,
@@ -180,8 +184,8 @@ class ZKMLProverVerifier:
                         output_names=["output"],
                         export_params=True,
                         dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
-                        # Use legacy exporter settings
                         verbose=False,
+                        keep_initializers_as_inputs=False,
                         training=torch.onnx.TrainingMode.EVAL
                     )
             else:
@@ -204,24 +208,38 @@ class ZKMLProverVerifier:
                     raise RuntimeError("ONNX model validation failed for EZKL compatibility")
                     
         except Exception as e:
-            # If ONNX export fails, try with legacy exporter for EZKL
+            # If ONNX export fails, try with most conservative legacy settings
             print(f"Initial ONNX export failed: {e}")
-            print("Retrying with legacy ONNX exporter...")
+            print("Retrying with most conservative legacy ONNX exporter...")
             
-            # Fallback: use legacy exporter with conservative settings
-            with torch.no_grad():
+            # Last resort: disable everything modern and use minimal settings
+            try:
+                import torch._dynamo
+                with torch._dynamo.config.patch(suppress_errors=True), \
+                     torch.no_grad():
+                    model_to_export.eval()
+                    torch.onnx.export(
+                        model_to_export,
+                        input_data,
+                        self.onnx_path,
+                        opset_version=11,
+                        do_constant_folding=False,
+                        input_names=["input"],
+                        output_names=["output"],
+                        export_params=True,
+                        verbose=False,
+                        keep_initializers_as_inputs=False
+                    )
+            except Exception as fallback_error:
+                # If even that fails, try without any special settings
+                print(f"Fallback also failed: {fallback_error}")
+                print("Trying absolute minimal export...")
                 model_to_export.eval()
                 torch.onnx.export(
                     model_to_export,
                     input_data,
                     self.onnx_path,
-                    opset_version=11,
-                    do_constant_folding=False,
-                    input_names=["input"],
-                    output_names=["output"],
-                    export_params=True,
-                    verbose=False,
-                    training=torch.onnx.TrainingMode.EVAL
+                    opset_version=11
                 )
             
             # Validate fallback model
