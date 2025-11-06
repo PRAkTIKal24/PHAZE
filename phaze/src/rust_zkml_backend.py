@@ -365,8 +365,11 @@ class RustRiscZeroBackend:
                                         os.environ['RISC0_GUEST_PATH'] = str(legacy_elf_path)
                                         os.environ['RISC0_ELF_PATH'] = str(legacy_elf_path)
                                     else:
+                                        # Legacy ELF not found, use provided path
+                                        os.environ['RISC0_GUEST_PATH'] = str(self._guest_program_path)
+                                        os.environ['RISC0_ELF_PATH'] = str(self._guest_program_path)
+                                    
                                     # Also try setting environment variables the backend might expect
-                                    os.environ['RISC0_GUEST_PATH'] = str(self._guest_program_path)
                                     os.environ['RISC0_ELF_PATH'] = str(self._guest_program_path)
                                     
                                     # Additional debugging - check if ELF file is actually accessible
@@ -380,11 +383,16 @@ class RustRiscZeroBackend:
                                             with open(elf_path, 'rb') as f:
                                                 magic = f.read(4)
                                                 if magic == b'\x7fELF':
+                                                    print(f"Valid ELF file found at {elf_path} ({file_size} bytes)")
                                                 else:
+                                                    print(f"File at {elf_path} is not a valid ELF file")
                                         except Exception as e:
+                                            print(f"Error checking ELF file: {e}")
                                     else:
+                                        print(f"ELF file not found at {self._guest_program_path}")
                                     
                                 else:
+                                    print(f"Could not find rust_bindings directory for path: {self._guest_program_path}")
                                     
                                 proof = self.risc_zero.prove(input_data, serialized_weights)
                             finally:
