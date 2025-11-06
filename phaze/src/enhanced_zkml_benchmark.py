@@ -1102,6 +1102,7 @@ class RiscZeroBackendWrapper:
         if not backbone_weights:
             input_size = self.model_info.get("input_size", 784)
             hidden_size = 128
+            logger.warning(f"No backbone weights found, creating defaults for input_size={input_size}")
             backbone_weights = [
                 [[0.1] * input_size for _ in range(hidden_size)],  # First layer
                 [[0.1] * hidden_size for _ in range(hidden_size)],  # Hidden layer
@@ -1111,9 +1112,12 @@ class RiscZeroBackendWrapper:
         if not exit_weights:
             output_size = self.model_info.get("output_size", 10)
             hidden_size = len(backbone_bias[-1]) if backbone_bias else 128
+            logger.warning(f"No exit weights found, creating defaults for output_size={output_size}, hidden_size={hidden_size}")
             # Create exit at layer 0 (early exit)
             exit_weights = [[[0.1] * hidden_size for _ in range(output_size)]]
             exit_bias = [[0.0] * output_size]
+
+        logger.info(f"Multi-exit conversion complete: {len(backbone_weights)} backbone layers, {len(exit_weights)} exits")
 
         # Determine which exit to use (prefer early exits for efficiency)
         exit_layer = 0  # Use first exit by default
@@ -1183,6 +1187,33 @@ class RiscZeroBackendWrapper:
                         model_weights["fc.weight"] = torch.tensor(weights_data["fc_weights"][0])
                     if "fc_bias" in weights_data:
                         model_weights["fc.bias"] = torch.tensor(weights_data["fc_bias"])
+                elif architecture in ["multi_exit", "multiexit"]:
+                    # Convert multi-exit weights back to PyTorch format
+                    backbone_weights = weights_data.get("backbone_weights", [])
+                    backbone_bias = weights_data.get("backbone_bias", [])
+                    exit_weights = weights_data.get("exit_weights", [])
+                    exit_bias = weights_data.get("exit_bias", [])
+                    
+                    logger.info(f"Multi-exit weight reconstruction: backbone_weights={len(backbone_weights)}, exit_weights={len(exit_weights)}")
+                    
+                    # Validate we have sufficient weights
+                    if not backbone_weights or not exit_weights:
+                        raise ValueError(f"Insufficient multi-exit weights: backbone={len(backbone_weights)}, exits={len(exit_weights)}")
+                    
+                    # Reconstruct backbone layers
+                    for i, (weight, bias) in enumerate(zip(backbone_weights, backbone_bias)):
+                        layer_idx = i * 2  # Every other layer is a Linear layer
+                        model_weights[f"backbone_layers.{layer_idx}.weight"] = torch.tensor(weight)
+                        model_weights[f"backbone_layers.{layer_idx}.bias"] = torch.tensor(bias)
+                        logger.debug(f"Added backbone layer {layer_idx}: weight shape {torch.tensor(weight).shape}")
+                    
+                    # Reconstruct exit heads
+                    for i, (weight, bias) in enumerate(zip(exit_weights, exit_bias)):
+                        model_weights[f"exit_heads.{i}.weight"] = torch.tensor(weight)
+                        model_weights[f"exit_heads.{i}.bias"] = torch.tensor(bias)
+                        logger.debug(f"Added exit head {i}: weight shape {torch.tensor(weight).shape}")
+                    
+                    logger.info(f"Reconstructed {len(model_weights)} model weight tensors for multi-exit model")
                 # Add more architecture-specific weight handling as needed
                 
                 # Generate the actual proof using Rust RISC Zero backend
