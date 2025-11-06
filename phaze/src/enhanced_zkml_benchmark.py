@@ -291,10 +291,12 @@ class EnhancedZKMLBenchmark:
                     # Store proof for verification and size measurement
                     if i == 0:  # Store first proof for verification
                         stored_proof = proof
-                        if isinstance(proof, dict) and "proof" in proof:
-                            # Estimate proof size (rough approximation)
-                            proof_str = json.dumps(proof)
-                            result["proof_size_bytes"] = len(proof_str.encode("utf-8"))
+                        if isinstance(proof, dict):
+                            # Calculate proof size for both EZKL and RISC Zero formats
+                            if "proof" in proof or "proof_data" in proof:
+                                # Estimate proof size (rough approximation)
+                                proof_str = json.dumps(proof)
+                                result["proof_size_bytes"] = len(proof_str.encode("utf-8"))
 
                 except asyncio.TimeoutError:
                     logger.error(
