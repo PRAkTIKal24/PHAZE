@@ -473,33 +473,51 @@ class ZKMLPlotter(BasePlotter):
 
             params, sizes = zip(*valid_data, strict=False)
 
+            # Sort by parameter count for proper line connections
+            sorted_data = sorted(zip(params, sizes))
+            sorted_params, sorted_sizes = zip(*sorted_data, strict=False)
+
             # Get color for this framework
             color = colors.get(
                 framework,
                 self.config.primary_colors[i % len(self.config.primary_colors)],
             )
 
-            ax.scatter(
-                params,
-                sizes,
-                label=framework.replace("_", " ").title(),
+            # Plot connecting lines first (behind points)
+            ax.plot(
+                sorted_params,
+                sorted_sizes,
                 color=color,
-                alpha=0.7,
-                s=50,
+                alpha=0.6,
+                linewidth=2,
+                linestyle="-",
             )
 
-            # Add trend line if enough points
-            if len(params) > 1:
+            # Plot scatter points on top of lines
+            ax.scatter(
+                sorted_params,
+                sorted_sizes,
+                label=framework.replace("_", " ").title(),
+                color=color,
+                alpha=0.8,
+                s=60,
+                edgecolors='white',
+                linewidth=1,
+                zorder=5
+            )
+
+            # Add trend line if enough points (now more subtle)
+            if len(sorted_params) > 2:
                 # Fit log-log linear trend
-                log_params = np.log10(params)
-                log_sizes = np.log10(sizes)
+                log_params = np.log10(sorted_params)
+                log_sizes = np.log10(sorted_sizes)
                 coeffs = np.polyfit(log_params, log_sizes, 1)
 
                 # Generate trend line
-                x_trend = np.logspace(np.log10(min(params)), np.log10(max(params)), 50)
+                x_trend = np.logspace(np.log10(min(sorted_params)), np.log10(max(sorted_params)), 50)
                 y_trend = 10 ** (coeffs[0] * np.log10(x_trend) + coeffs[1])
 
-                ax.plot(x_trend, y_trend, "--", color=color, alpha=0.8, linewidth=2)
+                ax.plot(x_trend, y_trend, ":", color=color, alpha=0.5, linewidth=1.5)
 
         ax.set_xlabel("Model Parameters")
         ax.set_ylabel("Proof Size per Event (bytes)")
