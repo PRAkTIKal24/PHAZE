@@ -338,9 +338,20 @@ class RustRiscZeroBackend:
                             try:
                                 # The error message suggests: "cd rust_bindings && ./build_guest.sh"
                                 # So the backend expects to be run from rust_bindings directory
-                                rust_bindings_dir = Path(self._guest_program_path).parents[4]  # Go up from .../docker/elf to rust_bindings
-                                if rust_bindings_dir.name == 'rust_bindings':
-                                    print(f"DEBUG: Changing to rust_bindings directory: {rust_bindings_dir}")
+                                # Path: /Users/.../rust_bindings/guest_programs/.../docker/guest_multi_exit_minimal
+                                # We need to find the rust_bindings ancestor directory
+                                from pathlib import Path
+                                current_path = Path(self._guest_program_path)
+                                rust_bindings_dir = None
+                                
+                                # Walk up the path until we find rust_bindings
+                                for parent in current_path.parents:
+                                    if parent.name == 'rust_bindings':
+                                        rust_bindings_dir = parent
+                                        break
+                                
+                                if rust_bindings_dir and rust_bindings_dir.exists():
+                                    print(f"DEBUG: Found rust_bindings directory: {rust_bindings_dir}")
                                     os.chdir(str(rust_bindings_dir))
                                     
                                     # Also try setting environment variables the backend might expect
@@ -348,7 +359,8 @@ class RustRiscZeroBackend:
                                     os.environ['RISC0_ELF_PATH'] = str(self._guest_program_path)
                                     print(f"DEBUG: Set environment variables for ELF path")
                                 else:
-                                    print(f"DEBUG: Could not find rust_bindings directory, staying in current directory")
+                                    print(f"DEBUG: Could not find rust_bindings directory in path: {self._guest_program_path}")
+                                    
                                 proof = self.risc_zero.prove(input_data, serialized_weights)
                             finally:
                                 os.chdir(original_cwd)
