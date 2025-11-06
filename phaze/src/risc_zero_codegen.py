@@ -773,6 +773,10 @@ class RiscZeroBuildManager:
                 
                 if elf_path:
                     logger.debug(f"ELF file found: {elf_path}")
+                    
+                    # Ensure release symlinks exist for RISC Zero backend compatibility
+                    self._create_release_symlinks(guest_dir, arch_info)
+                    
                     return True
                 else:
                     logger.warning(f"Build succeeded but ELF not found. Tried: {possible_names}")
@@ -784,6 +788,52 @@ class RiscZeroBuildManager:
         except Exception as e:
             logger.error(f"Error building guest program: {e}")
             return False
+
+    def _create_release_symlinks(self, guest_dir: Path, arch_info: Dict[str, Any]):
+        """Create release directory symlinks to docker builds for RISC Zero backend compatibility.
+        
+        The RISC Zero backend expects ELF files in release/ directories, but our builds 
+        are in docker/ directories. Create symlinks to bridge this gap.
+        """
+        try:
+            docker_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker"
+            release_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release"
+            
+            # Create release directory if it doesn't exist
+            release_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Find the ELF file in docker directory
+            possible_names = [
+                guest_dir.name,  # guest_multi_exit_minimal
+                guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
+                arch_info.get("guest_program_name", ""),  # from arch info
+            ]
+            
+            docker_elf_path = None
+            for name in possible_names:
+                candidate_path = docker_dir / name
+                if candidate_path.exists():
+                    docker_elf_path = candidate_path
+                    break
+            
+            if docker_elf_path:
+                # Create symlink from release to docker
+                release_symlink = release_dir / docker_elf_path.name
+                
+                # Remove existing symlink if it exists
+                if release_symlink.is_symlink() or release_symlink.exists():
+                    release_symlink.unlink()
+                
+                # Create relative symlink (more portable)
+                relative_docker_path = Path("../docker") / docker_elf_path.name
+                release_symlink.symlink_to(relative_docker_path)
+                
+                logger.debug(f"Created release symlink: {release_symlink} -> {relative_docker_path}")
+            else:
+                logger.warning(f"No docker ELF found to symlink for {guest_dir.name}")
+                
+        except Exception as e:
+            logger.warning(f"Failed to create release symlinks for {guest_dir.name}: {e}")
 
     def get_guest_program_path(self, arch_key: str) -> Optional[Path]:
         """Get the path to a built guest program ELF.
@@ -808,7 +858,7 @@ class RiscZeroBuildManager:
             guest_program_name,  # from arch info
         ]
         
-        # Check both release/ and docker/ subdirectories
+        # Check both release/ and docker/ subdirectories (prefer release for backend compatibility)
         subdirs = ["release", "docker"]
         
         for subdir in subdirs:

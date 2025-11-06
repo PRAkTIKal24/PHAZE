@@ -71,6 +71,7 @@ def build_guest_programs(dataset_name="mnist"):
             print("💡 PHAZE will work with the successfully built architectures")
         else:
             print("🎉 All guest programs built successfully!")
+            print("🔗 Release symlinks automatically created for RISC Zero backend compatibility")
 
         return success_count > 0
 
