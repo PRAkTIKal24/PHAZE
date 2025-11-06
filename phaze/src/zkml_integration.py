@@ -119,6 +119,39 @@ class ZKMLProverVerifier:
             os.path.expanduser("~"), ".ezkl", "srs", "kzg17.srs"
         )
 
+    def _validate_onnx_model(self) -> bool:
+        """Validate the exported ONNX model for EZKL compatibility."""
+        if not os.path.exists(self.onnx_path):
+            return False
+            
+        try:
+            import onnx
+            
+            # Load and check the ONNX model
+            model = onnx.load(self.onnx_path)
+            onnx.checker.check_model(model)
+            
+            print(f"✅ ONNX model validation passed: {self.onnx_path}")
+            print(f"   Model IR version: {model.ir_version}")
+            print(f"   Opset version: {model.opset_import[0].version if model.opset_import else 'Unknown'}")
+            
+            # Check for known problematic operations
+            problematic_ops = ["Loop", "If", "Scan", "RNN", "LSTM", "GRU"]
+            model_ops = set()
+            
+            for node in model.graph.node:
+                model_ops.add(node.op_type)
+                
+            found_problematic = [op for op in problematic_ops if op in model_ops]
+            if found_problematic:
+                print(f"⚠️  Warning: Found potentially problematic ops for EZKL: {found_problematic}")
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ ONNX model validation failed: {e}")
+            return False
+
     def _export_to_onnx(self, input_data: torch.Tensor):
         """Exports the PyTorch model to ONNX format."""
         # Handle different model types
@@ -128,24 +161,70 @@ class ZKMLProverVerifier:
         else:
             model_to_export = self.model
 
-        torch.onnx.export(
-            model_to_export,
-            input_data,
-            self.onnx_path,
-            opset_version=18,  # Updated to recommended version
-            do_constant_folding=True,
-            input_names=["input"],
-            output_names=["output"],
-            # Removed dynamic_axes to avoid dynamo warning
-        )
+        # Use opset 11 for EZKL compatibility (EZKL has issues with newer opsets)
+        # The ONNX version compatibility issues were resolved in dependencies, not opset
+        opset_version = 11 if self.zkml_system_name == "ezkl" else 18
+        
+        try:
+            torch.onnx.export(
+                model_to_export,
+                input_data,
+                self.onnx_path,
+                opset_version=opset_version,
+                do_constant_folding=True,
+                input_names=["input"],
+                output_names=["output"],
+                export_params=True,
+                # Removed dynamic_axes to avoid dynamo warning for newer opsets
+                # For EZKL (opset 11), we might need dynamic_axes for some models
+                dynamic_axes=None if opset_version >= 18 else {"input": {0: "batch_size"}, "output": {0: "batch_size"}}
+            )
+            
+            # Validate the exported model for EZKL
+            if self.zkml_system_name == "ezkl":
+                if not self._validate_onnx_model():
+                    raise RuntimeError("ONNX model validation failed for EZKL compatibility")
+                    
+        except Exception as e:
+            # If ONNX export fails, try with more conservative settings
+            print(f"Initial ONNX export failed with opset {opset_version}: {e}")
+            print("Retrying with more conservative settings...")
+            
+            # Fallback: try opset 11 with no dynamic axes
+            torch.onnx.export(
+                model_to_export,
+                input_data,
+                self.onnx_path,
+                opset_version=11,
+                do_constant_folding=False,  # Disable aggressive optimizations
+                input_names=["input"],
+                output_names=["output"],
+                export_params=True
+            )
+            
+            # Validate fallback model
+            if self.zkml_system_name == "ezkl":
+                if not self._validate_onnx_model():
+                    raise RuntimeError("ONNX model validation failed even with conservative settings")
 
     async def _async_setup(self, input_data: torch.Tensor):
         """Asynchronous part of the setup process."""
         if not EZKL_AVAILABLE:
             raise ImportError("ezkl is not available")
 
-        # Generate settings
-        ezkl.gen_settings(self.onnx_path, self.settings_path)
+        try:
+            # Generate settings with better error handling
+            print(f"Generating EZKL settings for {self.onnx_path}...")
+            ezkl.gen_settings(self.onnx_path, self.settings_path)
+            print("✅ Settings generation completed")
+            
+        except Exception as e:
+            # Check if it's a tract/graph translation error
+            if "tract" in str(e).lower() or "graph" in str(e).lower():
+                print(f"❌ EZKL settings generation failed due to ONNX compatibility: {e}")
+                print("This often happens with newer ONNX opset versions or complex model structures")
+                print("Suggestion: Try with a simpler model architecture or check EZKL version compatibility")
+            raise RuntimeError(f"Failed to generate settings: {e}")
 
         # Download SRS if not exists
         if not os.path.exists(self.srs_path):
@@ -157,14 +236,18 @@ class ZKMLProverVerifier:
             await ezkl.get_srs(srs_path=self.srs_path, settings_path=self.settings_path)
 
         # Compile the model
+        print("Compiling EZKL circuit...")
         ezkl.compile_circuit(
             self.onnx_path, self.compiled_model_path, self.settings_path
         )
+        print("✅ Circuit compilation completed")
 
         # Generate proving and verification keys
+        print("Generating proving and verification keys...")
         ezkl.setup(
             self.compiled_model_path, self.vk_path, self.pk_path, srs_path=self.srs_path
         )
+        print("✅ Key generation completed")
 
     def setup(self, input_data: torch.Tensor):
         """Sets up the ZKML system for the model."""
