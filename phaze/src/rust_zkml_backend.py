@@ -325,9 +325,13 @@ class RustRiscZeroBackend:
                                 with open(elf_path, 'rb') as f:
                                     magic = f.read(4)
                                     if magic == b'\x7fELF':
+                                        logger.debug(f"Valid ELF file found at {elf_path} ({file_size} bytes)")
                                     else:
+                                        logger.warning(f"File at {elf_path} is not a valid ELF file")
                             except Exception as e:
+                                logger.error(f"Error checking ELF file: {e}")
                         else:
+                            logger.error(f"ELF file not found at {self._guest_program_path}")
                         
                         # Try to pass the ELF path directly to the prove method
                         if hasattr(self.risc_zero, 'prove_with_elf'):
