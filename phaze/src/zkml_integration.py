@@ -161,24 +161,42 @@ class ZKMLProverVerifier:
         else:
             model_to_export = self.model
 
-        # Use opset 14 for EZKL compatibility (avoids conversion issues from newer PyTorch)
-        # The ONNX version compatibility issues were resolved in dependencies, not opset
-        opset_version = 14 if self.zkml_system_name == "ezkl" else 18
+        # Use opset 11 with legacy exporter for EZKL compatibility
+        # The new dynamo exporter causes issues with EZKL's tract backend
+        opset_version = 11 if self.zkml_system_name == "ezkl" else 18
         
         try:
-            torch.onnx.export(
-                model_to_export,
-                input_data,
-                self.onnx_path,
-                opset_version=opset_version,
-                do_constant_folding=True,
-                input_names=["input"],
-                output_names=["output"],
-                export_params=True,
-                # Removed dynamic_axes to avoid dynamo warning for newer opsets
-                # For EZKL (opset 14), we include dynamic_axes for batch flexibility
-                dynamic_axes=None if opset_version >= 18 else {"input": {0: "batch_size"}, "output": {0: "batch_size"}}
-            )
+            # For EZKL, use legacy exporter to avoid dynamo/tract conflicts
+            if self.zkml_system_name == "ezkl":
+                # Force legacy exporter for EZKL compatibility
+                with torch.no_grad():
+                    torch.onnx.export(
+                        model_to_export,
+                        input_data,
+                        self.onnx_path,
+                        opset_version=11,
+                        do_constant_folding=True,
+                        input_names=["input"],
+                        output_names=["output"],
+                        export_params=True,
+                        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+                        # Use legacy exporter settings
+                        verbose=False,
+                        training=torch.onnx.TrainingMode.EVAL
+                    )
+            else:
+                # For RISC Zero, use modern exporter
+                torch.onnx.export(
+                    model_to_export,
+                    input_data,
+                    self.onnx_path,
+                    opset_version=opset_version,
+                    do_constant_folding=True,
+                    input_names=["input"],
+                    output_names=["output"],
+                    export_params=True,
+                    dynamic_axes=None  # Modern exporter for RISC Zero
+                )
             
             # Validate the exported model for EZKL
             if self.zkml_system_name == "ezkl":
@@ -186,21 +204,25 @@ class ZKMLProverVerifier:
                     raise RuntimeError("ONNX model validation failed for EZKL compatibility")
                     
         except Exception as e:
-            # If ONNX export fails, try with more conservative settings
-            print(f"Initial ONNX export failed with opset {opset_version}: {e}")
-            print("Retrying with more conservative settings...")
+            # If ONNX export fails, try with legacy exporter for EZKL
+            print(f"Initial ONNX export failed: {e}")
+            print("Retrying with legacy ONNX exporter...")
             
-            # Fallback: try opset 14 with no dynamic axes
-            torch.onnx.export(
-                model_to_export,
-                input_data,
-                self.onnx_path,
-                opset_version=14,
-                do_constant_folding=False,  # Disable aggressive optimizations
-                input_names=["input"],
-                output_names=["output"],
-                export_params=True
-            )
+            # Fallback: use legacy exporter with conservative settings
+            with torch.no_grad():
+                model_to_export.eval()
+                torch.onnx.export(
+                    model_to_export,
+                    input_data,
+                    self.onnx_path,
+                    opset_version=11,
+                    do_constant_folding=False,
+                    input_names=["input"],
+                    output_names=["output"],
+                    export_params=True,
+                    verbose=False,
+                    training=torch.onnx.TrainingMode.EVAL
+                )
             
             # Validate fallback model
             if self.zkml_system_name == "ezkl":
