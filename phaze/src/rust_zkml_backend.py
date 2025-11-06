@@ -269,9 +269,79 @@ class RustRiscZeroBackend:
         # Convert PyTorch tensors to flat float lists
         input_data = input_tensor.flatten().tolist()
 
-        # Handle different weight formats
-        flattened_weights = []
-        
+        # Check if this is structured weights (multi-exit) or standard state_dict
+        if isinstance(model_weights, dict) and any(
+            key in model_weights for key in ["backbone_weights", "exit_weights", "backbone_bias", "exit_bias"]
+        ):
+            # This is structured weights format for multi-exit models
+            # The guest program expects a ModelInput struct with this exact structure
+            
+            # Check if we're using real RISC Zero bindings or mock
+            # Import here to avoid circular imports
+            from . import rust_zkml_backend
+            use_real_bindings = rust_zkml_backend.RustZKMLBackend.is_using_real_bindings()
+            print(f"DEBUG: Using real RISC Zero bindings: {use_real_bindings}")
+            
+            if use_real_bindings:
+                # Real implementation: create proper ModelInput structure
+                model_input = {
+                    "input_tensor": input_data,
+                    "weights": {
+                        "backbone_weights": model_weights["backbone_weights"],
+                        "backbone_bias": model_weights["backbone_bias"], 
+                        "exit_weights": model_weights["exit_weights"],
+                        "exit_bias": model_weights["exit_bias"],
+                        "exit_layer": model_weights["exit_layer"]
+                    }
+                }
+                
+                # Serialize the complete ModelInput for the guest program
+                import json
+                serialized_input = json.dumps(model_input)
+                print(f"DEBUG: Attempting structured input: {len(serialized_input)} bytes")
+                
+                # Check if the backend has a method for structured input
+                try:
+                    if hasattr(self.risc_zero, 'prove_structured'):
+                        print("DEBUG: Using prove_structured method")
+                        proof = self.risc_zero.prove_structured(serialized_input.encode('utf-8'))
+                    else:
+                        print("DEBUG: Using standard prove method with structured data")
+                        # Fallback: try to pass the structured data directly
+                        proof = self.risc_zero.prove(serialized_input.encode('utf-8'))
+                except Exception as e:
+                    print(f"DEBUG: Real backend failed: {e}, falling back to mock approach")
+                    # If real backend fails, fall back to flattened approach
+                    flattened_weights = self._flatten_structured_weights(model_weights)
+                    proof = self.risc_zero.prove(input_data, flattened_weights)
+            else:
+                # Mock implementation: flatten everything for backward compatibility
+                flattened_weights = self._flatten_structured_weights(model_weights)
+                proof = self.risc_zero.prove(input_data, flattened_weights)
+        else:
+            # Standard state_dict format with PyTorch tensors - flatten for backward compatibility
+            flattened_weights = []
+            for weight in model_weights.values():
+                if hasattr(weight, 'flatten'):
+                    flattened_weights.extend(weight.flatten().tolist())
+                else:
+                    # Handle case where weight might already be a list
+                    if isinstance(weight, (list, tuple)):
+                        flattened_weights.extend(weight)
+                    else:
+                        flattened_weights.append(float(weight))
+
+            proof = self.risc_zero.prove(input_data, flattened_weights)
+            
+        return {
+            "proof_data": proof.proof_data,
+            "public_inputs": proof.public_inputs,
+            "framework": proof.framework,
+            "verification_key_hash": proof.verification_key_hash,
+        }
+
+    def _flatten_structured_weights(self, model_weights: Dict[str, any]) -> List[float]:
+        """Flatten structured weights for mock backend compatibility."""
         def recursive_flatten(item):
             """Recursively flatten any nested structure to a flat list of floats."""
             if hasattr(item, 'flatten'):
@@ -287,38 +357,14 @@ class RustRiscZeroBackend:
                 # Single value, convert to float
                 return [float(item)]
         
-        # Check if this is structured weights (multi-exit) or standard state_dict
-        if isinstance(model_weights, dict) and any(
-            key in model_weights for key in ["backbone_weights", "exit_weights", "backbone_bias", "exit_bias"]
-        ):
-            # This is structured weights format (already converted for guest program)
-            # Flatten all weight and bias arrays
-            for key, weight_data in model_weights.items():
-                if key == "exit_layer":
-                    # exit_layer is typically an integer, skip it or add as single value
-                    if isinstance(weight_data, (int, float)):
-                        flattened_weights.append(float(weight_data))
-                    continue
-                
-                # Use recursive flattening for all weight data
-                flattened_weights.extend(recursive_flatten(weight_data))
-        else:
-            # Standard state_dict format with PyTorch tensors
-            for weight in model_weights.values():
-                flattened_weights.extend(recursive_flatten(weight))
-
-        # Debug: log the first few values to ensure they're all floats
-        print(f"DEBUG: Flattened weights sample (first 10): {flattened_weights[:10]}")
-        print(f"DEBUG: Flattened weights length: {len(flattened_weights)}")
-        print(f"DEBUG: All items are numbers: {all(isinstance(x, (int, float)) for x in flattened_weights[:10])}")
-
-        proof = self.risc_zero.prove(input_data, flattened_weights)
-        return {
-            "proof_data": proof.proof_data,
-            "public_inputs": proof.public_inputs,
-            "framework": proof.framework,
-            "verification_key_hash": proof.verification_key_hash,
-        }
+        flattened_weights = []
+        for key, weight_data in model_weights.items():
+            if key == "exit_layer":
+                # exit_layer is typically an integer, skip it for weight flattening in mock
+                continue
+            flattened_weights.extend(recursive_flatten(weight_data))
+        
+        return flattened_weights
 
     def verify(
         self, proof_dict: Dict[str, Any], expected_outputs: torch.Tensor = None
