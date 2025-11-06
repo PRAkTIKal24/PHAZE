@@ -330,15 +330,25 @@ class RustRiscZeroBackend:
                             print("DEBUG: Using prove_with_elf method")
                             proof = self.risc_zero.prove_with_elf(input_data, serialized_weights, self._guest_program_path)
                         else:
-                            print("DEBUG: Setting working directory and using standard prove method")
-                            # Try changing working directory to help the backend find the ELF
+                            print("DEBUG: Setting working directory to rust_bindings and using standard prove method")
+                            # Try changing working directory to rust_bindings root as suggested by error message
                             import os
                             from pathlib import Path
                             original_cwd = os.getcwd()
                             try:
-                                # Change to the directory containing the ELF
-                                elf_dir = Path(self._guest_program_path).parent
-                                os.chdir(str(elf_dir))
+                                # The error message suggests: "cd rust_bindings && ./build_guest.sh"
+                                # So the backend expects to be run from rust_bindings directory
+                                rust_bindings_dir = Path(self._guest_program_path).parents[4]  # Go up from .../docker/elf to rust_bindings
+                                if rust_bindings_dir.name == 'rust_bindings':
+                                    print(f"DEBUG: Changing to rust_bindings directory: {rust_bindings_dir}")
+                                    os.chdir(str(rust_bindings_dir))
+                                    
+                                    # Also try setting environment variables the backend might expect
+                                    os.environ['RISC0_GUEST_PATH'] = str(self._guest_program_path)
+                                    os.environ['RISC0_ELF_PATH'] = str(self._guest_program_path)
+                                    print(f"DEBUG: Set environment variables for ELF path")
+                                else:
+                                    print(f"DEBUG: Could not find rust_bindings directory, staying in current directory")
                                 proof = self.risc_zero.prove(input_data, serialized_weights)
                             finally:
                                 os.chdir(original_cwd)
