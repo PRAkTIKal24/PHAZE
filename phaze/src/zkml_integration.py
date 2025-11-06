@@ -303,12 +303,28 @@ class ZKMLProverVerifier:
             self.model = self.model.cpu()
             with torch.no_grad():
                 output = self.model(input_data)
+            
+            # Realistic SNARK proof size approximation
+            # SNARKs typically have very small, constant-size proofs (~200-500 bytes)
+            # regardless of computation complexity, but setup depends on circuit size
+            model_params = sum(p.numel() for p in self.model.parameters())
+            
+            # Base SNARK proof size (Groth16: ~200 bytes, PLONK: ~400 bytes)
+            base_proof_size = 384  # bytes for PLONK-style proof
+            
+            # Public inputs size scales with model outputs (typically small)
+            public_inputs = output.flatten().tolist()[:3]  # Limit to first 3 outputs
+            public_inputs_size = len(str(public_inputs))
+            
+            # Create realistic mock proof with appropriate size
+            mock_proof_data = "0x" + "a" * (base_proof_size * 2)  # Hex representation
+            
             mock_proof = {
-                "proof": "mock_proof_data",
-                "public_inputs": output.flatten().tolist()[
-                    :3
-                ],  # First 3 outputs as public
+                "proof": mock_proof_data,
+                "public_inputs": public_inputs,
                 "transcript_type": "EVM",
+                "verification_key_hash": "0x" + "b" * 64,
+                "circuit_digest": "0x" + "c" * 64,
             }
             return mock_proof, output.cpu().numpy().tolist()
 
