@@ -1155,12 +1155,13 @@ class RiscZeroBackendWrapper:
                 risc_zero_backend = RustRiscZeroBackend()
                 
                 if not risc_zero_backend.is_setup:
-                    # Setup with architecture-specific parameters
+                    # Setup with architecture-specific parameters including guest program path
                     setup_params = {
                         "model_type": architecture,
                         "input_size": str(len(guest_input["input_tensor"])),
                         "output_size": str(self.model_info.get("output_size", 10)),
                         "architecture": self.arch_key,
+                        "guest_program_path": str(self.guest_program_path),
                     }
                     risc_zero_backend.setup(setup_params)
                 
@@ -1303,6 +1304,7 @@ class RiscZeroBackendWrapper:
                         "model_type": self.model_info.get("architecture", "simple"),
                         "input_size": str(sample_input.numel()),
                         "output_size": str(self.model_info.get("output_size", 10)),
+                        "guest_program_path": str(self.guest_program_path),
                     }
                     risc_zero_backend.setup(setup_params)
                 
