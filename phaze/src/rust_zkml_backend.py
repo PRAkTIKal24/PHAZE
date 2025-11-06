@@ -308,8 +308,12 @@ class RustRiscZeroBackend:
                     else:
                         print("DEBUG: Using standard prove method with structured data")
                         # Real backend expects: prove(input_data, model_weights)
-                        # Pass the structured weights dict directly as second argument
-                        proof = self.risc_zero.prove(input_data, model_weights)
+                        # But model_weights must be a Sequence, not dict
+                        # Convert structured dict to JSON bytes for the backend
+                        import json
+                        serialized_weights = json.dumps(model_weights).encode('utf-8')
+                        print(f"DEBUG: Serialized weights to {len(serialized_weights)} bytes")
+                        proof = self.risc_zero.prove(input_data, serialized_weights)
                 except Exception as e:
                     print(f"DEBUG: Real backend failed: {e}, falling back to mock approach")
                     # If real backend fails, fall back to flattened approach
