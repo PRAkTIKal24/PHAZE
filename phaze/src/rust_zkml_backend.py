@@ -246,6 +246,22 @@ class RustRiscZeroBackend:
                 "output_size": "5",
             }
 
+        print(f"DEBUG: RustRiscZeroBackend.setup() called with params: {list(params.keys())}")
+        
+        # Store guest program path for later use if provided
+        if "guest_program_path" in params:
+            self._guest_program_path = params["guest_program_path"]
+            print(f"DEBUG: Storing guest program path: {self._guest_program_path}")
+        
+        # Also try alternative path keys
+        if "guest_elf_path" in params:
+            self._guest_program_path = params["guest_elf_path"]
+            print(f"DEBUG: Storing guest ELF path: {self._guest_program_path}")
+        
+        # Check if we have any path stored
+        if not hasattr(self, '_guest_program_path'):
+            print("DEBUG: No guest program path provided in setup params")
+
         result = self.risc_zero.setup(params)
         self.is_setup = True
         return result
