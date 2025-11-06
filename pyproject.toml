@@ -11,7 +11,7 @@ requires-python = ">=3.10, <3.13"
 readme = "README.md"
 dependencies = [
     "maturin",
-    "torch",
+    "torch==2.5.0",  # Working version from October when EZKL was functional
     "numpy",
     "scipy",
     "uv",
@@ -20,7 +20,7 @@ dependencies = [
     "onnxscript>=0.1.0",
     "ezkl",
     "scikit-learn",
-    "torchvision",
+    "torchvision==0.20.0",  # Compatible with torch 2.5.0
     "tqdm",
     "rich",
     "art",
@@ -59,7 +59,7 @@ test-fast = [
 
 ci = [
     # Core dependencies needed for CI tests
-    "torch",
+    "torch==2.5.0",  # Working version from October when EZKL was functional
     "numpy",
     "pandas>=2.3.2",
     "psutil",
