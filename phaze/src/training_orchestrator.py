@@ -412,40 +412,21 @@ class TrainingOrchestrator:
             dummy_input = torch.randn(1, model_metadata["input_size"])
 
             # Export to ONNX
-            # Export to ONNX using legacy behavior for EZKL compatibility
+            # Export to ONNX using simplified approach for EZKL compatibility
             model.eval()
-            try:
-                import torch._dynamo
-                with torch._dynamo.config.patch(suppress_errors=True), \
-                     torch.no_grad():
-                    torch.onnx.export(
-                        model,
-                        dummy_input,
-                        onnx_path,
-                        export_params=True,
-                        opset_version=11,
-                        do_constant_folding=True,
-                        input_names=["input"],
-                        output_names=["output"],
-                        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
-                        verbose=False,
-                        keep_initializers_as_inputs=False,
-                        training=torch.onnx.TrainingMode.EVAL
-                    )
-            except (ImportError, Exception):
-                # Fallback if dynamo not available or other errors
-                with torch.no_grad():
-                    torch.onnx.export(
-                        model,
-                        dummy_input,
-                        onnx_path,
-                        export_params=True,
-                        opset_version=11,
-                        do_constant_folding=True,
-                        input_names=["input"],
-                        output_names=["output"],
-                        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}}
-                    )
+            with torch.no_grad():
+                torch.onnx.export(
+                    model,
+                    dummy_input,
+                    onnx_path,
+                    export_params=True,
+                    opset_version=11,
+                    do_constant_folding=True,
+                    input_names=["input"],
+                    output_names=["output"],
+                    dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+                    verbose=False
+                )
 
             logger.info(f"Model exported to ONNX: {onnx_path}")
             return onnx_path

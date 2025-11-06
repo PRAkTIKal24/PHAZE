@@ -513,39 +513,23 @@ class MNISTTrainer:
 
             model.eval()
             
-            # Export to ONNX using legacy behavior for EZKL compatibility
-            try:
-                # Try with dynamo disabled first
-                import torch._dynamo
-                with torch._dynamo.config.patch(suppress_errors=True), \
-                     torch.no_grad():
-                    torch.onnx.export(
-                        model,
-                        dummy_input,
-                        onnx_path,
-                        opset_version=11,
-                        do_constant_folding=True,
-                        input_names=["input"],
-                        output_names=["output"],
-                        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
-                        verbose=False,
-                        keep_initializers_as_inputs=False,
-                        training=torch.onnx.TrainingMode.EVAL
-                    )
-            except Exception as e:
-                # Fallback if dynamo approach fails
-                logger.warning(f"Dynamo-disabled export failed: {e}, trying fallback...")
-                with torch.no_grad():
-                    torch.onnx.export(
-                        model,
-                        dummy_input,
-                        onnx_path,
-                        opset_version=11,
-                        do_constant_folding=True,
-                        input_names=["input"],
-                        output_names=["output"],
-                        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}}
-                    )
+            # Export to ONNX using simplified approach for EZKL compatibility
+            model.eval()
+            
+            # Simple ONNX export without dynamo complications
+            with torch.no_grad():
+                torch.onnx.export(
+                    model,
+                    dummy_input,
+                    onnx_path,
+                    opset_version=11,
+                    do_constant_folding=True,
+                    input_names=["input"],
+                    output_names=["output"],
+                    dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+                    verbose=False,
+                    export_params=True
+                )
 
             export_time = time.time() - export_start_time
 

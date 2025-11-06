@@ -166,14 +166,11 @@ class ZKMLProverVerifier:
         opset_version = 11 if self.zkml_system_name == "ezkl" else 18
         
         try:
-            # For EZKL, use legacy exporter to avoid dynamo/tract conflicts
+            # For EZKL, use simplified export to avoid variable scoping issues
             if self.zkml_system_name == "ezkl":
-                # Disable dynamo and force legacy export behavior for EZKL
-                import torch._dynamo
-                with torch._dynamo.config.patch(suppress_errors=True), \
-                     torch.no_grad():
-                    model_to_export.eval()
-                    # Use the older export API pattern that works with EZKL
+                # Simple ONNX export for EZKL compatibility
+                model_to_export.eval()
+                with torch.no_grad():
                     torch.onnx.export(
                         model_to_export,
                         input_data,
@@ -184,9 +181,7 @@ class ZKMLProverVerifier:
                         output_names=["output"],
                         export_params=True,
                         dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
-                        verbose=False,
-                        keep_initializers_as_inputs=False,
-                        training=torch.onnx.TrainingMode.EVAL
+                        verbose=False
                     )
             else:
                 # For RISC Zero, use modern exporter
