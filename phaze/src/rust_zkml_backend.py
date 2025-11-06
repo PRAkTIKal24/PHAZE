@@ -354,9 +354,18 @@ class RustRiscZeroBackend:
                                     print(f"DEBUG: Found rust_bindings directory: {rust_bindings_dir}")
                                     os.chdir(str(rust_bindings_dir))
                                     
-                                    # Also try setting environment variables the backend might expect
-                                    os.environ['RISC0_GUEST_PATH'] = str(self._guest_program_path)
-                                    os.environ['RISC0_ELF_PATH'] = str(self._guest_program_path)
+                                    # Check if the legacy risc0_guest build exists (what build_guest.sh creates)
+                                    legacy_elf_path = rust_bindings_dir / "risc0_guest" / "target" / "riscv32im-risc0-zkvm-elf" / "release" / "risc0_guest"
+                                    if legacy_elf_path.exists():
+                                        print(f"DEBUG: Found legacy ELF, using: {legacy_elf_path}")
+                                        os.environ['RISC0_GUEST_PATH'] = str(legacy_elf_path)
+                                        os.environ['RISC0_ELF_PATH'] = str(legacy_elf_path)
+                                    else:
+                                        print(f"DEBUG: No legacy ELF found at {legacy_elf_path}")
+                                        # Try the dynamic guest program path
+                                        os.environ['RISC0_GUEST_PATH'] = str(self._guest_program_path)
+                                        os.environ['RISC0_ELF_PATH'] = str(self._guest_program_path)
+                                    
                                     print(f"DEBUG: Set environment variables for ELF path")
                                 else:
                                     print(f"DEBUG: Could not find rust_bindings directory in path: {self._guest_program_path}")
