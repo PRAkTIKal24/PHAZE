@@ -774,6 +774,8 @@ class RiscZeroBackendWrapper:
         elif architecture == "transformer":
             return self._convert_transformer_weights(state_dict)
         elif architecture in ["multi_exit", "multiexit"]:
+            logger.info(f"Converting multi-exit weights from state_dict with {len(state_dict)} entries")
+            logger.debug(f"State dict keys: {list(state_dict.keys())}")
             return self._convert_multi_exit_weights(state_dict)
         else:
             logger.warning(
@@ -1168,57 +1170,29 @@ class RiscZeroBackendWrapper:
                 # Convert guest input to the format expected by Rust backend
                 input_tensor = torch.tensor(guest_input["input_tensor"]).unsqueeze(0)
                 
-                # Convert weights to PyTorch format for the backend
-                model_weights = {}
+                # The Rust backend expects the structured weight format that matches the guest program
+                # Don't convert back to PyTorch tensors - use the structured format directly
                 weights_data = guest_input["weights"]
                 
-                # Reconstruct model weights in PyTorch format
-                if architecture == "simple":
-                    model_weights["fc1.weight"] = torch.tensor(weights_data.get("fc1_weights", []))
-                    model_weights["fc1.bias"] = torch.tensor(weights_data.get("fc1_bias", []))
-                    model_weights["fc2.weight"] = torch.tensor(weights_data.get("fc2_weights", []))
-                    model_weights["fc2.bias"] = torch.tensor(weights_data.get("fc2_bias", []))
-                elif architecture == "conv":
-                    if "conv_weights" in weights_data:
-                        for i, conv_w in enumerate(weights_data["conv_weights"]):
-                            model_weights[f"conv{i+1}.weight"] = torch.tensor(conv_w)
-                    if "conv_bias" in weights_data:
-                        model_weights["conv1.bias"] = torch.tensor(weights_data["conv_bias"])
-                    if "fc_weights" in weights_data and weights_data["fc_weights"]:
-                        model_weights["fc.weight"] = torch.tensor(weights_data["fc_weights"][0])
-                    if "fc_bias" in weights_data:
-                        model_weights["fc.bias"] = torch.tensor(weights_data["fc_bias"])
-                elif architecture in ["multi_exit", "multiexit"]:
-                    # Convert multi-exit weights back to PyTorch format
-                    backbone_weights = weights_data.get("backbone_weights", [])
-                    backbone_bias = weights_data.get("backbone_bias", [])
-                    exit_weights = weights_data.get("exit_weights", [])
-                    exit_bias = weights_data.get("exit_bias", [])
+                logger.info(f"Using structured weights for RISC Zero: {type(weights_data)}")
+                logger.info(f"Weight keys: {list(weights_data.keys()) if isinstance(weights_data, dict) else 'Not a dict'}")
+                
+                # For RISC Zero, we need to pass the structured weights as expected by the guest program
+                if architecture in ["multi_exit", "multiexit"]:
+                    # Validate the multi-exit weight structure
+                    required_keys = ["backbone_weights", "backbone_bias", "exit_weights", "exit_bias", "exit_layer"]
+                    missing_keys = [key for key in required_keys if key not in weights_data]
+                    if missing_keys:
+                        raise ValueError(f"Missing required multi-exit weight keys: {missing_keys}")
                     
-                    logger.info(f"Multi-exit weight reconstruction: backbone_weights={len(backbone_weights)}, exit_weights={len(exit_weights)}")
-                    
-                    # Validate we have sufficient weights
-                    if not backbone_weights or not exit_weights:
-                        raise ValueError(f"Insufficient multi-exit weights: backbone={len(backbone_weights)}, exits={len(exit_weights)}")
-                    
-                    # Reconstruct backbone layers
-                    for i, (weight, bias) in enumerate(zip(backbone_weights, backbone_bias)):
-                        layer_idx = i * 2  # Every other layer is a Linear layer
-                        model_weights[f"backbone_layers.{layer_idx}.weight"] = torch.tensor(weight)
-                        model_weights[f"backbone_layers.{layer_idx}.bias"] = torch.tensor(bias)
-                        logger.debug(f"Added backbone layer {layer_idx}: weight shape {torch.tensor(weight).shape}")
-                    
-                    # Reconstruct exit heads
-                    for i, (weight, bias) in enumerate(zip(exit_weights, exit_bias)):
-                        model_weights[f"exit_heads.{i}.weight"] = torch.tensor(weight)
-                        model_weights[f"exit_heads.{i}.bias"] = torch.tensor(bias)
-                        logger.debug(f"Added exit head {i}: weight shape {torch.tensor(weight).shape}")
-                    
-                    logger.info(f"Reconstructed {len(model_weights)} model weight tensors for multi-exit model")
-                # Add more architecture-specific weight handling as needed
+                    logger.info(f"Multi-exit weights validated: {len(weights_data['backbone_weights'])} backbone layers, {len(weights_data['exit_weights'])} exits")
+                
+                # Pass the structured weights directly to the Rust backend
+                # The Rust backend will handle the conversion to the format expected by the guest program
                 
                 # Generate the actual proof using Rust RISC Zero backend
-                proof_result = risc_zero_backend.prove(input_tensor, model_weights)
+                logger.info(f"Calling risc_zero_backend.prove() with input shape {input_tensor.shape}")
+                proof_result = risc_zero_backend.prove(input_tensor, weights_data)
                 
                 # Return the real proof with additional metadata
                 return {
