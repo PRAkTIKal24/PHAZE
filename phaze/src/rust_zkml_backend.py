@@ -300,15 +300,16 @@ class RustRiscZeroBackend:
                 serialized_input = json.dumps(model_input)
                 print(f"DEBUG: Attempting structured input: {len(serialized_input)} bytes")
                 
-                # Check if the backend has a method for structured input
+                # For real RISC Zero backend, we need to match the expected API signature
                 try:
                     if hasattr(self.risc_zero, 'prove_structured'):
                         print("DEBUG: Using prove_structured method")
                         proof = self.risc_zero.prove_structured(serialized_input.encode('utf-8'))
                     else:
                         print("DEBUG: Using standard prove method with structured data")
-                        # Fallback: try to pass the structured data directly
-                        proof = self.risc_zero.prove(serialized_input.encode('utf-8'))
+                        # Real backend expects: prove(input_data, model_weights)
+                        # Pass the structured weights dict directly as second argument
+                        proof = self.risc_zero.prove(input_data, model_weights)
                 except Exception as e:
                     print(f"DEBUG: Real backend failed: {e}, falling back to mock approach")
                     # If real backend fails, fall back to flattened approach
