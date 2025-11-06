@@ -531,8 +531,8 @@ class MNISTTrainer:
                         keep_initializers_as_inputs=False,
                         training=torch.onnx.TrainingMode.EVAL
                     )
-            except ImportError:
-                # Fallback if dynamo not available
+            except (ImportError, Exception):
+                # Fallback if dynamo not available or other errors
                 with torch.no_grad():
                     torch.onnx.export(
                         model,
