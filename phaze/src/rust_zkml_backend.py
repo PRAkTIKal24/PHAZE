@@ -251,13 +251,14 @@ class RustRiscZeroBackend:
         return result
 
     def prove(
-        self, input_tensor: torch.Tensor, model_weights: Dict[str, torch.Tensor]
+        self, input_tensor: torch.Tensor, model_weights: Dict[str, any]
     ) -> Dict[str, Any]:
         """Generate a RISC Zero proof.
 
         Args:
             input_tensor: Input tensor for model inference
-            model_weights: Model weights as a dictionary of tensors (state_dict format)
+            model_weights: Model weights - can be state_dict (Dict[str, torch.Tensor]) or 
+                          structured weights (Dict[str, List]) for multi-exit models
 
         Returns:
             Dictionary containing the proof and related information
@@ -268,12 +269,52 @@ class RustRiscZeroBackend:
         # Convert PyTorch tensors to flat float lists
         input_data = input_tensor.flatten().tolist()
 
-        # Convert model weights to a flat list
-        # In a real implementation, this would need to match
-        # the expected format in the guest program
+        # Handle different weight formats
         flattened_weights = []
-        for weight in model_weights.values():
-            flattened_weights.extend(weight.flatten().tolist())
+        
+        # Check if this is structured weights (multi-exit) or standard state_dict
+        if isinstance(model_weights, dict) and any(
+            key in model_weights for key in ["backbone_weights", "exit_weights", "backbone_bias", "exit_bias"]
+        ):
+            # This is structured weights format (already converted for guest program)
+            # Flatten all weight and bias arrays
+            for key, weight_data in model_weights.items():
+                if key == "exit_layer":
+                    # exit_layer is typically an integer, skip it
+                    continue
+                    
+                if isinstance(weight_data, list):
+                    # For lists of weight arrays, flatten each array and extend
+                    for weight_array in weight_data:
+                        if hasattr(weight_array, 'flatten'):
+                            # PyTorch tensor
+                            flattened_weights.extend(weight_array.flatten().tolist())
+                        elif isinstance(weight_array, (list, tuple)):
+                            # Already a list/tuple, extend directly
+                            flattened_weights.extend(weight_array)
+                        else:
+                            # Single value, append
+                            flattened_weights.append(float(weight_array))
+                elif hasattr(weight_data, 'flatten'):
+                    # PyTorch tensor
+                    flattened_weights.extend(weight_data.flatten().tolist())
+                elif isinstance(weight_data, (list, tuple)):
+                    # Already a list/tuple
+                    flattened_weights.extend(weight_data)
+                else:
+                    # Single value
+                    flattened_weights.append(float(weight_data))
+        else:
+            # Standard state_dict format with PyTorch tensors
+            for weight in model_weights.values():
+                if hasattr(weight, 'flatten'):
+                    flattened_weights.extend(weight.flatten().tolist())
+                else:
+                    # Handle case where weight might already be a list
+                    if isinstance(weight, (list, tuple)):
+                        flattened_weights.extend(weight)
+                    else:
+                        flattened_weights.append(float(weight))
 
         proof = self.risc_zero.prove(input_data, flattened_weights)
         return {
