@@ -161,9 +161,9 @@ class ZKMLProverVerifier:
         else:
             model_to_export = self.model
 
-        # Use opset 11 for EZKL compatibility (EZKL has issues with newer opsets)
+        # Use opset 14 for EZKL compatibility (avoids conversion issues from newer PyTorch)
         # The ONNX version compatibility issues were resolved in dependencies, not opset
-        opset_version = 11 if self.zkml_system_name == "ezkl" else 18
+        opset_version = 14 if self.zkml_system_name == "ezkl" else 18
         
         try:
             torch.onnx.export(
@@ -176,7 +176,7 @@ class ZKMLProverVerifier:
                 output_names=["output"],
                 export_params=True,
                 # Removed dynamic_axes to avoid dynamo warning for newer opsets
-                # For EZKL (opset 11), we might need dynamic_axes for some models
+                # For EZKL (opset 14), we include dynamic_axes for batch flexibility
                 dynamic_axes=None if opset_version >= 18 else {"input": {0: "batch_size"}, "output": {0: "batch_size"}}
             )
             
@@ -190,12 +190,12 @@ class ZKMLProverVerifier:
             print(f"Initial ONNX export failed with opset {opset_version}: {e}")
             print("Retrying with more conservative settings...")
             
-            # Fallback: try opset 11 with no dynamic axes
+            # Fallback: try opset 14 with no dynamic axes
             torch.onnx.export(
                 model_to_export,
                 input_data,
                 self.onnx_path,
-                opset_version=11,
+                opset_version=14,
                 do_constant_folding=False,  # Disable aggressive optimizations
                 input_names=["input"],
                 output_names=["output"],

@@ -516,7 +516,7 @@ class MNISTTrainer:
                 model,
                 dummy_input,
                 onnx_path,
-                opset_version=11,  # Reverted to 11 for EZKL compatibility
+                opset_version=14,  # EZKL-compatible without conversion issues
                 do_constant_folding=True,
                 input_names=["input"],
                 output_names=["output"],

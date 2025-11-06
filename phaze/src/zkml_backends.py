@@ -48,12 +48,12 @@ class EZKLBackend(ZKMLBackendInterface):
 
     def _export_to_onnx(self, input_data: torch.Tensor):
         """Export the PyTorch model to ONNX format."""
-        # Use opset 11 for EZKL compatibility
+        # Use opset 14 for EZKL compatibility (avoids PyTorch conversion issues)
         torch.onnx.export(
             self.model,
             input_data,
             self.onnx_path,
-            opset_version=11,  # EZKL works better with opset 11
+            opset_version=14,  # EZKL-compatible without conversion issues
             do_constant_folding=True,
             input_names=["input"],
             output_names=["output"],
