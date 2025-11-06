@@ -316,9 +316,33 @@ class RustRiscZeroBackend:
                 serialized_input = json.dumps(model_input)
                 print(f"DEBUG: Attempting structured input: {len(serialized_input)} bytes")
                 
+                # Serialize weights separately for the backend
+                serialized_weights = json.dumps(model_weights).encode('utf-8')
+                print(f"DEBUG: Serialized weights to {len(serialized_weights)} bytes")
+                
                 # For real RISC Zero backend, we need to match the expected API signature
                 try:
-                    if hasattr(self.risc_zero, 'prove_structured'):
+                    # Check if we have a stored guest program path from setup
+                    if hasattr(self, '_guest_program_path') and self._guest_program_path:
+                        print(f"DEBUG: Using stored guest program path: {self._guest_program_path}")
+                        # Try to pass the ELF path directly to the prove method
+                        if hasattr(self.risc_zero, 'prove_with_elf'):
+                            print("DEBUG: Using prove_with_elf method")
+                            proof = self.risc_zero.prove_with_elf(input_data, serialized_weights, self._guest_program_path)
+                        else:
+                            print("DEBUG: Setting working directory and using standard prove method")
+                            # Try changing working directory to help the backend find the ELF
+                            import os
+                            from pathlib import Path
+                            original_cwd = os.getcwd()
+                            try:
+                                # Change to the directory containing the ELF
+                                elf_dir = Path(self._guest_program_path).parent
+                                os.chdir(str(elf_dir))
+                                proof = self.risc_zero.prove(input_data, serialized_weights)
+                            finally:
+                                os.chdir(original_cwd)
+                    elif hasattr(self.risc_zero, 'prove_structured'):
                         print("DEBUG: Using prove_structured method")
                         proof = self.risc_zero.prove_structured(serialized_input.encode('utf-8'))
                     else:
@@ -326,9 +350,6 @@ class RustRiscZeroBackend:
                         # Real backend expects: prove(input_data, model_weights)
                         # But model_weights must be a Sequence, not dict
                         # Convert structured dict to JSON bytes for the backend
-                        import json
-                        serialized_weights = json.dumps(model_weights).encode('utf-8')
-                        print(f"DEBUG: Serialized weights to {len(serialized_weights)} bytes")
                         proof = self.risc_zero.prove(input_data, serialized_weights)
                 except Exception as e:
                     print(f"DEBUG: Real backend failed: {e}, falling back to mock approach")
