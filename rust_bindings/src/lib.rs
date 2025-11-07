@@ -723,31 +723,93 @@ impl ZKMLBackend for RiscZeroBackend {
             // This is structured multi-exit weights - create proper typed input for guest program
             let weights_obj = &combined_input["model_weights"];
             
-            // Parse the structured weights into the exact types expected by the guest program
+            // Debug: Check the structure of what we're receiving
+            eprintln!("DEBUG: Received multi-exit weights with keys: {:?}", 
+                     weights_obj.as_object().unwrap().keys().collect::<Vec<_>>());
+            
+            // Check backbone_weights structure
+            if let Some(backbone_weights_val) = weights_obj.get("backbone_weights") {
+                eprintln!("DEBUG: backbone_weights type: {}, is_array: {}", 
+                         serde_json::to_string(&backbone_weights_val.clone()).unwrap_or("serialization_failed".to_string()).chars().take(100).collect::<String>(),
+                         backbone_weights_val.is_array());
+                if backbone_weights_val.is_array() {
+                    eprintln!("DEBUG: backbone_weights has {} layers", backbone_weights_val.as_array().unwrap().len());
+                }
+            }
+            
+            // Try parsing each component separately to identify which fails
+            let backbone_weights_result: Result<Vec<Vec<Vec<f32>>>, _> = 
+                serde_json::from_value(weights_obj["backbone_weights"].clone());
+            if let Err(ref e) = backbone_weights_result {
+                eprintln!("DEBUG: FAILED parsing backbone_weights: {}", e);
+                return Err(format!("backbone_weights parsing failed: {}", e));
+            }
+            
+            let backbone_bias_result: Result<Vec<Vec<f32>>, _> = 
+                serde_json::from_value(weights_obj["backbone_bias"].clone());
+            if let Err(ref e) = backbone_bias_result {
+                eprintln!("DEBUG: FAILED parsing backbone_bias: {}", e);
+                return Err(format!("backbone_bias parsing failed: {}", e));
+            }
+            
+            let exit_weights_result: Result<Vec<Vec<Vec<f32>>>, _> = 
+                serde_json::from_value(weights_obj["exit_weights"].clone());
+            if let Err(ref e) = exit_weights_result {
+                eprintln!("DEBUG: FAILED parsing exit_weights: {}", e);
+                return Err(format!("exit_weights parsing failed: {}", e));
+            }
+            
+            let exit_bias_result: Result<Vec<Vec<f32>>, _> = 
+                serde_json::from_value(weights_obj["exit_bias"].clone());
+            if let Err(ref e) = exit_bias_result {
+                eprintln!("DEBUG: FAILED parsing exit_bias: {}", e);
+                return Err(format!("exit_bias parsing failed: {}", e));
+            }
+            
+            let exit_layer_result: Result<usize, _> = 
+                serde_json::from_value(weights_obj["exit_layer"].clone());
+            if let Err(ref e) = exit_layer_result {
+                eprintln!("DEBUG: FAILED parsing exit_layer: {}", e);
+                return Err(format!("exit_layer parsing failed: {}", e));
+            }
+            
+            eprintln!("DEBUG: All parsing successful, creating MultiExitWeights struct");
+            
             let multi_exit_weights = MultiExitWeights {
-                backbone_weights: serde_json::from_value(weights_obj["backbone_weights"].clone())
-                    .map_err(|e| format!("Failed to parse backbone_weights: {}", e))?,
-                backbone_bias: serde_json::from_value(weights_obj["backbone_bias"].clone())
-                    .map_err(|e| format!("Failed to parse backbone_bias: {}", e))?,
-                exit_weights: serde_json::from_value(weights_obj["exit_weights"].clone())
-                    .map_err(|e| format!("Failed to parse exit_weights: {}", e))?,
-                exit_bias: serde_json::from_value(weights_obj["exit_bias"].clone())
-                    .map_err(|e| format!("Failed to parse exit_bias: {}", e))?,
-                exit_layer: serde_json::from_value(weights_obj["exit_layer"].clone())
-                    .map_err(|e| format!("Failed to parse exit_layer: {}", e))?,
+                backbone_weights: backbone_weights_result.unwrap(),
+                backbone_bias: backbone_bias_result.unwrap(),
+                exit_weights: exit_weights_result.unwrap(),
+                exit_bias: exit_bias_result.unwrap(),
+                exit_layer: exit_layer_result.unwrap(),
             };
             
+            eprintln!("DEBUG: Created weights struct with {} backbone layers, {} exit layers, exit_layer={}",
+                     multi_exit_weights.backbone_weights.len(),
+                     multi_exit_weights.exit_weights.len(),
+                     multi_exit_weights.exit_layer);
+            
             let multi_exit_input = ModelInput {
-                input_tensor,
+                input_tensor: input_tensor.clone(),
                 weights: multi_exit_weights,
             };
             
+            eprintln!("DEBUG: Created ModelInput, attempting to write to ExecutorEnv");
+            
             // Set up the executor environment with the strongly-typed multi-exit input
-            let env = ExecutorEnv::builder()
-                .write(&multi_exit_input)
-                .unwrap()
-                .build()
-                .map_err(|e| format!("Failed to build executor environment: {}", e))?;
+            let env = match ExecutorEnv::builder()
+                .write(&multi_exit_input) {
+                Ok(builder) => {
+                    eprintln!("DEBUG: Successfully wrote to ExecutorEnv, building...");
+                    builder.build()
+                        .map_err(|e| format!("Failed to build executor environment: {}", e))?
+                },
+                Err(e) => {
+                    eprintln!("DEBUG: FAILED to write to ExecutorEnv: {}", e);
+                    return Err(format!("Failed to write to ExecutorEnv: {}", e));
+                }
+            };
+            
+            eprintln!("DEBUG: ExecutorEnv built successfully, loading guest ELF...");
             
             // Use the guest program specified in setup, or try default paths
             let guest_program_path = self.config.get("guest_program_path");
@@ -756,12 +818,16 @@ impl ZKMLBackend for RiscZeroBackend {
             
             // Try the configured guest program path first
             if let Some(configured_path) = guest_program_path {
+                eprintln!("DEBUG: Trying configured guest program path: {}", configured_path);
                 if let Ok(elf) = fs::read(configured_path) {
+                    eprintln!("DEBUG: Successfully loaded guest ELF from: {} ({} bytes)", configured_path, elf.len());
                     guest_elf = Some(elf);
                 } else {
+                    eprintln!("DEBUG: FAILED to load guest ELF from: {}", configured_path);
                     return Err(format!("Configured guest program not found: {}", configured_path));
                 }
             } else {
+                eprintln!("DEBUG: No guest_program_path configured, trying fallback paths");
                 // Fallback to default paths for backward compatibility
                 let guest_elf_paths = [
                     "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
@@ -771,6 +837,7 @@ impl ZKMLBackend for RiscZeroBackend {
                 
                 for path in &guest_elf_paths {
                     if let Ok(elf) = fs::read(path) {
+                        eprintln!("DEBUG: Successfully loaded guest ELF from fallback: {} ({} bytes)", path, elf.len());
                         guest_elf = Some(elf);
                         break;
                     }
@@ -780,15 +847,25 @@ impl ZKMLBackend for RiscZeroBackend {
             let guest_elf = match guest_elf {
                 Some(elf) => elf,
                 None => {
+                    eprintln!("DEBUG: FAILED to find any guest ELF file");
                     return Err("Guest ELF not found. Please build with: cd rust_bindings && ./build_guest.sh".to_string());
                 }
             };
             
+            eprintln!("DEBUG: Starting prover execution...");
+            
             // Run the prover with multi-exit model
             let prover = default_prover();
-            let receipt = prover
-                .prove(env, &guest_elf)
-                .map_err(|e| format!("Failed to generate multi-exit proof: {}", e))?;
+            let receipt = match prover.prove(env, &guest_elf) {
+                Ok(receipt) => {
+                    eprintln!("DEBUG: Prover execution successful!");
+                    receipt
+                },
+                Err(e) => {
+                    eprintln!("DEBUG: FAILED during prover execution: {}", e);
+                    return Err(format!("Failed to generate multi-exit proof: {}", e));
+                }
+            };
             
             // Extract the output from the receipt journal  
             let output: ModelOutput = receipt.receipt.journal
