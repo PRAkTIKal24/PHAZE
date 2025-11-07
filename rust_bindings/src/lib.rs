@@ -30,6 +30,23 @@ struct ModelInput {
     weights: SimpleModelWeights,
 }
 
+/// Multi-exit weights structure matching auto-generated guest programs
+#[derive(Serialize, Deserialize)]
+struct MultiExitWeights {
+    backbone_weights: Vec<Vec<Vec<f32>>>,
+    backbone_bias: Vec<Vec<f32>>,
+    exit_weights: Vec<Vec<Vec<f32>>>,
+    exit_bias: Vec<Vec<f32>>,
+    exit_layer: usize,
+}
+
+/// Multi-exit model input matching auto-generated guest programs
+#[derive(Serialize, Deserialize)]
+struct MultiExitModelInput {
+    input_tensor: Vec<f32>,
+    weights: MultiExitWeights,
+}
+
 /// Model output structure matching the guest program
 #[derive(Serialize, Deserialize)]
 struct ModelOutput {
@@ -703,22 +720,29 @@ impl ZKMLBackend for RiscZeroBackend {
         
         // Check if model_weights is structured (object) or flattened (array)
         if combined_input["model_weights"].is_object() {
-            // This is structured multi-exit weights - pass directly to auto-generated guest program
+            // This is structured multi-exit weights - create proper typed input for guest program
             let weights_obj = &combined_input["model_weights"];
             
-            // Create input in the format expected by auto-generated multi-exit guest programs
-            let multi_exit_input = serde_json::json!({
-                "input_tensor": input_tensor,
-                "weights": {
-                    "backbone_weights": weights_obj["backbone_weights"],
-                    "backbone_bias": weights_obj["backbone_bias"],
-                    "exit_weights": weights_obj["exit_weights"], 
-                    "exit_bias": weights_obj["exit_bias"],
-                    "exit_layer": weights_obj["exit_layer"]
-                }
-            });
+            // Parse the structured weights into the exact types expected by the guest program
+            let multi_exit_weights = MultiExitWeights {
+                backbone_weights: serde_json::from_value(weights_obj["backbone_weights"].clone())
+                    .map_err(|e| format!("Failed to parse backbone_weights: {}", e))?,
+                backbone_bias: serde_json::from_value(weights_obj["backbone_bias"].clone())
+                    .map_err(|e| format!("Failed to parse backbone_bias: {}", e))?,
+                exit_weights: serde_json::from_value(weights_obj["exit_weights"].clone())
+                    .map_err(|e| format!("Failed to parse exit_weights: {}", e))?,
+                exit_bias: serde_json::from_value(weights_obj["exit_bias"].clone())
+                    .map_err(|e| format!("Failed to parse exit_bias: {}", e))?,
+                exit_layer: serde_json::from_value(weights_obj["exit_layer"].clone())
+                    .map_err(|e| format!("Failed to parse exit_layer: {}", e))?,
+            };
             
-            // Set up the executor environment with the multi-exit input
+            let multi_exit_input = MultiExitModelInput {
+                input_tensor,
+                weights: multi_exit_weights,
+            };
+            
+            // Set up the executor environment with the strongly-typed multi-exit input
             let env = ExecutorEnv::builder()
                 .write(&multi_exit_input)
                 .unwrap()
