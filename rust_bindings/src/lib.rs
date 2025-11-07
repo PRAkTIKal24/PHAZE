@@ -981,6 +981,24 @@ impl RiscZeroBackend {
             Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
         }
     }
+
+    fn prove_structured(&self, structured_input: &[u8]) -> PyResult<ZKMLProof> {
+        if !self.is_setup {
+            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("Setup not completed"));
+        }
+        
+        // Call the trait implementation directly with structured input
+        match ZKMLBackend::prove(self, structured_input) {
+            Ok(proof_bytes) => {
+                // Deserialize the proof
+                match serde_json::from_slice::<ZKMLProof>(&proof_bytes) {
+                    Ok(proof) => Ok(proof),
+                    Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to deserialize proof: {}", e))),
+                }
+            },
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
     
     fn verify(&self, proof: &ZKMLProof, expected_outputs: Vec<f32>) -> PyResult<bool> {
         if !self.is_setup {
@@ -1001,6 +1019,24 @@ impl RiscZeroBackend {
         
         // Call the trait implementation
         match ZKMLBackend::verify(self, &proof_bytes, &outputs_bytes) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
+
+    fn verify_structured(&self, proof: &ZKMLProof, structured_outputs: &[u8]) -> PyResult<bool> {
+        if !self.is_setup {
+            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("Setup not completed"));
+        }
+        
+        // Serialize the proof to bytes for the trait implementation
+        let proof_bytes = match serde_json::to_vec(proof) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize proof: {}", e))),
+        };
+        
+        // Call the trait implementation with structured outputs
+        match ZKMLBackend::verify(self, &proof_bytes, structured_outputs) {
             Ok(result) => Ok(result),
             Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
         }
