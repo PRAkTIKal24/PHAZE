@@ -312,99 +312,23 @@ class RustRiscZeroBackend:
                 
                 # For real RISC Zero backend, we need to match the expected API signature
                 try:
-                    # Check if we have a stored guest program path from setup
-                    if hasattr(self, '_guest_program_path') and self._guest_program_path:
+                    # For structured multi-exit weights, pass the complete structured input
+                    # The Rust backend will detect this is an object and handle it appropriately
+                    combined_input = {
+                        "input_tensor": input_data,
+                        "model_weights": model_weights  # Pass structured weights directly
+                    }
+                    
+                    # Serialize the complete input for the Rust backend trait method
+                    import json
+                    input_bytes = json.dumps(combined_input).encode('utf-8')
+                    
+                    # Call the Rust backend trait method directly
+                    proof_bytes = self.risc_zero.prove(input_bytes)
+                    
+                    # The proof_bytes should be a serialized ZKMLProof
+                    proof = json.loads(proof_bytes.decode('utf-8'))
                         
-                        # Debug: Check if the ELF file actually exists before trying to use it
-                        from pathlib import Path
-                        elf_path = Path(self._guest_program_path)
-                        if elf_path.exists():
-                            file_size = elf_path.stat().st_size
-                            
-                            # Check if it's a valid ELF
-                            try:
-                                with open(elf_path, 'rb') as f:
-                                    magic = f.read(4)
-                                    if magic == b'\x7fELF':
-                                        logging.debug(f"Valid ELF file found at {elf_path} ({file_size} bytes)")
-                                    else:
-                                        logging.warning(f"File at {elf_path} is not a valid ELF file")
-                            except Exception as e:
-                                logging.error(f"Error checking ELF file: {e}")
-                        else:
-                            logging.error(f"ELF file not found at {self._guest_program_path}")
-                        
-                        # Try to pass the ELF path directly to the prove method
-                        if hasattr(self.risc_zero, 'prove_with_elf'):
-                            proof = self.risc_zero.prove_with_elf(input_data, serialized_weights, self._guest_program_path)
-                        else:
-                            # Try changing working directory to rust_bindings root as suggested by error message
-                            import os
-                            from pathlib import Path
-                            original_cwd = os.getcwd()
-                            try:
-                                # The error message suggests: "cd rust_bindings && ./build_guest.sh"
-                                # So the backend expects to be run from rust_bindings directory
-                                # Path: /Users/.../rust_bindings/guest_programs/.../docker/guest_multi_exit_minimal
-                                # We need to find the rust_bindings ancestor directory
-                                from pathlib import Path
-                                current_path = Path(self._guest_program_path)
-                                rust_bindings_dir = None
-                                
-                                # Walk up the path until we find rust_bindings
-                                for parent in current_path.parents:
-                                    if parent.name == 'rust_bindings':
-                                        rust_bindings_dir = parent
-                                        break
-                                
-                                if rust_bindings_dir and rust_bindings_dir.exists():
-                                    os.chdir(str(rust_bindings_dir))
-                                    
-                                    # Check if the legacy risc0_guest build exists (what build_guest.sh creates)
-                                    legacy_elf_path = rust_bindings_dir / "risc0_guest" / "target" / "riscv32im-risc0-zkvm-elf" / "release" / "risc0_guest"
-                                    if legacy_elf_path.exists():
-                                        os.environ['RISC0_GUEST_PATH'] = str(legacy_elf_path)
-                                        os.environ['RISC0_ELF_PATH'] = str(legacy_elf_path)
-                                    else:
-                                        # Legacy ELF not found, use provided path
-                                        os.environ['RISC0_GUEST_PATH'] = str(self._guest_program_path)
-                                        os.environ['RISC0_ELF_PATH'] = str(self._guest_program_path)
-                                    
-                                    # Also try setting environment variables the backend might expect
-                                    os.environ['RISC0_ELF_PATH'] = str(self._guest_program_path)
-                                    
-                                    # Additional debugging - check if ELF file is actually accessible
-                                    from pathlib import Path
-                                    elf_path = Path(self._guest_program_path)
-                                    if elf_path.exists():
-                                        file_size = elf_path.stat().st_size
-                                        
-                                        # Check if it's a valid ELF by reading magic bytes
-                                        try:
-                                            with open(elf_path, 'rb') as f:
-                                                magic = f.read(4)
-                                                if magic == b'\x7fELF':
-                                                    logging.debug(f"Valid ELF file found at {elf_path} ({file_size} bytes)")
-                                                else:
-                                                    logging.warning(f"File at {elf_path} is not a valid ELF file")
-                                        except Exception as e:
-                                            logging.error(f"Error checking ELF file: {e}")
-                                    else:
-                                        logging.error(f"ELF file not found at {self._guest_program_path}")
-                                    
-                                else:
-                                    logging.error(f"Could not find rust_bindings directory for path: {self._guest_program_path}")
-                                    
-                                proof = self.risc_zero.prove(input_data, serialized_weights)
-                            finally:
-                                os.chdir(original_cwd)
-                    elif hasattr(self.risc_zero, 'prove_structured'):
-                        proof = self.risc_zero.prove_structured(serialized_input.encode('utf-8'))
-                    else:
-                        # Real backend expects: prove(input_data, model_weights)
-                        # But model_weights must be a Sequence, not dict
-                        # Convert structured dict to JSON bytes for the backend
-                        proof = self.risc_zero.prove(input_data, serialized_weights)
                 except Exception as e:
                     # If real backend fails, fall back to flattened approach
                     flattened_weights = self._flatten_structured_weights(model_weights)
