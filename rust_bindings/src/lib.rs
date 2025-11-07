@@ -23,9 +23,9 @@ struct SimpleModelWeights {
     fc2_bias: Vec<f32>,
 }
 
-/// Model input structure matching the guest program
+/// Simple model input structure matching the simple guest program
 #[derive(Serialize, Deserialize)]
-struct ModelInput {
+struct SimpleModelInput {
     input_tensor: Vec<f32>,
     weights: SimpleModelWeights,
 }
@@ -42,7 +42,7 @@ struct MultiExitWeights {
 
 /// Multi-exit model input matching auto-generated guest programs
 #[derive(Serialize, Deserialize)]
-struct MultiExitModelInput {
+struct ModelInput {
     input_tensor: Vec<f32>,
     weights: MultiExitWeights,
 }
@@ -737,7 +737,7 @@ impl ZKMLBackend for RiscZeroBackend {
                     .map_err(|e| format!("Failed to parse exit_layer: {}", e))?,
             };
             
-            let multi_exit_input = MultiExitModelInput {
+            let multi_exit_input = ModelInput {
                 input_tensor,
                 weights: multi_exit_weights,
             };
@@ -876,7 +876,7 @@ impl ZKMLBackend for RiscZeroBackend {
             fc2_bias,
         };
         
-        let model_input = ModelInput {
+        let model_input = SimpleModelInput {
             input_tensor,
             weights,
         };
