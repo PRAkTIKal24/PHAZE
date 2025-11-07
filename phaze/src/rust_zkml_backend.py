@@ -310,26 +310,27 @@ class RustRiscZeroBackend:
                 # Serialize weights separately for the backend
                 serialized_weights = json.dumps(model_weights).encode('utf-8')
                 
-                # For real RISC Zero backend, we need to match the expected API signature
+                # For real RISC Zero backend with structured weights
                 try:
-                    # For structured multi-exit weights, pass the complete structured input
-                    # The Rust backend will detect this is an object and handle it appropriately
+                    # Create the combined input structure that the Rust trait method expects
                     combined_input = {
                         "input_tensor": input_data,
                         "model_weights": model_weights  # Pass structured weights directly
                     }
                     
-                    # Serialize the complete input for the Rust backend trait method
+                    # Serialize and call the new prove_structured method
                     import json
                     input_bytes = json.dumps(combined_input).encode('utf-8')
                     
-                    # Call the Rust backend trait method directly
-                    proof_bytes = self.risc_zero.prove(input_bytes)
-                    
-                    # The proof_bytes should be a serialized ZKMLProof
-                    proof = json.loads(proof_bytes.decode('utf-8'))
+                    # Use the new prove_structured method that accepts structured input
+                    if hasattr(self.risc_zero, 'prove_structured'):
+                        proof = self.risc_zero.prove_structured(input_bytes)
+                    else:
+                        # Fallback to flattened approach if prove_structured not available
+                        raise Exception("prove_structured method not available")
                         
                 except Exception as e:
+                    logging.warning(f"Structured weights approach failed ({e}), falling back to flattened weights")
                     # If real backend fails, fall back to flattened approach
                     flattened_weights = self._flatten_structured_weights(model_weights)
                     proof = self.risc_zero.prove(input_data, flattened_weights)
@@ -397,6 +398,29 @@ class RustRiscZeroBackend:
             proof_dict["public_inputs"],
             proof_dict["framework"],
         )
+
+        # Check if we have structured outputs or simple tensor outputs
+        if isinstance(expected_outputs, dict):
+            # Structured outputs (for multi-exit models)
+            try:
+                import json
+                structured_outputs = json.dumps(expected_outputs).encode('utf-8')
+                if hasattr(self.risc_zero, 'verify_structured'):
+                    return self.risc_zero.verify_structured(proof, structured_outputs)
+                else:
+                    # Fallback: flatten the structured outputs
+                    flattened_outputs = []
+                    for key, value in expected_outputs.items():
+                        if hasattr(value, 'flatten'):
+                            flattened_outputs.extend(value.flatten().tolist())
+                        elif isinstance(value, (list, tuple)):
+                            flattened_outputs.extend(value)
+                        else:
+                            flattened_outputs.append(float(value))
+                    return self.risc_zero.verify(proof, flattened_outputs)
+            except Exception:
+                # If structured verification fails, fall back to standard verification
+                pass
 
         # Convert expected outputs to a flat float list, if provided
         expected_outputs_list = []
