@@ -113,16 +113,16 @@ def setup_risc_zero():
 
     # Install RISC Zero toolchain components
     try:
-        print("🔧 Installing RISC Zero toolchain components...")
-        run_command(["rzup", "install"], check=True)
+        print("🔧 Installing RISC Zero toolchain components (version 3.0)...")
+        run_command(["rzup", "install", "3.0"], check=True)
 
-        print("🦀 Installing cargo-risczero...")
-        run_command(["rzup", "install", "cargo-risczero"], check=True)
+        print("🦀 Installing cargo-risczero (version 3.0)...")
+        run_command(["rzup", "install", "cargo-risczero", "3.0"], check=True)
 
-        print("🦀 Installing Rust toolchain for RISC Zero...")
-        run_command(["rzup", "install", "rust"], check=True)
+        print("🦀 Installing Rust toolchain for RISC Zero (version 3.0)...")
+        run_command(["rzup", "install", "rust", "3.0"], check=True)
 
-        print("✅ RISC Zero toolchain setup complete")
+        print("✅ RISC Zero toolchain setup complete (version 3.0)")
         return True
 
     except Exception as e:
