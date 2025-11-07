@@ -794,17 +794,13 @@ impl ZKMLBackend for RiscZeroBackend {
             };
         }
         
-        // Handle flattened weights (simple model case)
-        let model_weights_raw: Vec<f32> = {
-        } else {
-            // This is flattened weights (legacy format)
-            combined_input["model_weights"]
-                .as_array()
-                .ok_or("Missing model_weights")?
-                .iter()
-                .map(|v| v.as_f64().unwrap_or(0.0) as f32)
-                .collect()
-        };
+        // Handle flattened weights (simple model case) 
+        let model_weights_raw: Vec<f32> = combined_input["model_weights"]
+            .as_array()
+            .ok_or("Missing model_weights")?
+            .iter()
+            .map(|v| v.as_f64().unwrap_or(0.0) as f32)
+            .collect();
         
         // Convert flat weights to structured format
         // For a simple 784->128->10 network (MNIST)
@@ -978,7 +974,7 @@ impl ZKMLBackend for RiscZeroBackend {
             }
         }
         
-        let guest_elf = match guest_elf {
+        let _guest_elf = match guest_elf {
             Some(elf) => elf,
             None => {
                 return Err("Guest ELF not found for verification. Please build with: cd rust_bindings && ./build_guest.sh".to_string());
