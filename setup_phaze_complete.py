@@ -114,7 +114,7 @@ def setup_risc_zero():
     # Install RISC Zero toolchain components
     try:
         print("🔧 Installing RISC Zero toolchain components (version 3.0)...")
-        run_command(["rzup", "install", "3.0"], check=True)
+        run_command(["rzup", "install"], check=True)
 
         print("🦀 Installing cargo-risczero (version 3.0)...")
         run_command(["rzup", "install", "cargo-risczero", "3.0"], check=True)
