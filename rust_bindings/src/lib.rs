@@ -702,14 +702,100 @@ impl ZKMLBackend for RiscZeroBackend {
             .collect();
         
         // Check if model_weights is structured (object) or flattened (array)
-        let model_weights_raw: Vec<f32> = if combined_input["model_weights"].is_object() {
-            // This is structured multi-exit weights - for now, return a mock proof
-            // TODO: Implement proper structured weight handling
-            return Ok(serde_json::to_vec(&ZKMLProof::new(
-                "mock_structured_proof".to_string(),
-                vec!["0.1".to_string(), "0.2".to_string(), "0.3".to_string()],
+        if combined_input["model_weights"].is_object() {
+            // This is structured multi-exit weights - pass directly to auto-generated guest program
+            let weights_obj = &combined_input["model_weights"];
+            
+            // Create input in the format expected by auto-generated multi-exit guest programs
+            let multi_exit_input = serde_json::json!({
+                "input_tensor": input_tensor,
+                "weights": {
+                    "backbone_weights": weights_obj["backbone_weights"],
+                    "backbone_bias": weights_obj["backbone_bias"],
+                    "exit_weights": weights_obj["exit_weights"], 
+                    "exit_bias": weights_obj["exit_bias"],
+                    "exit_layer": weights_obj["exit_layer"]
+                }
+            });
+            
+            // Set up the executor environment with the multi-exit input
+            let env = ExecutorEnv::builder()
+                .write(&multi_exit_input)
+                .unwrap()
+                .build()
+                .map_err(|e| format!("Failed to build executor environment: {}", e))?;
+            
+            // Use the guest program specified in setup, or try default paths
+            let guest_program_path = self.config.get("guest_program_path");
+            
+            let mut guest_elf = None;
+            
+            // Try the configured guest program path first
+            if let Some(configured_path) = guest_program_path {
+                if let Ok(elf) = fs::read(configured_path) {
+                    guest_elf = Some(elf);
+                } else {
+                    return Err(format!("Configured guest program not found: {}", configured_path));
+                }
+            } else {
+                // Fallback to default paths for backward compatibility
+                let guest_elf_paths = [
+                    "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+                    "./risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest", 
+                    "../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+                ];
+                
+                for path in &guest_elf_paths {
+                    if let Ok(elf) = fs::read(path) {
+                        guest_elf = Some(elf);
+                        break;
+                    }
+                }
+            }
+            
+            let guest_elf = match guest_elf {
+                Some(elf) => elf,
+                None => {
+                    return Err("Guest ELF not found. Please build with: cd rust_bindings && ./build_guest.sh".to_string());
+                }
+            };
+            
+            // Run the prover with multi-exit model
+            let prover = default_prover();
+            let receipt = prover
+                .prove(env, &guest_elf)
+                .map_err(|e| format!("Failed to generate multi-exit proof: {}", e))?;
+            
+            // Extract the output from the receipt journal  
+            let output: ModelOutput = receipt.receipt.journal
+                .decode()
+                .map_err(|e| format!("Failed to decode multi-exit receipt journal: {}", e))?;
+            
+            // Create a proof structure with the receipt
+            let proof_data = bincode::serialize(&receipt)
+                .map_err(|e| format!("Failed to serialize multi-exit receipt: {}", e))?;
+            
+            // Extract output tensor from the auto-generated guest program output
+            let output_tensor = output.output_tensor
+                .iter()
+                .map(|v| v.to_string())
+                .collect();
+            
+            let proof = ZKMLProof::new(
+                hex::encode(&proof_data),
+                output_tensor,
                 "RISC0".to_string(),
-            )).unwrap());
+            );
+            
+            // Serialize the proof to bytes and return
+            return match serde_json::to_vec(&proof) {
+                Ok(bytes) => Ok(bytes),
+                Err(e) => Err(format!("Failed to serialize multi-exit proof: {}", e)),
+            };
+        }
+        
+        // Handle flattened weights (simple model case)
+        let model_weights_raw: Vec<f32> = {
         } else {
             // This is flattened weights (legacy format)
             combined_input["model_weights"]
@@ -788,18 +874,30 @@ impl ZKMLBackend for RiscZeroBackend {
             .map_err(|e| format!("Failed to build executor environment: {}", e))?;
         
         // Get the guest ELF binary
-        // This should be built with: cargo risczero build --manifest-path risc0_guest/Cargo.toml
-        let guest_elf_paths = [
-            "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
-            "./risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
-            "../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
-        ];
+        // Use the configured guest program path or fallback to default
+        let guest_program_path = self.config.get("guest_program_path");
         
         let mut guest_elf = None;
-        for path in &guest_elf_paths {
-            if let Ok(elf) = fs::read(path) {
+        
+        if let Some(configured_path) = guest_program_path {
+            if let Ok(elf) = fs::read(configured_path) {
                 guest_elf = Some(elf);
-                break;
+            } else {
+                return Err(format!("Configured guest program not found: {}", configured_path));
+            }
+        } else {
+            // Fallback to default paths for simple models
+            let guest_elf_paths = [
+                "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+                "./risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+                "../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+            ];
+            
+            for path in &guest_elf_paths {
+                if let Ok(elf) = fs::read(path) {
+                    guest_elf = Some(elf);
+                    break;
+                }
             }
         }
         
