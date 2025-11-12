@@ -512,10 +512,10 @@ class MNISTTrainer:
             export_start_time = time.time()
 
             model.eval()
-            
+
             # Export to ONNX using simplified approach for EZKL compatibility
             model.eval()
-            
+
             # Simple ONNX export without dynamo complications
             with torch.no_grad():
                 torch.onnx.export(
@@ -526,9 +526,12 @@ class MNISTTrainer:
                     do_constant_folding=True,
                     input_names=["input"],
                     output_names=["output"],
-                    dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+                    dynamic_axes={
+                        "input": {0: "batch_size"},
+                        "output": {0: "batch_size"},
+                    },
                     verbose=False,
-                    export_params=True
+                    export_params=True,
                 )
 
             export_time = time.time() - export_start_time

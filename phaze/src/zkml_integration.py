@@ -123,31 +123,35 @@ class ZKMLProverVerifier:
         """Validate the exported ONNX model for EZKL compatibility."""
         if not os.path.exists(self.onnx_path):
             return False
-            
+
         try:
             import onnx
-            
+
             # Load and check the ONNX model
             model = onnx.load(self.onnx_path)
             onnx.checker.check_model(model)
-            
+
             print(f"✅ ONNX model validation passed: {self.onnx_path}")
             print(f"   Model IR version: {model.ir_version}")
-            print(f"   Opset version: {model.opset_import[0].version if model.opset_import else 'Unknown'}")
-            
+            print(
+                f"   Opset version: {model.opset_import[0].version if model.opset_import else 'Unknown'}"
+            )
+
             # Check for known problematic operations
             problematic_ops = ["Loop", "If", "Scan", "RNN", "LSTM", "GRU"]
             model_ops = set()
-            
+
             for node in model.graph.node:
                 model_ops.add(node.op_type)
-                
+
             found_problematic = [op for op in problematic_ops if op in model_ops]
             if found_problematic:
-                print(f"⚠️  Warning: Found potentially problematic ops for EZKL: {found_problematic}")
-            
+                print(
+                    f"⚠️  Warning: Found potentially problematic ops for EZKL: {found_problematic}"
+                )
+
             return True
-            
+
         except Exception as e:
             print(f"❌ ONNX model validation failed: {e}")
             return False
@@ -164,13 +168,13 @@ class ZKMLProverVerifier:
         # Use opset 11 with legacy exporter for EZKL compatibility
         # The new dynamo exporter causes issues with EZKL's tract backend
         opset_version = 11 if self.zkml_system_name == "ezkl" else 18
-        
+
         try:
             # For EZKL, use simplified export to avoid variable scoping issues
             if self.zkml_system_name == "ezkl":
                 # Simple ONNX export for EZKL compatibility
                 model_to_export.eval()
-                with torch.no_grad():
+                with torch.no_grad():  # noqa: F823
                     torch.onnx.export(
                         model_to_export,
                         input_data,
@@ -180,8 +184,11 @@ class ZKMLProverVerifier:
                         input_names=["input"],
                         output_names=["output"],
                         export_params=True,
-                        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
-                        verbose=False
+                        dynamic_axes={
+                            "input": {0: "batch_size"},
+                            "output": {0: "batch_size"},
+                        },
+                        verbose=False,
                     )
             else:
                 # For RISC Zero, use modern exporter
@@ -194,24 +201,26 @@ class ZKMLProverVerifier:
                     input_names=["input"],
                     output_names=["output"],
                     export_params=True,
-                    dynamic_axes=None  # Modern exporter for RISC Zero
+                    dynamic_axes=None,  # Modern exporter for RISC Zero
                 )
-            
+
             # Validate the exported model for EZKL
             if self.zkml_system_name == "ezkl":
                 if not self._validate_onnx_model():
-                    raise RuntimeError("ONNX model validation failed for EZKL compatibility")
-                    
+                    raise RuntimeError(
+                        "ONNX model validation failed for EZKL compatibility"
+                    )
+
         except Exception as e:
             # If ONNX export fails, try with most conservative legacy settings
             print(f"Initial ONNX export failed: {e}")
             print("Retrying with most conservative legacy ONNX exporter...")
-            
+
             # Last resort: disable everything modern and use minimal settings
             try:
                 import torch._dynamo
-                with torch._dynamo.config.patch(suppress_errors=True), \
-                     torch.no_grad():
+
+                with torch._dynamo.config.patch(suppress_errors=True), torch.no_grad():
                     model_to_export.eval()
                     torch.onnx.export(
                         model_to_export,
@@ -223,7 +232,7 @@ class ZKMLProverVerifier:
                         output_names=["output"],
                         export_params=True,
                         verbose=False,
-                        keep_initializers_as_inputs=False
+                        keep_initializers_as_inputs=False,
                     )
             except Exception as fallback_error:
                 # If even that fails, try without any special settings
@@ -231,16 +240,15 @@ class ZKMLProverVerifier:
                 print("Trying absolute minimal export...")
                 model_to_export.eval()
                 torch.onnx.export(
-                    model_to_export,
-                    input_data,
-                    self.onnx_path,
-                    opset_version=11
+                    model_to_export, input_data, self.onnx_path, opset_version=11
                 )
-            
+
             # Validate fallback model
             if self.zkml_system_name == "ezkl":
                 if not self._validate_onnx_model():
-                    raise RuntimeError("ONNX model validation failed even with conservative settings")
+                    raise RuntimeError(
+                        "ONNX model validation failed even with conservative settings"
+                    ) from e
 
     async def _async_setup(self, input_data: torch.Tensor):
         """Asynchronous part of the setup process."""
@@ -252,14 +260,20 @@ class ZKMLProverVerifier:
             print(f"Generating EZKL settings for {self.onnx_path}...")
             ezkl.gen_settings(self.onnx_path, self.settings_path)
             print("✅ Settings generation completed")
-            
+
         except Exception as e:
             # Check if it's a tract/graph translation error
             if "tract" in str(e).lower() or "graph" in str(e).lower():
-                print(f"❌ EZKL settings generation failed due to ONNX compatibility: {e}")
-                print("This often happens with newer ONNX opset versions or complex model structures")
-                print("Suggestion: Try with a simpler model architecture or check EZKL version compatibility")
-            raise RuntimeError(f"Failed to generate settings: {e}")
+                print(
+                    f"❌ EZKL settings generation failed due to ONNX compatibility: {e}"
+                )
+                print(
+                    "This often happens with newer ONNX opset versions or complex model structures"
+                )
+                print(
+                    "Suggestion: Try with a simpler model architecture or check EZKL version compatibility"
+                )
+            raise RuntimeError(f"Failed to generate settings: {e}") from e
 
         # Download SRS if not exists
         if not os.path.exists(self.srs_path):
@@ -303,22 +317,22 @@ class ZKMLProverVerifier:
             self.model = self.model.cpu()
             with torch.no_grad():
                 output = self.model(input_data)
-            
+
             # Realistic SNARK proof size approximation
             # SNARKs typically have very small, constant-size proofs (~200-500 bytes)
             # regardless of computation complexity, but setup depends on circuit size
-            model_params = sum(p.numel() for p in self.model.parameters())
-            
+            sum(p.numel() for p in self.model.parameters())
+
             # Base SNARK proof size (Groth16: ~200 bytes, PLONK: ~400 bytes)
             base_proof_size = 384  # bytes for PLONK-style proof
-            
+
             # Public inputs size scales with model outputs (typically small)
             public_inputs = output.flatten().tolist()[:3]  # Limit to first 3 outputs
-            public_inputs_size = len(str(public_inputs))
-            
+            len(str(public_inputs))
+
             # Create realistic mock proof with appropriate size
             mock_proof_data = "0x" + "a" * (base_proof_size * 2)  # Hex representation
-            
+
             mock_proof = {
                 "proof": mock_proof_data,
                 "public_inputs": public_inputs,

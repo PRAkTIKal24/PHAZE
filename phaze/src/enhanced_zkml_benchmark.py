@@ -296,7 +296,9 @@ class EnhancedZKMLBenchmark:
                             if "proof" in proof or "proof_data" in proof:
                                 # Estimate proof size (rough approximation)
                                 proof_str = json.dumps(proof)
-                                result["proof_size_bytes"] = len(proof_str.encode("utf-8"))
+                                result["proof_size_bytes"] = len(
+                                    proof_str.encode("utf-8")
+                                )
 
                 except asyncio.TimeoutError:
                     logger.error(
@@ -774,7 +776,9 @@ class RiscZeroBackendWrapper:
         elif architecture == "transformer":
             return self._convert_transformer_weights(state_dict)
         elif architecture in ["multi_exit", "multiexit"]:
-            logger.info(f"Converting multi-exit weights from state_dict with {len(state_dict)} entries")
+            logger.info(
+                f"Converting multi-exit weights from state_dict with {len(state_dict)} entries"
+            )
             logger.debug(f"State dict keys: {list(state_dict.keys())}")
             return self._convert_multi_exit_weights(state_dict)
         else:
@@ -1043,12 +1047,12 @@ class RiscZeroBackendWrapper:
         # backbone_layers.0, backbone_layers.2, etc. are Linear layers
         # backbone_layers.1, backbone_layers.3, etc. are ReLU (no parameters)
         # exit_heads.0, exit_heads.1, etc. are exit classifiers
-        
+
         backbone_layers = {}
         exit_layers = {}
 
         for name, tensor in state_dict.items():
-            if name.startswith("backbone_layers.") and not "confidence" in name:
+            if name.startswith("backbone_layers.") and "confidence" not in name:
                 # Extract layer number from backbone_layers.X
                 parts = name.split(".")
                 if len(parts) >= 2:
@@ -1057,27 +1061,34 @@ class RiscZeroBackendWrapper:
                         # Only even numbers are Linear layers (odd are ReLU activations)
                         if layer_num % 2 == 0:
                             linear_layer_idx = layer_num // 2
-                            
+
                             if linear_layer_idx not in backbone_layers:
-                                backbone_layers[linear_layer_idx] = {"weight": None, "bias": None}
-                            
+                                backbone_layers[linear_layer_idx] = {
+                                    "weight": None,
+                                    "bias": None,
+                                }
+
                             if "weight" in name:
-                                backbone_layers[linear_layer_idx]["weight"] = tensor.tolist()
+                                backbone_layers[linear_layer_idx]["weight"] = (
+                                    tensor.tolist()
+                                )
                             elif "bias" in name:
-                                backbone_layers[linear_layer_idx]["bias"] = tensor.tolist()
+                                backbone_layers[linear_layer_idx]["bias"] = (
+                                    tensor.tolist()
+                                )
                     except ValueError:
                         continue
-                        
-            elif name.startswith("exit_heads.") and not "confidence" in name:
+
+            elif name.startswith("exit_heads.") and "confidence" not in name:
                 # Extract exit number from exit_heads.X
                 parts = name.split(".")
                 if len(parts) >= 2:
                     try:
                         exit_num = int(parts[1])
-                        
+
                         if exit_num not in exit_layers:
                             exit_layers[exit_num] = {"weight": None, "bias": None}
-                        
+
                         if "weight" in name:
                             exit_layers[exit_num]["weight"] = tensor.tolist()
                         elif "bias" in name:
@@ -1104,7 +1115,9 @@ class RiscZeroBackendWrapper:
         if not backbone_weights:
             input_size = self.model_info.get("input_size", 784)
             hidden_size = 128
-            logger.warning(f"No backbone weights found, creating defaults for input_size={input_size}")
+            logger.warning(
+                f"No backbone weights found, creating defaults for input_size={input_size}"
+            )
             backbone_weights = [
                 [[0.1] * input_size for _ in range(hidden_size)],  # First layer
                 [[0.1] * hidden_size for _ in range(hidden_size)],  # Hidden layer
@@ -1114,12 +1127,16 @@ class RiscZeroBackendWrapper:
         if not exit_weights:
             output_size = self.model_info.get("output_size", 10)
             hidden_size = len(backbone_bias[-1]) if backbone_bias else 128
-            logger.warning(f"No exit weights found, creating defaults for output_size={output_size}, hidden_size={hidden_size}")
+            logger.warning(
+                f"No exit weights found, creating defaults for output_size={output_size}, hidden_size={hidden_size}"
+            )
             # Create exit at layer 0 (early exit)
             exit_weights = [[[0.1] * hidden_size for _ in range(output_size)]]
             exit_bias = [[0.0] * output_size]
 
-        logger.info(f"Multi-exit conversion complete: {len(backbone_weights)} backbone layers, {len(exit_weights)} exits")
+        logger.info(
+            f"Multi-exit conversion complete: {len(backbone_weights)} backbone layers, {len(exit_weights)} exits"
+        )
 
         # Determine which exit to use (prefer early exits for efficiency)
         exit_layer = 0  # Use first exit by default
@@ -1141,21 +1158,22 @@ class RiscZeroBackendWrapper:
     ) -> Dict[str, Any]:
         """Generate RISC Zero proof using the real Rust backend."""
         # Interface with the actual RISC Zero implementation via Rust bindings
-        from .rust_zkml_backend import RustZKMLBackend
         import hashlib
         import json
+
+        from .rust_zkml_backend import RustZKMLBackend
 
         architecture = self.model_info.get("architecture", "simple")
 
         try:
             # Use the real RISC Zero Rust backend directly
-            from .rust_zkml_backend import RustZKMLBackend, RustRiscZeroBackend
-            
+            from .rust_zkml_backend import RustRiscZeroBackend, RustZKMLBackend
+
             # Check if we can use the real RISC Zero implementation
             if RustZKMLBackend.is_using_real_bindings():
                 # Use the RISC Zero backend directly
                 risc_zero_backend = RustRiscZeroBackend()
-                
+
                 if not risc_zero_backend.is_setup:
                     # Setup with architecture-specific parameters including guest program path
                     setup_params = {
@@ -1166,34 +1184,52 @@ class RiscZeroBackendWrapper:
                         "guest_program_path": str(self.guest_program_path),
                     }
                     risc_zero_backend.setup(setup_params)
-                
+
                 # Convert guest input to the format expected by Rust backend
                 input_tensor = torch.tensor(guest_input["input_tensor"]).unsqueeze(0)
-                
+
                 # The Rust backend expects the structured weight format that matches the guest program
                 # Don't convert back to PyTorch tensors - use the structured format directly
                 weights_data = guest_input["weights"]
-                
-                logger.info(f"Using structured weights for RISC Zero: {type(weights_data)}")
-                logger.info(f"Weight keys: {list(weights_data.keys()) if isinstance(weights_data, dict) else 'Not a dict'}")
-                
+
+                logger.info(
+                    f"Using structured weights for RISC Zero: {type(weights_data)}"
+                )
+                logger.info(
+                    f"Weight keys: {list(weights_data.keys()) if isinstance(weights_data, dict) else 'Not a dict'}"
+                )
+
                 # For RISC Zero, we need to pass the structured weights as expected by the guest program
                 if architecture in ["multi_exit", "multiexit"]:
                     # Validate the multi-exit weight structure
-                    required_keys = ["backbone_weights", "backbone_bias", "exit_weights", "exit_bias", "exit_layer"]
-                    missing_keys = [key for key in required_keys if key not in weights_data]
+                    required_keys = [
+                        "backbone_weights",
+                        "backbone_bias",
+                        "exit_weights",
+                        "exit_bias",
+                        "exit_layer",
+                    ]
+                    missing_keys = [
+                        key for key in required_keys if key not in weights_data
+                    ]
                     if missing_keys:
-                        raise ValueError(f"Missing required multi-exit weight keys: {missing_keys}")
-                    
-                    logger.info(f"Multi-exit weights validated: {len(weights_data['backbone_weights'])} backbone layers, {len(weights_data['exit_weights'])} exits")
-                
+                        raise ValueError(
+                            f"Missing required multi-exit weight keys: {missing_keys}"
+                        )
+
+                    logger.info(
+                        f"Multi-exit weights validated: {len(weights_data['backbone_weights'])} backbone layers, {len(weights_data['exit_weights'])} exits"
+                    )
+
                 # Pass the structured weights directly to the Rust backend
                 # The Rust backend will handle the conversion to the format expected by the guest program
-                
+
                 # Generate the actual proof using Rust RISC Zero backend
-                logger.info(f"Calling risc_zero_backend.prove() with input shape {input_tensor.shape}")
+                logger.info(
+                    f"Calling risc_zero_backend.prove() with input shape {input_tensor.shape}"
+                )
                 proof_result = risc_zero_backend.prove(input_tensor, weights_data)
-                
+
                 # Return the real proof with additional metadata
                 return {
                     "proof_data": proof_result["proof_data"],
@@ -1205,40 +1241,60 @@ class RiscZeroBackendWrapper:
                     "model_complexity": self.model_info.get("complexity", "unknown"),
                     "input_size": len(guest_input["input_tensor"]),
                     "architecture_specific": {
-                        "weights_summary": self._summarize_weights(guest_input["weights"]),
+                        "weights_summary": self._summarize_weights(
+                            guest_input["weights"]
+                        ),
                         "computation_type": architecture,
-                        "backend_type": "real_rust_risc_zero"
+                        "backend_type": "real_rust_risc_zero",
                     },
                 }
-            
+
             else:
                 # Fallback: this shouldn't happen since we confirmed real bindings are loaded
-                logger.warning("Real RISC Zero bindings not available, this is unexpected!")
-                raise RuntimeError("Expected real RISC Zero bindings but they are not available")
-                
+                logger.warning(
+                    "Real RISC Zero bindings not available, this is unexpected!"
+                )
+                raise RuntimeError(
+                    "Expected real RISC Zero bindings but they are not available"
+                )
+
         except Exception as e:
             logger.error(f"RISC Zero proof generation failed: {e}")
-            logger.warning("Falling back to deterministic proof simulation for benchmarking")
-            
+            logger.warning(
+                "Falling back to deterministic proof simulation for benchmarking"
+            )
+
             # Fallback to deterministic simulation if real proof generation fails
             # This maintains the benchmark's ability to measure timing and memory
             input_str = json.dumps(guest_input, sort_keys=True)
             proof_hash = hashlib.sha256(input_str.encode()).hexdigest()
-            
+
             # Generate deterministic public inputs based on actual computation
             public_inputs = []
             input_tensor = guest_input["input_tensor"]
-            
+
             if architecture == "simple":
-                input_sum = sum(input_tensor[:5]) if len(input_tensor) >= 5 else sum(input_tensor)
+                input_sum = (
+                    sum(input_tensor[:5])
+                    if len(input_tensor) >= 5
+                    else sum(input_tensor)
+                )
                 public_inputs = [str(input_sum)]
             elif architecture == "multi_exit":
-                backbone_features = sum(input_tensor[:10]) if len(input_tensor) >= 10 else sum(input_tensor)
+                backbone_features = (
+                    sum(input_tensor[:10])
+                    if len(input_tensor) >= 10
+                    else sum(input_tensor)
+                )
                 exit_layer = guest_input["weights"].get("exit_layer", 0)
                 public_inputs = [str(backbone_features), str(exit_layer)]
             else:
-                public_inputs = [str(sum(input_tensor[:5])) if len(input_tensor) >= 5 else str(sum(input_tensor))]
-            
+                public_inputs = [
+                    str(sum(input_tensor[:5]))
+                    if len(input_tensor) >= 5
+                    else str(sum(input_tensor))
+                ]
+
             return {
                 "proof_data": proof_hash,
                 "public_inputs": public_inputs,
@@ -1250,9 +1306,9 @@ class RiscZeroBackendWrapper:
                 "architecture_specific": {
                     "weights_summary": self._summarize_weights(guest_input["weights"]),
                     "computation_type": architecture,
-                    "backend_type": "fallback_simulation"
+                    "backend_type": "fallback_simulation",
                 },
-                "error": str(e)
+                "error": str(e),
             }
 
     async def verify_proof(self, proof, sample_input: torch.Tensor):
@@ -1266,12 +1322,12 @@ class RiscZeroBackendWrapper:
 
         try:
             # Use the real RISC Zero Rust backend for verification
-            from .rust_zkml_backend import RustZKMLBackend, RustRiscZeroBackend
-            
+            from .rust_zkml_backend import RustRiscZeroBackend, RustZKMLBackend
+
             if RustZKMLBackend.is_using_real_bindings():
                 # Use real RISC Zero verification directly
                 risc_zero_backend = RustRiscZeroBackend()
-                
+
                 # Setup if needed (verification might require setup)
                 if not risc_zero_backend.is_setup:
                     setup_params = {
@@ -1281,36 +1337,38 @@ class RiscZeroBackendWrapper:
                         "guest_program_path": str(self.guest_program_path),
                     }
                     risc_zero_backend.setup(setup_params)
-                
+
                 # Prepare proof data for verification
                 proof_dict = {
                     "proof_data": proof.get("proof_data"),
                     "public_inputs": proof.get("public_inputs", []),
                     "framework": proof.get("framework", "risc_zero"),
-                    "verification_key_hash": proof.get("verification_key_hash")
+                    "verification_key_hash": proof.get("verification_key_hash"),
                 }
-                
+
                 # Get expected outputs from the actual model for comparison
                 with torch.no_grad():
                     expected_output = self.model(sample_input)
-                
+
                 # Verify using the real Rust backend
-                verification_result = risc_zero_backend.verify(proof_dict, expected_output)
-                
+                verification_result = risc_zero_backend.verify(
+                    proof_dict, expected_output
+                )
+
                 if not verification_result:
                     logger.warning("RISC Zero verification failed via Rust backend")
-                
+
                 return verification_result
-            
+
             else:
                 # This shouldn't happen since we confirmed real bindings
                 logger.warning("Real RISC Zero bindings not available for verification")
                 return False
-                
+
         except Exception as e:
             logger.warning(f"RISC Zero verification failed: {e}")
             logger.info("Falling back to basic proof structure validation")
-            
+
             # Fallback verification: basic structural validation
             # Verify the proof has the expected structure and architecture
             if proof.get("architecture") != self.arch_key:
@@ -1334,7 +1392,7 @@ class RiscZeroBackendWrapper:
 
             # Architecture-specific basic validation
             architecture = self.model_info.get("architecture", "simple")
-            
+
             try:
                 if architecture == "simple":
                     # For simple models, expect at least one numeric public input
@@ -1343,13 +1401,15 @@ class RiscZeroBackendWrapper:
                     # For multi-exit, expect backbone features and exit info
                     if len(public_inputs) >= 2:
                         float(public_inputs[0])  # backbone features
-                        int(float(public_inputs[1])) if len(public_inputs) >= 3 else 0  # exit layer
+                        int(float(public_inputs[1])) if len(
+                            public_inputs
+                        ) >= 3 else 0  # exit layer
                     else:
                         return False
                 # Add more architecture-specific validation as needed
-                
+
                 return True
-                
+
             except (ValueError, IndexError, TypeError) as validation_error:
                 logger.warning(f"Proof validation failed: {validation_error}")
                 return False

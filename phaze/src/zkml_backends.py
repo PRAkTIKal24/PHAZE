@@ -61,7 +61,7 @@ class EZKLBackend(ZKMLBackendInterface):
                 output_names=["output"],
                 export_params=True,
                 dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
-                verbose=False
+                verbose=False,
             )
 
     async def setup(self, input_data: torch.Tensor, **kwargs) -> None:

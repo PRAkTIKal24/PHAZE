@@ -133,11 +133,15 @@ class RiscZeroArchitectureRegistry:
             List of (architecture, complexity, model_info) tuples
         """
         # TEMP: Only focus on multi-exit models for faster development
-        architectures = ["multi_exit"]  # PHAZEModelFactory.get_available_architectures()
+        architectures = [
+            "multi_exit"
+        ]  # PHAZEModelFactory.get_available_architectures()
         complexities = PHAZEModelFactory.get_complexity_levels()
-        
+
         logger.info(f"TEMP: Only using architectures: {architectures}")
-        logger.info(f"TEMP: Using complexities: {[complexity.value for complexity in complexities]}")
+        logger.info(
+            f"TEMP: Using complexities: {[complexity.value for complexity in complexities]}"
+        )
 
         # Set dataset-specific defaults
         if dataset_config is None:
@@ -229,7 +233,7 @@ class RiscZeroArchitectureRegistry:
         """
         # Clear existing registry
         self.clear_registry()
-        
+
         # Register only multi-exit models
         return self.register_all_factory_models(dataset_config)
 
@@ -599,25 +603,25 @@ fn main() {
 
         # Write main.rs with the actual implementation
         # Extract and modify the template content to work as main.rs
-        lines = customized_content.split('\n')
-        
+        lines = customized_content.split("\n")
+
         # Build the main.rs content with proper attribute ordering
         main_rs_content = []
         main_rs_content.append("#![no_main]")
-        
+
         # Add all the template content except the first #![no_std] line
         for line in lines:
             if line.strip() == "#![no_std]":
                 main_rs_content.append("#![no_std]")  # Keep no_std but after no_main
             else:
                 main_rs_content.append(line)
-        
+
         main_rs_content.append("")
         main_rs_content.append("use risc0_zkvm::guest::entry;")
         main_rs_content.append("entry!(main);")
-        
+
         with open(src_dir / "main.rs", "w") as f:
-            f.write('\n'.join(main_rs_content))
+            f.write("\n".join(main_rs_content))
 
         # Write lib.rs (empty for now, could be used for shared utilities)
         with open(src_dir / "lib.rs", "w") as f:
@@ -732,25 +736,31 @@ class RiscZeroBuildManager:
 
             if result.returncode == 0:
                 # Check what files were actually created in target directory
-                target_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release"
+                target_dir = (
+                    guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release"
+                )
                 if target_dir.exists():
                     all_files = list(target_dir.glob("*"))
-                    logger.debug(f"Files in target/release: {[f.name for f in all_files]}")
-                    
+                    logger.debug(
+                        f"Files in target/release: {[f.name for f in all_files]}"
+                    )
+
                     # Look for any ELF files (binaries without extension)
-                    elf_files = [f for f in all_files if f.is_file() and '.' not in f.name]
+                    elf_files = [
+                        f for f in all_files if f.is_file() and "." not in f.name
+                    ]
                     logger.debug(f"Potential ELF files: {[f.name for f in elf_files]}")
-                
+
                 # Try multiple possible ELF paths
                 possible_names = [
                     guest_dir.name,  # guest_multi_exit_minimal
                     guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
                     arch_info["guest_program_name"],  # from arch info
                 ]
-                
+
                 # Check both release/ and docker/ subdirectories
                 subdirs = ["release", "docker"]
-                
+
                 elf_path = None
                 for subdir in subdirs:
                     for name in possible_names:
@@ -770,16 +780,18 @@ class RiscZeroBuildManager:
                             break
                     if elf_path:
                         break
-                
+
                 if elf_path:
                     logger.debug(f"ELF file found: {elf_path}")
-                    
+
                     # Ensure release symlinks exist for RISC Zero backend compatibility
                     self._create_release_symlinks(guest_dir, arch_info)
-                    
+
                     return True
                 else:
-                    logger.warning(f"Build succeeded but ELF not found. Tried: {possible_names}")
+                    logger.warning(
+                        f"Build succeeded but ELF not found. Tried: {possible_names}"
+                    )
                     return False
             else:
                 logger.error(f"Build failed: {result.stderr}")
@@ -791,49 +803,53 @@ class RiscZeroBuildManager:
 
     def _create_release_symlinks(self, guest_dir: Path, arch_info: Dict[str, Any]):
         """Create release directory symlinks to docker builds for RISC Zero backend compatibility.
-        
-        The RISC Zero backend expects ELF files in release/ directories, but our builds 
+
+        The RISC Zero backend expects ELF files in release/ directories, but our builds
         are in docker/ directories. Create symlinks to bridge this gap.
         """
         try:
             docker_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker"
             release_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release"
-            
+
             # Create release directory if it doesn't exist
             release_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Find the ELF file in docker directory
             possible_names = [
                 guest_dir.name,  # guest_multi_exit_minimal
                 guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
                 arch_info.get("guest_program_name", ""),  # from arch info
             ]
-            
+
             docker_elf_path = None
             for name in possible_names:
                 candidate_path = docker_dir / name
                 if candidate_path.exists():
                     docker_elf_path = candidate_path
                     break
-            
+
             if docker_elf_path:
                 # Create symlink from release to docker
                 release_symlink = release_dir / docker_elf_path.name
-                
+
                 # Remove existing symlink if it exists
                 if release_symlink.is_symlink() or release_symlink.exists():
                     release_symlink.unlink()
-                
+
                 # Create relative symlink (more portable)
                 relative_docker_path = Path("../docker") / docker_elf_path.name
                 release_symlink.symlink_to(relative_docker_path)
-                
-                logger.debug(f"Created release symlink: {release_symlink} -> {relative_docker_path}")
+
+                logger.debug(
+                    f"Created release symlink: {release_symlink} -> {relative_docker_path}"
+                )
             else:
                 logger.warning(f"No docker ELF found to symlink for {guest_dir.name}")
-                
+
         except Exception as e:
-            logger.warning(f"Failed to create release symlinks for {guest_dir.name}: {e}")
+            logger.warning(
+                f"Failed to create release symlinks for {guest_dir.name}: {e}"
+            )
 
     def get_guest_program_path(self, arch_key: str) -> Optional[Path]:
         """Get the path to a built guest program ELF.
@@ -850,17 +866,17 @@ class RiscZeroBuildManager:
 
         guest_program_name = arch_info["guest_program_name"]
         guest_dir = self.registry.guest_programs_dir / guest_program_name
-        
+
         # Try multiple possible ELF paths (same logic as build method)
         possible_names = [
             guest_dir.name,  # guest_multi_exit_minimal
             guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
             guest_program_name,  # from arch info
         ]
-        
+
         # Check both release/ and docker/ subdirectories (prefer release for backend compatibility)
         subdirs = ["release", "docker"]
-        
+
         for subdir in subdirs:
             for name in possible_names:
                 # Try both with and without .bin extension

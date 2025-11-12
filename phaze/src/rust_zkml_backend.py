@@ -19,7 +19,9 @@ try:
     except AttributeError:
         _binding_info = {"implementation": "real_rust_bindings", "version": "unknown"}
 except ImportError:
-    logging.warning("rust_zkml_bindings not found. Using mock implementation for testing.")
+    logging.warning(
+        "rust_zkml_bindings not found. Using mock implementation for testing."
+    )
     from . import mock_rust_zkml_bindings as rust_zkml_bindings
 
     _using_real_bindings = False
@@ -250,7 +252,7 @@ class RustRiscZeroBackend:
         # Store guest program path for later use if provided
         if "guest_program_path" in params:
             self._guest_program_path = params["guest_program_path"]
-        
+
         # Also try alternative path keys
         if "guest_elf_path" in params:
             self._guest_program_path = params["guest_elf_path"]
@@ -266,7 +268,7 @@ class RustRiscZeroBackend:
 
         Args:
             input_tensor: Input tensor for model inference
-            model_weights: Model weights - can be state_dict (Dict[str, torch.Tensor]) or 
+            model_weights: Model weights - can be state_dict (Dict[str, torch.Tensor]) or
                           structured weights (Dict[str, List]) for multi-exit models
 
         Returns:
@@ -280,57 +282,70 @@ class RustRiscZeroBackend:
 
         # Check if this is structured weights (multi-exit) or standard state_dict
         if isinstance(model_weights, dict) and any(
-            key in model_weights for key in ["backbone_weights", "exit_weights", "backbone_bias", "exit_bias"]
+            key in model_weights
+            for key in [
+                "backbone_weights",
+                "exit_weights",
+                "backbone_bias",
+                "exit_bias",
+            ]
         ):
             # This is structured weights format for multi-exit models
             # The guest program expects a ModelInput struct with this exact structure
-            
+
             # Check if we're using real RISC Zero bindings or mock
             # Import here to avoid circular imports
             from . import rust_zkml_backend
-            use_real_bindings = rust_zkml_backend.RustZKMLBackend.is_using_real_bindings()
-            
+
+            use_real_bindings = (
+                rust_zkml_backend.RustZKMLBackend.is_using_real_bindings()
+            )
+
             if use_real_bindings:
                 # Real implementation: create proper ModelInput structure
                 model_input = {
                     "input_tensor": input_data,
                     "weights": {
                         "backbone_weights": model_weights["backbone_weights"],
-                        "backbone_bias": model_weights["backbone_bias"], 
+                        "backbone_bias": model_weights["backbone_bias"],
                         "exit_weights": model_weights["exit_weights"],
                         "exit_bias": model_weights["exit_bias"],
-                        "exit_layer": model_weights["exit_layer"]
-                    }
+                        "exit_layer": model_weights["exit_layer"],
+                    },
                 }
-                
+
                 # Serialize the complete ModelInput for the guest program
                 import json
-                serialized_input = json.dumps(model_input)
-                
+
+                json.dumps(model_input)
+
                 # Serialize weights separately for the backend
-                serialized_weights = json.dumps(model_weights).encode('utf-8')
-                
+                json.dumps(model_weights).encode("utf-8")
+
                 # For real RISC Zero backend with structured weights
                 try:
                     # Create the combined input structure that the Rust trait method expects
                     combined_input = {
                         "input_tensor": input_data,
-                        "model_weights": model_weights  # Pass structured weights directly
+                        "model_weights": model_weights,  # Pass structured weights directly
                     }
-                    
+
                     # Serialize and call the new prove_structured method
                     import json
-                    input_bytes = json.dumps(combined_input).encode('utf-8')
-                    
+
+                    input_bytes = json.dumps(combined_input).encode("utf-8")
+
                     # Use the new prove_structured method that accepts structured input
-                    if hasattr(self.risc_zero, 'prove_structured'):
+                    if hasattr(self.risc_zero, "prove_structured"):
                         proof = self.risc_zero.prove_structured(input_bytes)
                     else:
                         # Fallback to flattened approach if prove_structured not available
                         raise Exception("prove_structured method not available")
-                        
+
                 except Exception as e:
-                    logging.warning(f"Structured weights approach failed ({e}), falling back to flattened weights")
+                    logging.warning(
+                        f"Structured weights approach failed ({e}), falling back to flattened weights"
+                    )
                     # If real backend fails, fall back to flattened approach
                     flattened_weights = self._flatten_structured_weights(model_weights)
                     proof = self.risc_zero.prove(input_data, flattened_weights)
@@ -342,7 +357,7 @@ class RustRiscZeroBackend:
             # Standard state_dict format with PyTorch tensors - flatten for backward compatibility
             flattened_weights = []
             for weight in model_weights.values():
-                if hasattr(weight, 'flatten'):
+                if hasattr(weight, "flatten"):
                     flattened_weights.extend(weight.flatten().tolist())
                 else:
                     # Handle case where weight might already be a list
@@ -352,7 +367,7 @@ class RustRiscZeroBackend:
                         flattened_weights.append(float(weight))
 
             proof = self.risc_zero.prove(input_data, flattened_weights)
-            
+
         return {
             "proof_data": proof.proof_data,
             "public_inputs": proof.public_inputs,
@@ -362,9 +377,10 @@ class RustRiscZeroBackend:
 
     def _flatten_structured_weights(self, model_weights: Dict[str, any]) -> List[float]:
         """Flatten structured weights for mock backend compatibility."""
+
         def recursive_flatten(item):
             """Recursively flatten any nested structure to a flat list of floats."""
-            if hasattr(item, 'flatten'):
+            if hasattr(item, "flatten"):
                 # PyTorch tensor
                 return item.flatten().tolist()
             elif isinstance(item, (list, tuple)):
@@ -376,14 +392,14 @@ class RustRiscZeroBackend:
             else:
                 # Single value, convert to float
                 return [float(item)]
-        
+
         flattened_weights = []
         for key, weight_data in model_weights.items():
             if key == "exit_layer":
                 # exit_layer is typically an integer, skip it for weight flattening in mock
                 continue
             flattened_weights.extend(recursive_flatten(weight_data))
-        
+
         return flattened_weights
 
     def verify(
@@ -404,14 +420,15 @@ class RustRiscZeroBackend:
             # Structured outputs (for multi-exit models)
             try:
                 import json
-                structured_outputs = json.dumps(expected_outputs).encode('utf-8')
-                if hasattr(self.risc_zero, 'verify_structured'):
+
+                structured_outputs = json.dumps(expected_outputs).encode("utf-8")
+                if hasattr(self.risc_zero, "verify_structured"):
                     return self.risc_zero.verify_structured(proof, structured_outputs)
                 else:
                     # Fallback: flatten the structured outputs
                     flattened_outputs = []
-                    for key, value in expected_outputs.items():
-                        if hasattr(value, 'flatten'):
+                    for _key, value in expected_outputs.items():
+                        if hasattr(value, "flatten"):
                             flattened_outputs.extend(value.flatten().tolist())
                         elif isinstance(value, (list, tuple)):
                             flattened_outputs.extend(value)
