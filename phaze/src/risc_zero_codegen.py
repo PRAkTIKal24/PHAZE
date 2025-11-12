@@ -132,8 +132,16 @@ class RiscZeroArchitectureRegistry:
         Returns:
             List of (architecture, complexity, model_info) tuples
         """
-        architectures = PHAZEModelFactory.get_available_architectures()
+        # TEMP: Only focus on multi-exit models for faster development
+        architectures = [
+            "multi_exit"
+        ]  # PHAZEModelFactory.get_available_architectures()
         complexities = PHAZEModelFactory.get_complexity_levels()
+
+        logger.info(f"TEMP: Only using architectures: {architectures}")
+        logger.info(
+            f"TEMP: Using complexities: {[complexity.value for complexity in complexities]}"
+        )
 
         # Set dataset-specific defaults
         if dataset_config is None:
@@ -157,25 +165,13 @@ class RiscZeroArchitectureRegistry:
         for architecture in architectures:
             for complexity in complexities:
                 try:
-                    # Create a sample model to extract architecture info
-                    if architecture == "conv":
-                        # Convolutional models need spatial dimensions
-                        model = PHAZEModelFactory.create_full_model(
-                            architecture=architecture,
-                            complexity=complexity,
-                            input_size=dataset_config["input_size"],
-                            output_size=dataset_config["output_size"],
-                            input_channels=dataset_config["input_channels"],
-                            spatial_size=dataset_config["spatial_size"],
-                        )
-                    else:
-                        # Other architectures use flattened input
-                        model = PHAZEModelFactory.create_full_model(
-                            architecture=architecture,
-                            complexity=complexity,
-                            input_size=dataset_config["input_size"],
-                            output_size=dataset_config["output_size"],
-                        )
+                    # TEMP: Only multi-exit models, so we always use flattened input
+                    model = PHAZEModelFactory.create_full_model(
+                        architecture=architecture,
+                        complexity=complexity,
+                        input_size=dataset_config["input_size"],
+                        output_size=dataset_config["output_size"],
+                    )
 
                     # Extract model information and add dataset info
                     model_info = model.get_model_info()
@@ -189,6 +185,12 @@ class RiscZeroArchitectureRegistry:
                     continue
 
         return model_configs
+
+    def clear_registry(self):
+        """Clear the current architecture registry."""
+        self.architectures = {}
+        self._save_registry()
+        logger.info("Cleared architecture registry")
 
     def register_all_factory_models(
         self, dataset_config: Optional[Dict[str, Any]] = None
@@ -218,6 +220,23 @@ class RiscZeroArchitectureRegistry:
         )
         return newly_registered
 
+    def register_multi_exit_only(
+        self, dataset_config: Optional[Dict[str, Any]] = None
+    ) -> int:
+        """Clear registry and register only multi-exit models.
+
+        Args:
+            dataset_config: Optional dataset configuration for model creation
+
+        Returns:
+            Number of registered architectures
+        """
+        # Clear existing registry
+        self.clear_registry()
+
+        # Register only multi-exit models
+        return self.register_all_factory_models(dataset_config)
+
 
 class RiscZeroTemplateEngine:
     """Template engine for generating RISC Zero guest programs."""
@@ -228,10 +247,11 @@ class RiscZeroTemplateEngine:
 
     def create_templates(self):
         """Create initial template files for all supported architectures."""
+        # TEMP: Only create multi-exit template for faster development
         templates = {
-            "simple_model.rs.template": self._generate_simple_template(),
-            "conv_model.rs.template": self._generate_conv_template(),
-            "transformer_model.rs.template": self._generate_transformer_template(),
+            # "simple_model.rs.template": self._generate_simple_template(),
+            # "conv_model.rs.template": self._generate_conv_template(),
+            # "transformer_model.rs.template": self._generate_transformer_template(),
             "multi_exit_model.rs.template": self._generate_multi_exit_template(),
             "generic_model.rs.template": self._generate_generic_template(),
         }
@@ -299,7 +319,7 @@ fn forward(input: &[f32], weights: &ModelWeights) -> Vec<f32> {
     output
 }
 
-pub fn main() {
+fn main() {
     let input: ModelInput = env::read();
     let output_tensor = forward(&input.input_tensor, &input.weights);
     let output = ModelOutput { output_tensor };
@@ -382,7 +402,7 @@ fn forward(input: &[f32], weights: &ConvWeights, input_shape: (usize, usize, usi
     output
 }
 
-pub fn main() {
+fn main() {
     let input: ModelInput = env::read();
     let output_tensor = forward(&input.input_tensor, &input.weights, input.input_shape);
     let output = ModelOutput { output_tensor };
@@ -453,7 +473,7 @@ fn forward(input: &[f32], weights: &TransformerWeights) -> Vec<f32> {
     output
 }
 
-pub fn main() {
+fn main() {
     let input: ModelInput = env::read();
     let output_tensor = forward(&input.input_tensor, &input.weights);
     let output = ModelOutput { output_tensor };
@@ -527,7 +547,7 @@ fn forward(input: &[f32], weights: &MultiExitWeights) -> Vec<f32> {
     }
 }
 
-pub fn main() {
+fn main() {
     let input: ModelInput = env::read();
     let output_tensor = forward(&input.input_tensor, &input.weights);
     let output = ModelOutput { output_tensor };
@@ -581,13 +601,31 @@ pub fn main() {
         # Apply any architecture-specific customizations
         customized_content = self._customize_template(template_content, arch_info)
 
-        # Write main.rs
-        with open(src_dir / "main.rs", "w") as f:
-            f.write("#![no_main]\n\nuse risc0_zkvm::guest::entry;\n\nentry!(main);\n")
+        # Write main.rs with the actual implementation
+        # Extract and modify the template content to work as main.rs
+        lines = customized_content.split("\n")
 
-        # Write lib.rs
+        # Build the main.rs content with proper attribute ordering
+        main_rs_content = []
+        main_rs_content.append("#![no_main]")
+
+        # Add all the template content except the first #![no_std] line
+        for line in lines:
+            if line.strip() == "#![no_std]":
+                main_rs_content.append("#![no_std]")  # Keep no_std but after no_main
+            else:
+                main_rs_content.append(line)
+
+        main_rs_content.append("")
+        main_rs_content.append("use risc0_zkvm::guest::entry;")
+        main_rs_content.append("entry!(main);")
+
+        with open(src_dir / "main.rs", "w") as f:
+            f.write("\n".join(main_rs_content))
+
+        # Write lib.rs (empty for now, could be used for shared utilities)
         with open(src_dir / "lib.rs", "w") as f:
-            f.write(customized_content)
+            f.write("// Shared utilities for the guest program\n")
 
         logger.info(f"Generated guest program: {guest_dir}")
         return guest_dir
@@ -644,6 +682,13 @@ class RiscZeroBuildManager:
         for arch_key in self.registry.list_architectures():
             logger.info(f"Building guest program for {arch_key}...")
 
+            # Get architecture info
+            arch_info = self.registry.get_architecture_info(arch_key)
+            if not arch_info:
+                logger.error(f"Architecture info not found for {arch_key}")
+                results[arch_key] = False
+                continue
+
             # Generate guest program
             guest_dir = template_engine.generate_guest_program(arch_key)
             if not guest_dir:
@@ -651,7 +696,7 @@ class RiscZeroBuildManager:
                 continue
 
             # Build the guest program
-            success = self._build_guest_program(guest_dir)
+            success = self._build_guest_program(guest_dir, arch_info)
             results[arch_key] = success
 
             if success:
@@ -661,7 +706,7 @@ class RiscZeroBuildManager:
 
         return results
 
-    def _build_guest_program(self, guest_dir: Path) -> bool:
+    def _build_guest_program(self, guest_dir: Path, arch_info: Dict[str, Any]) -> bool:
         """Build a single guest program using cargo risczero build.
 
         Args:
@@ -690,19 +735,63 @@ class RiscZeroBuildManager:
             )
 
             if result.returncode == 0:
-                # Verify the ELF was created
-                elf_path = (
-                    guest_dir
-                    / "target"
-                    / "riscv32im-risc0-zkvm-elf"
-                    / "release"
-                    / guest_dir.name
+                # Check what files were actually created in target directory
+                target_dir = (
+                    guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release"
                 )
-                if elf_path.exists():
-                    logger.debug(f"ELF file created: {elf_path}")
+                if target_dir.exists():
+                    all_files = list(target_dir.glob("*"))
+                    logger.debug(
+                        f"Files in target/release: {[f.name for f in all_files]}"
+                    )
+
+                    # Look for any ELF files (binaries without extension)
+                    elf_files = [
+                        f for f in all_files if f.is_file() and "." not in f.name
+                    ]
+                    logger.debug(f"Potential ELF files: {[f.name for f in elf_files]}")
+
+                # Try multiple possible ELF paths
+                possible_names = [
+                    guest_dir.name,  # guest_multi_exit_minimal
+                    guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
+                    arch_info["guest_program_name"],  # from arch info
+                ]
+
+                # Check both release/ and docker/ subdirectories
+                subdirs = ["release", "docker"]
+
+                elf_path = None
+                for subdir in subdirs:
+                    for name in possible_names:
+                        # Try both with and without .bin extension
+                        for extension in ["", ".bin"]:
+                            candidate_path = (
+                                guest_dir
+                                / "target"
+                                / "riscv32im-risc0-zkvm-elf"
+                                / subdir
+                                / (name + extension)
+                            )
+                            if candidate_path.exists():
+                                elf_path = candidate_path
+                                break
+                        if elf_path:
+                            break
+                    if elf_path:
+                        break
+
+                if elf_path:
+                    logger.debug(f"ELF file found: {elf_path}")
+
+                    # Ensure release symlinks exist for RISC Zero backend compatibility
+                    self._create_release_symlinks(guest_dir, arch_info)
+
                     return True
                 else:
-                    logger.warning(f"Build succeeded but ELF not found: {elf_path}")
+                    logger.warning(
+                        f"Build succeeded but ELF not found. Tried: {possible_names}"
+                    )
                     return False
             else:
                 logger.error(f"Build failed: {result.stderr}")
@@ -711,6 +800,56 @@ class RiscZeroBuildManager:
         except Exception as e:
             logger.error(f"Error building guest program: {e}")
             return False
+
+    def _create_release_symlinks(self, guest_dir: Path, arch_info: Dict[str, Any]):
+        """Create release directory symlinks to docker builds for RISC Zero backend compatibility.
+
+        The RISC Zero backend expects ELF files in release/ directories, but our builds
+        are in docker/ directories. Create symlinks to bridge this gap.
+        """
+        try:
+            docker_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker"
+            release_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release"
+
+            # Create release directory if it doesn't exist
+            release_dir.mkdir(parents=True, exist_ok=True)
+
+            # Find the ELF file in docker directory
+            possible_names = [
+                guest_dir.name,  # guest_multi_exit_minimal
+                guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
+                arch_info.get("guest_program_name", ""),  # from arch info
+            ]
+
+            docker_elf_path = None
+            for name in possible_names:
+                candidate_path = docker_dir / name
+                if candidate_path.exists():
+                    docker_elf_path = candidate_path
+                    break
+
+            if docker_elf_path:
+                # Create symlink from release to docker
+                release_symlink = release_dir / docker_elf_path.name
+
+                # Remove existing symlink if it exists
+                if release_symlink.is_symlink() or release_symlink.exists():
+                    release_symlink.unlink()
+
+                # Create relative symlink (more portable)
+                relative_docker_path = Path("../docker") / docker_elf_path.name
+                release_symlink.symlink_to(relative_docker_path)
+
+                logger.debug(
+                    f"Created release symlink: {release_symlink} -> {relative_docker_path}"
+                )
+            else:
+                logger.warning(f"No docker ELF found to symlink for {guest_dir.name}")
+
+        except Exception as e:
+            logger.warning(
+                f"Failed to create release symlinks for {guest_dir.name}: {e}"
+            )
 
     def get_guest_program_path(self, arch_key: str) -> Optional[Path]:
         """Get the path to a built guest program ELF.
@@ -727,12 +866,29 @@ class RiscZeroBuildManager:
 
         guest_program_name = arch_info["guest_program_name"]
         guest_dir = self.registry.guest_programs_dir / guest_program_name
-        elf_path = (
-            guest_dir
-            / "target"
-            / "riscv32im-risc0-zkvm-elf"
-            / "release"
-            / guest_program_name
-        )
 
-        return elf_path if elf_path.exists() else None
+        # Try multiple possible ELF paths (same logic as build method)
+        possible_names = [
+            guest_dir.name,  # guest_multi_exit_minimal
+            guest_dir.name.replace("guest_", ""),  # multi_exit_minimal
+            guest_program_name,  # from arch info
+        ]
+
+        # Check both release/ and docker/ subdirectories (prefer release for backend compatibility)
+        subdirs = ["release", "docker"]
+
+        for subdir in subdirs:
+            for name in possible_names:
+                # Try both with and without .bin extension
+                for extension in ["", ".bin"]:
+                    elf_path = (
+                        guest_dir
+                        / "target"
+                        / "riscv32im-risc0-zkvm-elf"
+                        / subdir
+                        / (name + extension)
+                    )
+                    if elf_path.exists():
+                        return elf_path
+
+        return None

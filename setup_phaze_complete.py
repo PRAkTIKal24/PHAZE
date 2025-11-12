@@ -204,7 +204,7 @@ def build_dynamic_guest_programs(dataset_name="mnist"):
                 f"from phaze.src.dataset_config import get_dataset_config; "
                 f"dataset_config = get_dataset_config('{dataset_name}').to_dict(); "
                 f"registry = RiscZeroArchitectureRegistry(); "
-                f"registry.register_all_factory_models(dataset_config); "
+                f"registry.register_multi_exit_only(dataset_config); "
                 f"build_manager = RiscZeroBuildManager(registry); "
                 f"results = build_manager.build_all_guest_programs(); "
                 f"success_count = sum(1 for success in results.values() if success); "
@@ -215,6 +215,9 @@ def build_dynamic_guest_programs(dataset_name="mnist"):
             check=True,
         )
 
+        # Create release symlinks for RISC Zero backend compatibility
+        _create_risc_zero_symlinks()
+
         print(f"✅ Dynamic guest programs built successfully for {dataset_name}")
         return True
 
@@ -224,6 +227,51 @@ def build_dynamic_guest_programs(dataset_name="mnist"):
             "💡 This may be due to missing RISC Zero toolchain or model factory issues"
         )
         return False
+
+
+def _create_risc_zero_symlinks():
+    """Create release directory symlinks for RISC Zero backend compatibility."""
+    print("🔗 Creating RISC Zero release symlinks...")
+
+    project_root = Path(__file__).parent
+    guest_programs_dir = project_root / "rust_bindings" / "guest_programs"
+
+    if not guest_programs_dir.exists():
+        print("⚠️  Guest programs directory not found, skipping symlinks")
+        return
+
+    symlinks_created = 0
+
+    for guest_dir in guest_programs_dir.glob("guest_multi_exit_*"):
+        if guest_dir.is_dir():
+            guest_name = guest_dir.name
+            docker_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "docker"
+            release_dir = guest_dir / "target" / "riscv32im-risc0-zkvm-elf" / "release"
+
+            # Check if docker ELF exists
+            docker_elf = docker_dir / guest_name
+            if docker_elf.exists():
+                # Create release directory
+                release_dir.mkdir(parents=True, exist_ok=True)
+
+                # Remove existing symlink/file if it exists
+                release_symlink = release_dir / guest_name
+                if release_symlink.exists() or release_symlink.is_symlink():
+                    release_symlink.unlink()
+
+                # Create relative symlink
+                relative_path = Path("../docker") / guest_name
+                release_symlink.symlink_to(relative_path)
+
+                print(f"  ✅ {guest_name}: release -> docker")
+                symlinks_created += 1
+            else:
+                print(f"  ⚠️  Docker ELF not found for {guest_name}")
+
+    if symlinks_created > 0:
+        print(f"🎉 Created {symlinks_created} release symlinks for RISC Zero backend")
+    else:
+        print("⚠️  No symlinks created - make sure guest programs are built first")
 
 
 def build_rust_bindings():

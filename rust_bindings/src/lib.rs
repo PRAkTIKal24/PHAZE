@@ -23,11 +23,28 @@ struct SimpleModelWeights {
     fc2_bias: Vec<f32>,
 }
 
-/// Model input structure matching the guest program
+/// Simple model input structure matching the simple guest program
+#[derive(Serialize, Deserialize)]
+struct SimpleModelInput {
+    input_tensor: Vec<f32>,
+    weights: SimpleModelWeights,
+}
+
+/// Multi-exit weights structure matching auto-generated guest programs
+#[derive(Serialize, Deserialize)]
+struct MultiExitWeights {
+    backbone_weights: Vec<Vec<Vec<f32>>>,
+    backbone_bias: Vec<Vec<f32>>,
+    exit_weights: Vec<Vec<Vec<f32>>>,
+    exit_bias: Vec<Vec<f32>>,
+    exit_layer: usize,
+}
+
+/// Multi-exit model input matching auto-generated guest programs
 #[derive(Serialize, Deserialize)]
 struct ModelInput {
     input_tensor: Vec<f32>,
-    weights: SimpleModelWeights,
+    weights: MultiExitWeights,
 }
 
 /// Model output structure matching the guest program
@@ -700,7 +717,83 @@ impl ZKMLBackend for RiscZeroBackend {
             .iter()
             .map(|v| v.as_f64().unwrap_or(0.0) as f32)
             .collect();
+        
+        // Check if model_weights is structured (object) or flattened (array)  
+        if combined_input["model_weights"].is_object() {
+            // This is structured multi-exit weights - create proper typed input for guest program
+            let weights_obj = &combined_input["model_weights"];
             
+            // Parse the structured weights into the exact types expected by the guest program
+            let multi_exit_weights = MultiExitWeights {
+                backbone_weights: serde_json::from_value(weights_obj["backbone_weights"].clone())
+                    .map_err(|e| format!("Failed to parse backbone_weights: {}", e))?,
+                backbone_bias: serde_json::from_value(weights_obj["backbone_bias"].clone())
+                    .map_err(|e| format!("Failed to parse backbone_bias: {}", e))?,
+                exit_weights: serde_json::from_value(weights_obj["exit_weights"].clone())
+                    .map_err(|e| format!("Failed to parse exit_weights: {}", e))?,
+                exit_bias: serde_json::from_value(weights_obj["exit_bias"].clone())
+                    .map_err(|e| format!("Failed to parse exit_bias: {}", e))?,
+                exit_layer: serde_json::from_value(weights_obj["exit_layer"].clone())
+                    .map_err(|e| format!("Failed to parse exit_layer: {}", e))?,
+            };
+            
+            let multi_exit_input = ModelInput {
+                input_tensor: input_tensor.clone(),
+                weights: multi_exit_weights,
+            };
+            
+            // Set up the executor environment with the strongly-typed multi-exit input
+            let env = ExecutorEnv::builder()
+                .write(&multi_exit_input)
+                .unwrap()
+                .build()
+                .map_err(|e| format!("Failed to build executor environment: {}", e))?;
+            
+            // Use the guest program specified in setup, or try default paths
+            let guest_program_path = self.config.get("guest_program_path");
+            
+            let guest_elf = if let Some(configured_path) = guest_program_path {
+                fs::read(configured_path)
+                    .map_err(|_| format!("Configured guest program not found: {}", configured_path))?
+            } else {
+                return Err("No guest_program_path configured for multi-exit model".to_string());
+            };
+            
+            // Run the prover with multi-exit model
+            let prover = default_prover();
+            let receipt = prover
+                .prove(env, &guest_elf)
+                .map_err(|e| format!("Failed to generate multi-exit proof: {}", e))?;
+            
+            // Extract the output from the receipt journal  
+            let output: ModelOutput = receipt.receipt.journal
+                .decode()
+                .map_err(|e| format!("Failed to decode multi-exit receipt journal: {}", e))?;
+            
+            // Create a proof structure with the receipt
+            let proof_data = bincode::serialize(&receipt)
+                .map_err(|e| format!("Failed to serialize multi-exit receipt: {}", e))?;
+            
+            // Extract output tensor from the auto-generated guest program output
+            let output_tensor = output.output_tensor
+                .iter()
+                .map(|v| v.to_string())
+                .collect();
+            
+            let proof = ZKMLProof::new(
+                hex::encode(&proof_data),
+                output_tensor,
+                "RISC0".to_string(),
+            );
+            
+            // Serialize the proof to bytes and return
+            return match serde_json::to_vec(&proof) {
+                Ok(bytes) => Ok(bytes),
+                Err(e) => Err(format!("Failed to serialize multi-exit proof: {}", e)),
+            };
+        }
+        
+        // Handle flattened weights (simple model case) 
         let model_weights_raw: Vec<f32> = combined_input["model_weights"]
             .as_array()
             .ok_or("Missing model_weights")?
@@ -758,7 +851,7 @@ impl ZKMLBackend for RiscZeroBackend {
             fc2_bias,
         };
         
-        let model_input = ModelInput {
+        let model_input = SimpleModelInput {
             input_tensor,
             weights,
         };
@@ -776,18 +869,30 @@ impl ZKMLBackend for RiscZeroBackend {
             .map_err(|e| format!("Failed to build executor environment: {}", e))?;
         
         // Get the guest ELF binary
-        // This should be built with: cargo risczero build --manifest-path risc0_guest/Cargo.toml
-        let guest_elf_paths = [
-            "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
-            "./risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
-            "../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
-        ];
+        // Use the configured guest program path or fallback to default
+        let guest_program_path = self.config.get("guest_program_path");
         
         let mut guest_elf = None;
-        for path in &guest_elf_paths {
-            if let Ok(elf) = fs::read(path) {
+        
+        if let Some(configured_path) = guest_program_path {
+            if let Ok(elf) = fs::read(configured_path) {
                 guest_elf = Some(elf);
-                break;
+            } else {
+                return Err(format!("Configured guest program not found: {}", configured_path));
+            }
+        } else {
+            // Fallback to default paths for simple models
+            let guest_elf_paths = [
+                "../../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+                "./risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+                "../risc0_guest/target/riscv32im-risc0-zkvm-elf/release/risc0_guest",
+            ];
+            
+            for path in &guest_elf_paths {
+                if let Ok(elf) = fs::read(path) {
+                    guest_elf = Some(elf);
+                    break;
+                }
             }
         }
         
@@ -868,7 +973,7 @@ impl ZKMLBackend for RiscZeroBackend {
             }
         }
         
-        let guest_elf = match guest_elf {
+        let _guest_elf = match guest_elf {
             Some(elf) => elf,
             None => {
                 return Err("Guest ELF not found for verification. Please build with: cd rust_bindings && ./build_guest.sh".to_string());
@@ -969,6 +1074,24 @@ impl RiscZeroBackend {
             Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
         }
     }
+
+    fn prove_structured(&self, structured_input: &[u8]) -> PyResult<ZKMLProof> {
+        if !self.is_setup {
+            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("Setup not completed"));
+        }
+        
+        // Call the trait implementation directly with structured input
+        match ZKMLBackend::prove(self, structured_input) {
+            Ok(proof_bytes) => {
+                // Deserialize the proof
+                match serde_json::from_slice::<ZKMLProof>(&proof_bytes) {
+                    Ok(proof) => Ok(proof),
+                    Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to deserialize proof: {}", e))),
+                }
+            },
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
     
     fn verify(&self, proof: &ZKMLProof, expected_outputs: Vec<f32>) -> PyResult<bool> {
         if !self.is_setup {
@@ -989,6 +1112,24 @@ impl RiscZeroBackend {
         
         // Call the trait implementation
         match ZKMLBackend::verify(self, &proof_bytes, &outputs_bytes) {
+            Ok(result) => Ok(result),
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
+        }
+    }
+
+    fn verify_structured(&self, proof: &ZKMLProof, structured_outputs: &[u8]) -> PyResult<bool> {
+        if !self.is_setup {
+            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("Setup not completed"));
+        }
+        
+        // Serialize the proof to bytes for the trait implementation
+        let proof_bytes = match serde_json::to_vec(proof) {
+            Ok(bytes) => bytes,
+            Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize proof: {}", e))),
+        };
+        
+        // Call the trait implementation with structured outputs
+        match ZKMLBackend::verify(self, &proof_bytes, structured_outputs) {
             Ok(result) => Ok(result),
             Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e)),
         }

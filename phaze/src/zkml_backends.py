@@ -48,16 +48,21 @@ class EZKLBackend(ZKMLBackendInterface):
 
     def _export_to_onnx(self, input_data: torch.Tensor):
         """Export the PyTorch model to ONNX format."""
-        torch.onnx.export(
-            self.model,
-            input_data,
-            self.onnx_path,
-            opset_version=11,
-            do_constant_folding=True,
-            input_names=["input"],
-            output_names=["output"],
-            dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
-        )
+        # Simple ONNX export for EZKL compatibility
+        self.model.eval()
+        with torch.no_grad():
+            torch.onnx.export(
+                self.model,
+                input_data,
+                self.onnx_path,
+                opset_version=11,
+                do_constant_folding=True,
+                input_names=["input"],
+                output_names=["output"],
+                export_params=True,
+                dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+                verbose=False,
+            )
 
     async def setup(self, input_data: torch.Tensor, **kwargs) -> None:
         """Setup the EZKL system."""

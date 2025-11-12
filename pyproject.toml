@@ -4,22 +4,23 @@ build-backend = "maturin"
 
 [project]
 name = "phaze"
-version = "0.14.4"
+version = "0.16.3"
 description = "A Python package for PHAZE: cryptographic and ZKML-based low latency inference at LHC"
 authors = [{ name = "Pratik Jawahar", email = "pratik.jawahar@cern.ch" }]
 requires-python = ">=3.10, <3.13"
 readme = "README.md"
 dependencies = [
     "maturin",
-    "torch",
+    "torch==2.5.0",  # Working version from October when EZKL was functional
     "numpy",
     "scipy",
     "uv",
-    "onnx",
-    "onnxruntime",
+    "onnx>=1.15.0,<1.17.0",
+    "onnxruntime>=1.18.0,<1.20.0",
+    "onnxscript>=0.1.0",
     "ezkl",
     "scikit-learn",
-    "torchvision",
+    "torchvision==0.20.0",  # Compatible with torch 2.5.0
     "tqdm",
     "rich",
     "art",
@@ -58,7 +59,7 @@ test-fast = [
 
 ci = [
     # Core dependencies needed for CI tests
-    "torch",
+    "torch==2.5.0",  # Working version from October when EZKL was functional
     "numpy",
     "pandas>=2.3.2",
     "psutil",
