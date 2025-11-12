@@ -1,6 +1,6 @@
 # PHAZE: Probabilistic Hashing And Zero-knowledge-ml for Early-exit models
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17370252.svg)](https://doi.org/10.5281/zenodo.17370252)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17592256.svg)](https://doi.org/10.5281/zenodo.17592256)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/PRAkTIKal24/PHAZE/actions/workflows/pytest.yml/badge.svg)](https://github.com/PRAkTIKal24/PHAZE/actions/workflows/pytest.yml)
 [![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
